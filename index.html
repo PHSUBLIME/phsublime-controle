@@ -1891,7 +1891,8 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
+                <!-- CAMPOS DE LOGÍSTICA, RESPONSÁVEL E STATUS (ORGANIZADOS EM 3 COLUNAS) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     <div>
                         <label class="block text-yellow-400 text-xs font-bold uppercase mb-1">Tipo Logística</label>
                         <select id="ped-tipo-entrega" onchange="alternarCamposLogistica()" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-yellow-400 text-xs font-bold">
@@ -1909,10 +1910,12 @@
                         <label class="block text-neutral-400 text-xs font-semibold mb-1">Data Prevista</label>
                         <input type="date" id="ped-data-entrega" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-yellow-400 text-xs">
                     </div>
+
                     <div>
                         <label class="block text-neutral-400 text-xs font-semibold mb-1">Responsável</label>
                         <input type="text" id="ped-responsavel" readonly placeholder="Atendente" class="w-full bg-neutral-800/60 border border-neutral-700 rounded-xl px-3 py-2 text-yellow-400 font-bold focus:outline-none cursor-not-allowed text-xs">
                     </div>
+
                     <div>
                         <label class="block text-neutral-400 text-xs font-semibold mb-1">Forma de Pagamento</label>
                         <select id="ped-forma-pagamento" onchange="verificarFormaPagamento()" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-yellow-400 text-xs">
@@ -1923,6 +1926,7 @@
                             <option value="Parte Dinheiro / Parte Pix">Parte Dinheiro / Parte Pix</option>
                         </select>
                     </div>
+
                     <div>
                         <label class="block text-yellow-400 text-xs font-bold uppercase mb-1">Status Produção</label>
                         <select id="ped-status" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-yellow-400 text-xs font-bold">
@@ -1935,6 +1939,8 @@
                             <option value="Cancelado">Cancelado</option>
                         </select>
                     </div>
+
+                    <div>
                         <label class="block text-emerald-400 text-xs font-bold uppercase mb-1">Status Pagamento</label>
                         <select id="ped-status-pagamento" onchange="alternarCampoSinalCustom()" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-400 text-xs font-bold">
                             <option value="Pendente">🔴 Pendente (0% Pago)</option>
@@ -1972,7 +1978,7 @@
                     <button type="button" onclick="salvarPedido(event, true)" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/40">
                         <i class="fa-solid fa-plus-circle"></i> Salvar e Criar Outro
                     </button>
-                    <button type="submit" class="px-5 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-black font-bold rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-yellow-950/30">
+                    <button type="submit" class="px-5 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-black font-black rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-yellow-950/30">
                         <i class="fa-solid fa-check"></i> Salvar Pedido
                     </button>
                 </div>
