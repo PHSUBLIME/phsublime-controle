@@ -415,22 +415,22 @@
             <!-- QUADRO KANBAN EM 4 COLUNAS -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
                 
-                <!-- COLUNA 1: NOVOS / AGUARDANDO -->
+                <!-- COLUNA 1: CRIAÇÃO DE ARTE -->
                 <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-2xl space-y-3">
                     <div class="flex justify-between items-center border-b border-neutral-800 pb-2">
-                        <h3 class="text-xs font-black uppercase text-yellow-400 tracking-wider flex items-center gap-2">
-                            <i class="fa-solid fa-clock"></i> 1. Novos / Fila
+                        <h3 class="text-xs font-black uppercase text-purple-400 tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-palette"></i> 1. Criação de Arte
                         </h3>
-                        <span id="kanban-count-aguardando" class="bg-neutral-800 text-yellow-400 font-bold text-xs px-2.5 py-0.5 rounded-full border border-neutral-700">0</span>
+                        <span id="kanban-count-aguardando" class="bg-neutral-800 text-purple-400 font-bold text-xs px-2.5 py-0.5 rounded-full border border-neutral-700">0</span>
                     </div>
                     <div id="kanban-col-aguardando" class="space-y-3 min-h-[150px]"></div>
                 </div>
 
-                <!-- COLUNA 2: EM PRODUÇÃO -->
+                <!-- COLUNA 2: PRODUÇÃO / IMPRESSÃO -->
                 <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-2xl space-y-3">
                     <div class="flex justify-between items-center border-b border-neutral-800 pb-2">
                         <h3 class="text-xs font-black uppercase text-amber-400 tracking-wider flex items-center gap-2">
-                            <i class="fa-solid fa-gears"></i> 2. Em Produção
+                            <i class="fa-solid fa-print"></i> 2. Produção / Impressão
                         </h3>
                         <span id="kanban-count-producao" class="bg-neutral-800 text-amber-400 font-bold text-xs px-2.5 py-0.5 rounded-full border border-neutral-700">0</span>
                     </div>
@@ -2500,14 +2500,16 @@ function renderizarKanban() {
 
             let cAguardando = 0, cProducao = 0, cPronto = 0, cEntregue = 0;
 
-            const pedidosAtivos = [...appData.pedidos].sort((a, b) => b.id - a.id);
+            // Ordena a Fila de Pedidos do MAIS ANTIGO no topo ao MAIS NOVO embaixo (Ordem de Chegada)
+            const pedidosOrdenados = [...appData.pedidos].sort((a, b) => a.id - b.id);
 
-            pedidosAtivos.forEach(p => {
+            pedidosOrdenados.forEach(p => {
                 if (p.status === 'Cancelado') return;
 
                 const cli = appData.clientes.find(c => c.id == p.clienteId);
                 const descProdutos = p.itens ? p.itens.map(i => `${i.servico || 'Item'} (${i.qtd}x)`).join(', ') : 'Serviço';
                 const stPag = p.statusPagamento || 'Pendente';
+                const temTaxaArte = parseFloat(p.valorArte || 0) > 0;
 
                 let badgePagClass = 'text-rose-400 bg-rose-500/10 border-rose-500/30';
                 if (stPag === 'Pago 100%') badgePagClass = 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30';
@@ -2516,16 +2518,32 @@ function renderizarKanban() {
                 const card = document.createElement('div');
                 card.className = "bg-neutral-950 border border-neutral-800 p-4 rounded-xl space-y-2.5 shadow-lg hover:border-yellow-400/40 transition-all text-xs";
 
+                let destinoColuna = null;
                 let botoesAcao = '';
 
                 if (p.status === 'AGUARDANDO') {
-                    cAguardando++;
-                    botoesAcao = `
-                        <button onclick="moverStatusKanban(${p.id}, 'Em Produção')" class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-black py-2 rounded-lg text-xs transition-all shadow-md flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-play"></i> Iniciar Produção
-                        </button>
-                    `;
+                    if (temTaxaArte) {
+                        // COM TAXA DE ARTE: Entra na Coluna 1 (Criação de Arte)
+                        destinoColuna = 'aguardando';
+                        cAguardando++;
+                        botoesAcao = `
+                            <button onclick="moverStatusKanban(${p.id}, 'Em Produção')" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-black py-2 rounded-lg text-xs transition-all shadow-md flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-palette"></i> Arte Concluída ➔ Ir p/ Produção
+                            </button>
+                        `;
+                    } else {
+                        // SEM TAXA DE ARTE: Pula a Coluna 1 e entra direto na Coluna 2 (Produção / Impressão)
+                        destinoColuna = 'producao';
+                        cProducao++;
+                        botoesAcao = `
+                            <button onclick="moverStatusKanban(${p.id}, 'Pronto p/ Retirada')" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-black py-2 rounded-lg text-xs transition-all shadow-md flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-check"></i> Marcar como Pronto
+                            </button>
+                        `;
+                    }
                 } else if (p.status === 'Em Produção') {
+                    // Já em produção (seja vindo da Arte ou direto)
+                    destinoColuna = 'producao';
                     cProducao++;
                     botoesAcao = `
                         <button onclick="moverStatusKanban(${p.id}, 'Pronto p/ Retirada')" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-black py-2 rounded-lg text-xs transition-all shadow-md flex items-center justify-center gap-1.5">
@@ -2533,6 +2551,7 @@ function renderizarKanban() {
                         </button>
                     `;
                 } else if (p.status === 'Pronto p/ Retirada' || p.status === 'Concluído') {
+                    destinoColuna = 'pronto';
                     cPronto++;
                     botoesAcao = `
                         <button onclick="enviarMensagemWhatsAppEntrega(${p.id})" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg text-xs transition-all shadow-md flex items-center justify-center gap-1.5 mb-1.5">
@@ -2543,6 +2562,7 @@ function renderizarKanban() {
                         </button>
                     `;
                 } else if (p.status === 'Entregue') {
+                    destinoColuna = 'entregue';
                     cEntregue++;
                     botoesAcao = `
                         <span class="block text-center text-emerald-400 font-bold py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-[11px]">
@@ -2557,9 +2577,12 @@ function renderizarKanban() {
                             <strong class="text-yellow-400 text-sm font-black block">#${p.id}</strong>
                             <span class="text-[10px] text-neutral-400 font-mono">${p.data}</span>
                         </div>
-                        <span class="px-2 py-0.5 text-[10px] font-bold rounded-full border ${badgePagClass}">
-                            ${escapeAttr(stPag)}
-                        </span>
+                        <div class="flex flex-col items-end gap-1">
+                            <span class="px-2 py-0.5 text-[10px] font-bold rounded-full border ${badgePagClass}">
+                                ${escapeAttr(stPag)}
+                            </span>
+                            ${temTaxaArte ? `<span class="px-1.5 py-0.5 text-[9px] font-bold rounded bg-purple-500/20 text-purple-300 border border-purple-500/40">🎨 Arte R$ ${parseFloat(p.valorArte).toFixed(2)}</span>` : ''}
+                        </div>
                     </div>
 
                     <div>
@@ -2577,10 +2600,10 @@ function renderizarKanban() {
                     </div>
                 `;
 
-                if (p.status === 'AGUARDANDO') colAguardando.appendChild(card);
-                else if (p.status === 'Em Produção') colProducao.appendChild(card);
-                else if (p.status === 'Pronto p/ Retirada' || p.status === 'Concluído') colPronto.appendChild(card);
-                else if (p.status === 'Entregue') colEntregue.appendChild(card);
+                if (destinoColuna === 'aguardando') colAguardando.appendChild(card);
+                else if (destinoColuna === 'producao') colProducao.appendChild(card);
+                else if (destinoColuna === 'pronto') colPronto.appendChild(card);
+                else if (destinoColuna === 'entregue') colEntregue.appendChild(card);
             });
 
             document.getElementById('kanban-count-aguardando').innerText = cAguardando;
