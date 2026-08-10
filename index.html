@@ -1927,6 +1927,7 @@
                         <label class="block text-yellow-400 text-xs font-bold uppercase mb-1">Status Produção</label>
                         <select id="ped-status" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-yellow-400 text-xs font-bold">
                             <option value="AGUARDANDO">AGUARDANDO</option>
+                            <option value="Criação de Arte">🎨 Criação de Arte</option>
                             <option value="Em Produção">Em Produção</option>
                             <option value="Pronto p/ Retirada">Pronto p/ Retirada</option>
                             <option value="Concluído">Concluído</option>
@@ -1934,7 +1935,6 @@
                             <option value="Cancelado">Cancelado</option>
                         </select>
                     </div>
-                    <div>
                         <label class="block text-emerald-400 text-xs font-bold uppercase mb-1">Status Pagamento</label>
                         <select id="ped-status-pagamento" onchange="alternarCampoSinalCustom()" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-400 text-xs font-bold">
                             <option value="Pendente">🔴 Pendente (0% Pago)</option>
@@ -2521,8 +2521,8 @@ function renderizarKanban() {
                 let destinoColuna = null;
                 let botoesAcao = '';
 
-                if (p.status === 'AGUARDANDO') {
-                    if (temTaxaArte) {
+                if (p.status === 'AGUARDANDO' || p.status === 'Criação de Arte') {
+    if (temTaxaArte || p.status === 'Criação de Arte') {
                         // COM TAXA DE ARTE: Entra na Coluna 1 (Criação de Arte)
                         destinoColuna = 'aguardando';
                         cAguardando++;
@@ -4266,6 +4266,7 @@ function renderizarKanban() {
                 <td class="p-3">
                     <select onchange="alterarStatusPedido(${p.id}, this.value)" class="bg-neutral-800 text-xs text-white border border-neutral-700 rounded-lg p-1 font-bold focus:outline-none">
                         <option value="AGUARDANDO" ${p.status==='AGUARDANDO'?'selected':''}>AGUARDANDO</option>
+                        <option value="Criação de Arte" ${p.status==='Criação de Arte'?'selected':''}>🎨 Criação de Arte</option>
                         <option value="Em Produção" ${p.status==='Em Produção'?'selected':''}>Em Produção</option>
                         <option value="Pronto p/ Retirada" ${p.status==='Pronto p/ Retirada'?'selected':''}>Pronto p/ Retirada</option>
                         <option value="Concluído" ${p.status==='Concluído'?'selected':''}>Concluído</option>
