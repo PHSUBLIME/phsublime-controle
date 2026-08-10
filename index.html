@@ -165,6 +165,12 @@
                 <button onclick="navegar('dashboard')" id="btn-dashboard" class="nav-btn active flex items-center gap-3 w-full px-4 py-3 rounded-xl font-bold text-sm transition-all text-yellow-400 bg-yellow-400/10 border-l-4 border-yellow-400">
                     <i class="fa-solid fa-chart-pie text-base"></i> Dashboard
                 </button>
+                <button onclick="navegar('kanban')" id="btn-kanban" class="nav-btn flex items-center justify-between w-full px-4 py-3 rounded-xl font-semibold text-sm transition-all text-neutral-400 hover:text-white hover:bg-neutral-800">
+                    <span class="flex items-center gap-3">
+                        <i class="fa-solid fa-layer-group text-base text-yellow-400"></i> Fila de Produção
+                    </span>
+                    <span id="badge-kanban-count" class="bg-yellow-400 text-black text-[10px] font-black px-2 py-0.5 rounded-full hidden">0</span>
+                </button>
 
                 <button onclick="navegar('entregas')" id="btn-entregas" class="nav-btn flex items-center justify-between w-full px-4 py-3 rounded-xl font-semibold text-sm transition-all text-neutral-400 hover:text-white hover:bg-neutral-800">
                     <span class="flex items-center gap-3">
@@ -390,7 +396,71 @@
             </div>
 
         </section>
+<!-- ================= SEÇÃO: FILA DE PRODUÇÃO (KANBAN) ================= -->
+        <section id="secao-kanban" class="secao-conteudo hidden space-y-6">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-neutral-900 p-6 rounded-2xl border border-neutral-800 shadow-2xl">
+                <div>
+                    <h2 class="text-2xl font-black text-yellow-400 flex items-center gap-2">
+                        <i class="fa-solid fa-layer-group text-yellow-400"></i> Fila de Produção & Prazos
+                    </h2>
+                    <p class="text-neutral-400 text-sm mt-1">Acompanhe o fluxo dos trabalhos em tempo real, do pedido novo até a entrega final.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="abrirModalPedido()" class="bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-yellow-950/30">
+                        <i class="fa-solid fa-plus"></i> + Novo Pedido
+                    </button>
+                </div>
+            </div>
 
+            <!-- QUADRO KANBAN EM 4 COLUNAS -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
+                
+                <!-- COLUNA 1: NOVOS / AGUARDANDO -->
+                <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-2xl space-y-3">
+                    <div class="flex justify-between items-center border-b border-neutral-800 pb-2">
+                        <h3 class="text-xs font-black uppercase text-yellow-400 tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-clock"></i> 1. Novos / Fila
+                        </h3>
+                        <span id="kanban-count-aguardando" class="bg-neutral-800 text-yellow-400 font-bold text-xs px-2.5 py-0.5 rounded-full border border-neutral-700">0</span>
+                    </div>
+                    <div id="kanban-col-aguardando" class="space-y-3 min-h-[150px]"></div>
+                </div>
+
+                <!-- COLUNA 2: EM PRODUÇÃO -->
+                <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-2xl space-y-3">
+                    <div class="flex justify-between items-center border-b border-neutral-800 pb-2">
+                        <h3 class="text-xs font-black uppercase text-amber-400 tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-gears"></i> 2. Em Produção
+                        </h3>
+                        <span id="kanban-count-producao" class="bg-neutral-800 text-amber-400 font-bold text-xs px-2.5 py-0.5 rounded-full border border-neutral-700">0</span>
+                    </div>
+                    <div id="kanban-col-producao" class="space-y-3 min-h-[150px]"></div>
+                </div>
+
+                <!-- COLUNA 3: PRONTO P/ RETIRADA OU ENTREGA -->
+                <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-2xl space-y-3">
+                    <div class="flex justify-between items-center border-b border-neutral-800 pb-2">
+                        <h3 class="text-xs font-black uppercase text-blue-400 tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-boxes-packing"></i> 3. Pronto p/ Entrega
+                        </h3>
+                        <span id="kanban-count-pronto" class="bg-neutral-800 text-blue-400 font-bold text-xs px-2.5 py-0.5 rounded-full border border-neutral-700">0</span>
+                    </div>
+                    <div id="kanban-col-pronto" class="space-y-3 min-h-[150px]"></div>
+                </div>
+
+                <!-- COLUNA 4: ENTREGUES / CONCLUÍDOS -->
+                <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-2xl space-y-3">
+                    <div class="flex justify-between items-center border-b border-neutral-800 pb-2">
+                        <h3 class="text-xs font-black uppercase text-emerald-400 tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-circle-check"></i> 4. Concluído
+                        </h3>
+                        <span id="kanban-count-entregue" class="bg-neutral-800 text-emerald-400 font-bold text-xs px-2.5 py-0.5 rounded-full border border-neutral-700">0</span>
+                    </div>
+                    <div id="kanban-col-entregue" class="space-y-3 min-h-[150px] max-h-[600px] overflow-y-auto"></div>
+                </div>
+
+            </div>
+        </section>
         <!-- ================= SEÇÃO: ENTREGAS DE HOJE ================= -->
         <section id="secao-entregas" class="secao-conteudo hidden space-y-6">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-neutral-900 p-6 rounded-2xl border border-neutral-800 shadow-2xl">
@@ -2404,6 +2474,7 @@ appData.pedidos.forEach(p => {
             document.getElementById('fin-lucro-10').innerText = `R$ ${dezPercentLucro.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
             document.getElementById('fin-lucro-liquido').innerText = `R$ ${lucroLiquidoFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
 
+            renderizarKanban();
             renderizarEntreguesHoje();
             renderizarClientes();
             renderizarPedidos();
@@ -2414,7 +2485,130 @@ appData.pedidos.forEach(p => {
             renderizarHistoricoFechamentos();
             atualizarGraficos();
         }
+function renderizarKanban() {
+            const colAguardando = document.getElementById('kanban-col-aguardando');
+            const colProducao = document.getElementById('kanban-col-producao');
+            const colPronto = document.getElementById('kanban-col-pronto');
+            const colEntregue = document.getElementById('kanban-col-entregue');
 
+            if (!colAguardando || !colProducao || !colPronto || !colEntregue) return;
+
+            colAguardando.innerHTML = '';
+            colProducao.innerHTML = '';
+            colPronto.innerHTML = '';
+            colEntregue.innerHTML = '';
+
+            let cAguardando = 0, cProducao = 0, cPronto = 0, cEntregue = 0;
+
+            const pedidosAtivos = [...appData.pedidos].sort((a, b) => b.id - a.id);
+
+            pedidosAtivos.forEach(p => {
+                if (p.status === 'Cancelado') return;
+
+                const cli = appData.clientes.find(c => c.id == p.clienteId);
+                const descProdutos = p.itens ? p.itens.map(i => `${i.servico || 'Item'} (${i.qtd}x)`).join(', ') : 'Serviço';
+                const stPag = p.statusPagamento || 'Pendente';
+
+                let badgePagClass = 'text-rose-400 bg-rose-500/10 border-rose-500/30';
+                if (stPag === 'Pago 100%') badgePagClass = 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30';
+                else if (stPag.includes('Sinal') || stPag.includes('Parcial')) badgePagClass = 'text-yellow-400 bg-yellow-500/10 border-yellow-500/30';
+
+                const card = document.createElement('div');
+                card.className = "bg-neutral-950 border border-neutral-800 p-4 rounded-xl space-y-2.5 shadow-lg hover:border-yellow-400/40 transition-all text-xs";
+
+                let botoesAcao = '';
+
+                if (p.status === 'AGUARDANDO') {
+                    cAguardando++;
+                    botoesAcao = `
+                        <button onclick="moverStatusKanban(${p.id}, 'Em Produção')" class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-black py-2 rounded-lg text-xs transition-all shadow-md flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-play"></i> Iniciar Produção
+                        </button>
+                    `;
+                } else if (p.status === 'Em Produção') {
+                    cProducao++;
+                    botoesAcao = `
+                        <button onclick="moverStatusKanban(${p.id}, 'Pronto p/ Retirada')" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-black py-2 rounded-lg text-xs transition-all shadow-md flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-check"></i> Marcar como Pronto
+                        </button>
+                    `;
+                } else if (p.status === 'Pronto p/ Retirada' || p.status === 'Concluído') {
+                    cPronto++;
+                    botoesAcao = `
+                        <button onclick="enviarMensagemWhatsAppEntrega(${p.id})" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg text-xs transition-all shadow-md flex items-center justify-center gap-1.5 mb-1.5">
+                            <i class="fa-brands fa-whatsapp text-sm"></i> Avisar no Whats
+                        </button>
+                        <button onclick="moverStatusKanban(${p.id}, 'Entregue')" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded-lg text-xs transition-all shadow-md flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-truck"></i> Confirmar Entrega
+                        </button>
+                    `;
+                } else if (p.status === 'Entregue') {
+                    cEntregue++;
+                    botoesAcao = `
+                        <span class="block text-center text-emerald-400 font-bold py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-[11px]">
+                            <i class="fa-solid fa-check-double"></i> Concluído
+                        </span>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start border-b border-neutral-800 pb-2">
+                        <div>
+                            <strong class="text-yellow-400 text-sm font-black block">#${p.id}</strong>
+                            <span class="text-[10px] text-neutral-400 font-mono">${p.data}</span>
+                        </div>
+                        <span class="px-2 py-0.5 text-[10px] font-bold rounded-full border ${badgePagClass}">
+                            ${escapeAttr(stPag)}
+                        </span>
+                    </div>
+
+                    <div>
+                        <strong class="text-white text-xs block font-bold">${escapeAttr(p.clienteNome)}</strong>
+                        <p class="text-[11px] text-neutral-300 mt-1 line-clamp-2">${escapeAttr(descProdutos)}</p>
+                    </div>
+
+                    <div class="flex items-center justify-between text-[11px] text-neutral-400 pt-1 border-t border-neutral-900">
+                        <span><i class="fa-solid fa-user-gear text-yellow-400"></i> ${escapeAttr(p.responsavel || 'N/I')}</span>
+                        <span class="font-bold text-white">R$ ${parseFloat(p.total||0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+                    </div>
+
+                    <div class="pt-1">
+                        ${botoesAcao}
+                    </div>
+                `;
+
+                if (p.status === 'AGUARDANDO') colAguardando.appendChild(card);
+                else if (p.status === 'Em Produção') colProducao.appendChild(card);
+                else if (p.status === 'Pronto p/ Retirada' || p.status === 'Concluído') colPronto.appendChild(card);
+                else if (p.status === 'Entregue') colEntregue.appendChild(card);
+            });
+
+            document.getElementById('kanban-count-aguardando').innerText = cAguardando;
+            document.getElementById('kanban-count-producao').innerText = cProducao;
+            document.getElementById('kanban-count-pronto').innerText = cPronto;
+            document.getElementById('kanban-count-entregue').innerText = cEntregue;
+
+            const badgeMenu = document.getElementById('badge-kanban-count');
+            if (badgeMenu) {
+                const pendentesTotal = cAguardando + cProducao;
+                if (pendentesTotal > 0) {
+                    badgeMenu.innerText = pendentesTotal;
+                    badgeMenu.classList.remove('hidden');
+                } else {
+                    badgeMenu.classList.add('hidden');
+                }
+            }
+        }
+
+        async function moverStatusKanban(pedidoId, novoStatus) {
+            const { error } = await supabaseClient.from('pedidos').update({ status: novoStatus }).eq('id', pedidoId);
+            if (!error) {
+                await carregarDados();
+                mostrarToast(`Pedido #${pedidoId} movido para "${novoStatus}"!`);
+            } else {
+                mostrarToast(`Erro ao mover: ${error.message}`, "erro");
+            }
+        }
         // ================= FUNÇÕES DO MÓDULO: ENTREGAS DE HOJE =================
         function renderizarEntreguesHoje() {
             const container = document.getElementById('lista-entregas-hoje-container');
