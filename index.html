@@ -2507,7 +2507,16 @@ function renderizarKanban() {
             let cAguardando = 0, cProducao = 0, cPronto = 0, cEntregue = 0;
 
             // Ordena a Fila de Pedidos do MAIS ANTIGO no topo ao MAIS NOVO embaixo (Ordem de Chegada)
-            const pedidosOrdenados = [...appData.pedidos].sort((a, b) => a.id - b.id);
+            // Ordena pelo horário real de criação (Mais antigo no TOPO, mais novo EMBAIXO)
+            const getPedTime = (p) => {
+                if (p.created_at) {
+                    const t = new Date(p.created_at).getTime();
+                    if (!isNaN(t) && t > 0) return t;
+                }
+                return (p._originalIndex !== undefined) ? p._originalIndex : 0;
+            };
+
+            const pedidosOrdenados = [...appData.pedidos].sort((a, b) => getPedTime(a) - getPedTime(b));
 
             pedidosOrdenados.forEach(p => {
                 if (p.status === 'Cancelado') return;
