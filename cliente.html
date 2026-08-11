@@ -36,6 +36,9 @@
         .btn-gabarito { background-color: #2563eb; color: #ffffff; }
         .btn-gabarito:hover { background-color: #1d4ed8; }
 
+        .tag-promocao { background-color: #38bdf8; color: #0284c7; font-size: 9px; font-weight: 800; padding: 1px 5px; border-radius: 3px; }
+        .tag-novo { background-color: #380764; color: #e9d5ff; font-size: 9px; font-weight: 800; padding: 1px 5px; border-radius: 3px; }
+
         .conteudo-html-descricao h2 { font-size: 1.1rem; font-weight: 800; color: #3b0764; margin-top: 1rem; margin-bottom: 0.5rem; }
         .conteudo-html-descricao p { font-size: 0.8rem; color: #475569; line-height: 1.5; margin-bottom: 0.5rem; }
     </style>
@@ -193,44 +196,146 @@
             <!-- LAYOUT PRINCIPAL EM 2 COLUNAS (FOTO 1 MODELO) -->
             <div class="flex flex-col lg:flex-row gap-6 pt-2">
                 
-                <!-- SIDEBAR ESQUERDA COMPLETA DA FOTO 1 -->
+                <!-- SIDEBAR ESQUERDA COMPLETA COM SANFONA (ACORDEÃO) -->
                 <aside class="hidden lg:block w-full lg:w-64 shrink-0 space-y-4">
+                    
+                    <!-- MAIS VENDIDOS -->
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                         <div class="bg-red-600 text-white font-black text-xs px-4 py-2.5 uppercase tracking-wider flex items-center justify-between">
                             <span>MAIS VENDIDOS</span>
                             <i class="fa-solid fa-fire text-amber-300"></i>
                         </div>
                         <ul class="divide-y divide-slate-100 text-xs font-semibold text-slate-700 max-h-96 overflow-y-auto">
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('cartao')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Cartão de Visita</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('cartao 250g')" class="px-4 py-2 hover:bg-purple-50 text-[11px] text-slate-500 pl-6 flex items-center justify-between"><span>• Cartão de Visita 250g</span></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('cartao 300g')" class="px-4 py-2 hover:bg-purple-50 text-[11px] text-slate-500 pl-6 flex items-center justify-between"><span>• Cartão de Visita 300g</span></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('verniz')" class="px-4 py-2 hover:bg-purple-50 text-[11px] text-slate-500 pl-6 flex items-center justify-between"><span>• Cartão Verniz UV / Laminação</span></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('pvc')" class="px-4 py-2 hover:bg-purple-50 text-[11px] text-slate-500 pl-6 flex items-center justify-between"><span>• Cartão de Visita PVC</span></a></li>
+                            <li>
+                                <a href="javascript:void(0)" onclick="filtrarCategoria('tubete')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between">
+                                    <span>Banner com tubete</span> <span class="tag-promocao">PROMOÇÃO</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0)" onclick="filtrarCategoria('artes')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between">
+                                    <span>ARTES</span> <span class="tag-promocao">PROMOÇÃO</span>
+                                </a>
+                            </li>
+
+                            <!-- CARTÃO DE VISITA COM SUBMENU EXPANSÍVEL -->
+                            <li>
+                                <div onclick="toggleSubmenu('sub-cartao-mv', 'cartao')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between cursor-pointer select-none">
+                                    <span>Cartão de Visita</span>
+                                    <i id="icon-sub-cartao-mv" class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform"></i>
+                                </div>
+                                <ul id="sub-cartao-mv" class="hidden pl-6 bg-slate-50 divide-y divide-slate-100 text-[11px] text-slate-600">
+                                    <li><a href="javascript:void(0)" onclick="filtrarCategoria('cartao 250g')" class="py-1.5 block hover:text-purple-900">• Cartão de Visita 250g</a></li>
+                                    <li><a href="javascript:void(0)" onclick="filtrarCategoria('cartao 300g')" class="py-1.5 block hover:text-purple-900">• Cartão de Visita 300g</a></li>
+                                    <li><a href="javascript:void(0)" onclick="filtrarCategoria('verniz')" class="py-1.5 block hover:text-purple-900">• Cartão Verniz UV / Laminação</a></li>
+                                    <li><a href="javascript:void(0)" onclick="filtrarCategoria('pvc')" class="py-1.5 block hover:text-purple-900">• Cartão de Visita PVC</a></li>
+                                    <li><a href="javascript:void(0)" onclick="filtrarCategoria('opaline')" class="py-1.5 block hover:text-purple-900">• Cartão de Visita Opaline</a></li>
+                                    <li><a href="javascript:void(0)" onclick="filtrarCategoria('reciclado')" class="py-1.5 block hover:text-purple-900">• Cartão de Visita Reciclado</a></li>
+                                </ul>
+                            </li>
+
                             <li><a href="javascript:void(0)" onclick="filtrarCategoria('folheto')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Folheto, Folder & Flyer</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
                             <li><a href="javascript:void(0)" onclick="filtrarCategoria('abada')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Abadá Carnaval</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('adesivo')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Adesivo & Vinil</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('adesivo')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Adesivo</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
                             <li><a href="javascript:void(0)" onclick="filtrarCategoria('banner')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Banner, Faixa, Lona & Painel</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
                             <li><a href="javascript:void(0)" onclick="filtrarCategoria('bloco')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Blocos & Comandas</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('copo')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Canecas, Copos & Taças</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('bolsa')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Bolsa em Tecido</span> <span class="tag-novo">NOVO</span></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('calendario')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Calendários & Folhinha</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
                             <li><a href="javascript:void(0)" onclick="filtrarCategoria('camisa')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Camisa, Camiseta & Blusa</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('casa')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Casa & Decoração</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('festas')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Festas</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
                         </ul>
                     </div>
 
+                    <!-- TODOS OS PRODUTOS (LISTA COMPLETA 65+ ITENS) -->
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                         <div class="bg-purple-900 text-white font-black text-xs px-4 py-2.5 uppercase tracking-wider">
                             TODOS OS PRODUTOS
                         </div>
-                        <ul class="divide-y divide-slate-100 text-xs font-semibold text-slate-700 max-h-[500px] overflow-y-auto">
+                        <ul class="divide-y divide-slate-100 text-xs font-semibold text-slate-700 max-h-[600px] overflow-y-auto">
                             <li><a href="javascript:void(0)" onclick="filtrarCategoria('')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between font-bold text-purple-900"><span>Ver Todo o Catálogo</span> <i class="fa-solid fa-border-all text-[10px]"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('acrilico')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Acrílicos & Placas</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('agenda')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Agendas, Cadernos & Planners</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('calendario')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Calendários & Folhinhas</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('mochila pirulito')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Mochila Pirulito</span></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('tubete')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Banner com tubete</span> <span class="tag-promocao">PROMOÇÃO</span></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('artes')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>ARTES</span> <span class="tag-promocao">PROMOÇÃO</span></a></li>
+                            
+                            <!-- CARTÃO DE VISITA EXPANSÍVEL -->
+                            <li>
+                                <div onclick="toggleSubmenu('sub-cartao-tp', 'cartao')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between cursor-pointer select-none">
+                                    <span>Cartão de Visita</span>
+                                    <i id="icon-sub-cartao-tp" class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform"></i>
+                                </div>
+                                <ul id="sub-cartao-tp" class="hidden pl-6 bg-slate-50 divide-y divide-slate-100 text-[11px] text-slate-600">
+                                    <li><a href="javascript:void(0)" onclick="filtrarCategoria('cartao 250g')" class="py-1.5 block hover:text-purple-900">• Cartão 250g</a></li>
+                                    <li><a href="javascript:void(0)" onclick="filtrarCategoria('cartao 300g')" class="py-1.5 block hover:text-purple-900">• Cartão 300g</a></li>
+                                    <li><a href="javascript:void(0)" onclick="filtrarCategoria('verniz')" class="py-1.5 block hover:text-purple-900">• Verniz UV / Laminação</a></li>
+                                    <li><a href="javascript:void(0)" onclick="filtrarCategoria('pvc')" class="py-1.5 block hover:text-purple-900">• Cartão PVC</a></li>
+                                </ul>
+                            </li>
+
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('folheto')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Folheto, Folder & Flyer</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('abada')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Abadá Carnaval</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('acrilico')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Acrílico</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('adesivo')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Adesivo</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('agenda')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Agendas, Cadernos e Planners</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('figurinha')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Álbum de Figurinhas Fotográfico</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('avental')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Avental</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('banner')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Banner, Faixa, Lona e Painel</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('bermuda')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Bermuda & Short</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('bloco')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Blocos e Comandas</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('bolsa')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Bolsa em Tecido</span> <span class="tag-novo">NOVO</span></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('bone')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Bonés e Viseiras</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('calendario')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Calendários e Folhinha</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('camisa')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Camisa, Camiseta e Blusa</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('copo')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Canecas, Copos e Taças</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('canga')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Cangas</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('carne')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Capa de Carnê</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('corte')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Capa de Corte</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('cardapio')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Cardápio</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('cartao duplo')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Cartão Duplo</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('cartao mini')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Cartão Mini</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('cartao postal')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Cartão Postal</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('cartaz')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Cartaz e Poster</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('bijuteria')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Cartela Para Bijuteria</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('casa')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Casa & Decoração</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('diploma')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Certificado e Diploma</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('coroa')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Coroa de Papel</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('credencial')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Credenciais</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('display')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Display</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
                             <li><a href="javascript:void(0)" onclick="filtrarCategoria('dtf')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>DTF Transfer Digital</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('embalagem')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Embalagens & Sacos Kraft</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('envelope')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Envelopes & Pastas</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('mochila')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Mochila Pirulito</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('santinho')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Santinhos & Eleitoral</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('wind')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Wind Banner Completo</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('embalagem')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Embalagens Fast Food</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('embalagem presente')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Embalagens Presente</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('envelope')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Envelope</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('festas')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Festas</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('cupom')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Folheto Cupom de Desconto</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('ima')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Ímã de Geladeira</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('laser')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Impressão Laser</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('jogo americano')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Jogo Americano</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('jogo tabuleiro')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Jogo de Tabuleiro</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('marcador')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Marcador de Página</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('mascara')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Máscara em Tecido</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('mobile')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Móbile</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('mochila cordao')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Mochila de Cordão</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('moleton')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Moletons</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('mousepad')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Mouse Pad Personalizado</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('orcamento')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Orçamento Aprovado</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('papel bandeja')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Papel Bandeja</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('papel e adesivo')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Papel e Adesivo Para Impressão</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('papel fotografico')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Papel Fotográfico</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('papel sublimatico')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Papel Sublimático</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('pastas')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Pastas</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('photobook')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Photobook</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('planner')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Planner</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('porta copo')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Porta Copo</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('ps pvc')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>PS | PVC com Impressão UV</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('quadro decorativo')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Quadro Decorativo Personalizado</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('quadro magnetico')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Quadro Magnético</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('quebra cabeca')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Quebra-Cabeça</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('raspadinha')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Raspadinha</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('revista')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Revista de Colorir</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('sublimacao')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Sublimação</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('suprimentos')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Suprimentos</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('timbrado')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Timbrado e Receituários</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('ventarola')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Ventarola, Abanador e Leque</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('wind')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Wind Banner</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
                         </ul>
                     </div>
                 </aside>
@@ -239,7 +344,7 @@
                 <div class="flex-1 space-y-4">
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between flex-wrap gap-2">
                         <h3 class="text-base font-black text-purple-950 uppercase font-heading flex items-center gap-2">
-                            <i class="fa-solid fa-fire text-amber-500"></i> PRODUTOS MAIS VENDIDOS
+                            <i class="fa-solid fa-fire text-amber-500"></i> PRODUTOS DA GRÁFICA
                         </h3>
                         <span id="txt-contador-produtos" class="text-xs text-slate-500 font-bold bg-slate-100 px-3 py-1 rounded-full">Carregando produtos...</span>
                     </div>
@@ -253,15 +358,8 @@
             </div>
         </div>
 
-
-        <!-- ================= SEÇÃO 2: CARRINHO ================= -->
+        <!-- OUTRAS SEÇÕES (CARRINHO, RASTREIO, MINHAS COMPRAS) -->
         <div id="secao-carrinho" class="hidden space-y-6">
-            <div class="text-xs text-slate-500 flex items-center gap-2 bg-slate-200/60 px-4 py-2.5 rounded-lg border border-slate-300/50">
-                <a href="javascript:void(0)" onclick="alternarAba('catalogo')" class="hover:underline text-purple-900 font-bold">Início</a>
-                <span>/</span>
-                <span class="font-bold text-slate-700">Carrinho</span>
-            </div>
-
             <div id="carrinho-vazio-msg" class="hidden bg-white border border-slate-200 p-12 rounded-xl text-center space-y-3 shadow-sm">
                 <i class="fa-solid fa-cart-flatbed text-5xl text-slate-300 block"></i>
                 <h3 class="text-lg font-black text-slate-800">Seu carrinho de compras está vazio.</h3>
@@ -269,7 +367,6 @@
                     VER PRODUTOS DISPONÍVEIS
                 </button>
             </div>
-
             <div id="carrinho-conteudo-box" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 <div class="lg:col-span-8 space-y-6">
                     <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
@@ -291,35 +388,8 @@
                             </table>
                         </div>
                     </div>
-
-                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
-                        <h3 class="text-xs font-black text-purple-950 uppercase font-heading flex items-center gap-2">
-                            <i class="fa-solid fa-location-dot text-amber-500"></i> Endereço de Entrega / Retirada
-                        </h3>
-                        <input type="text" id="input-endereco-completo" value="Rua Marcílio Dias, quadra 20 lote 36 casa b, Seropédica/RJ" class="w-full border border-slate-300 rounded px-3 py-2 text-xs text-slate-800 font-bold bg-slate-50 focus:outline-none">
-                    </div>
-
-                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-                        <h3 class="text-xs font-black text-purple-950 uppercase font-heading flex items-center gap-2">
-                            <i class="fa-solid fa-credit-card text-amber-500"></i> Forma de Pagamento
-                        </h3>
-                        <div class="bg-purple-950 text-white p-4 rounded-xl space-y-2 border border-purple-800">
-                            <div class="flex items-center justify-between text-xs">
-                                <strong class="text-emerald-400 font-black flex items-center gap-1.5"><i class="fa-brands fa-pix text-base"></i> CHAVE PIX CNPJ</strong>
-                                <span class="bg-emerald-500/20 text-emerald-300 text-[10px] px-2 py-0.5 rounded font-bold">Liberação Imediata</span>
-                            </div>
-                            <div class="bg-slate-900 p-3 rounded-lg text-xs font-mono space-y-1 select-all border border-slate-700">
-                                <div><span class="text-slate-400">CNPJ:</span> <strong class="text-amber-400">58658668000100</strong></div>
-                                <div><span class="text-slate-400">Favorecido:</span> <strong class="text-white">Daniel Henrique Vieira de Sousa</strong></div>
-                            </div>
-                            <button onclick="copiarChavePix()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2 rounded-lg transition-all shadow flex items-center justify-center gap-2">
-                                <i class="fa-regular fa-copy"></i> Copiar Chave Pix CNPJ
-                            </button>
-                        </div>
-                    </div>
                 </div>
-
-                <div class="lg:col-span-4 space-y-5 lg:sticky lg:top-24">
+                <div class="lg:col-span-4 space-y-5">
                     <div class="bg-white border-2 border-purple-900 rounded-xl shadow-lg p-5 space-y-4">
                         <h3 class="text-sm font-black text-purple-950 uppercase font-heading border-b border-slate-100 pb-2.5">Resumo do Pedido</h3>
                         <div class="space-y-2.5 text-xs">
@@ -336,43 +406,20 @@
             </div>
         </div>
 
-        <!-- ================= SEÇÃO 3: RASTREIO ================= -->
         <div id="secao-pedidos" class="hidden space-y-6">
             <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
                 <h3 class="text-lg font-black text-purple-950 font-heading mb-1 flex items-center gap-2">
-                    <i class="fa-solid fa-magnifying-glass-location text-amber-500"></i> Rastreio e Acompanhamento de Pedidos
+                    <i class="fa-solid fa-magnifying-glass-location text-amber-500"></i> Rastreio de Pedidos
                 </h3>
-                <p class="text-xs text-slate-500">Digite seu CPF, CNPJ ou WhatsApp cadastrado para consultar a fila de produção.</p>
             </div>
-
-            <div id="msg-nao-identificado" class="bg-white border border-slate-200 p-8 sm:p-12 rounded-xl text-center space-y-4 shadow-md max-w-lg mx-auto">
-                <div class="w-16 h-16 bg-purple-50 text-purple-900 rounded-full flex items-center justify-center mx-auto text-2xl border border-purple-200">
-                    <i class="fa-solid fa-user-lock"></i>
-                </div>
-                <div class="space-y-1">
-                    <h4 class="text-lg font-black text-slate-800">Identifique-se para rastrear seus pedidos</h4>
-                    <p class="text-xs text-slate-500">Acesse seu histórico de compras e status de fabricação em tempo real.</p>
-                </div>
-                <button onclick="abrirModalIdentificacao()" class="w-full bg-amber-400 hover:bg-amber-300 text-purple-950 font-black py-3 rounded-lg text-xs transition-all shadow-md">
-                    DIGITAR MEU CPF OU WHATSAPP
-                </button>
-            </div>
-
-            <div id="container-lista-pedidos" class="hidden space-y-6"></div>
         </div>
 
-        <!-- ================= SEÇÃO 4: MINHAS COMPRAS ================= -->
         <div id="secao-recompra" class="hidden space-y-6">
-            <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200 flex items-center justify-between flex-wrap gap-4">
-                <div>
-                    <h3 class="text-lg font-black text-purple-950 font-heading flex items-center gap-2">
-                        <i class="fa-solid fa-rotate-right text-amber-500"></i> Repetir Pedidos Anteriores
-                    </h3>
-                    <p class="text-xs text-slate-500 mt-0.5">Faça a recompra rápida dos seus materiais com as mesmas configurações.</p>
-                </div>
+            <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
+                <h3 class="text-lg font-black text-purple-950 font-heading flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-right text-amber-500"></i> Repetir Pedidos
+                </h3>
             </div>
-
-            <div id="container-recompra-lista" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         </div>
 
     </main>
@@ -389,15 +436,12 @@
         </div>
     </footer>
 
-    <!-- MODAL DE DETALHES DO PRODUTO -->
+    <!-- MODAL DE DETALHES -->
     <div id="modal-detalhes-produto" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[998] hidden flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-white rounded-2xl max-w-2xl w-full p-6 space-y-5 shadow-2xl relative border border-purple-200 my-8">
             <button onclick="fecharModalDetalhes()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-xl font-bold"><i class="fa-solid fa-xmark"></i></button>
-
             <div class="flex flex-col sm:flex-row gap-5 items-start border-b border-slate-100 pb-4">
-                <div class="w-full sm:w-48 h-44 bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center shrink-0 overflow-hidden" id="box-imagem-modal">
-                    <!-- Imagem via JS -->
-                </div>
+                <div class="w-full sm:w-48 h-44 bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center shrink-0 overflow-hidden" id="box-imagem-modal"></div>
                 <div class="space-y-2">
                     <span id="txt-modal-categoria" class="bg-purple-100 text-purple-950 font-black text-[10px] px-2.5 py-1 rounded uppercase tracking-wider inline-block">PRODUTO</span>
                     <h3 id="txt-modal-titulo" class="text-lg font-black text-purple-950 font-heading leading-snug">Nome do Produto</h3>
@@ -405,16 +449,11 @@
                         <strong id="txt-modal-preco" class="text-emerald-600 font-black text-xl">R$ 0,00</strong>
                         <span id="txt-modal-ref" class="text-xs text-slate-500 font-semibold bg-slate-100 px-2 py-0.5 rounded">Ref: ---</span>
                     </div>
-                    <p id="txt-modal-producao" class="text-xs text-purple-900 font-bold"><i class="fa-regular fa-clock mr-1"></i> Produção: 24 horas</p>
                 </div>
             </div>
-
             <div id="txt-modal-descricao-html" class="conteudo-html-descricao max-h-72 overflow-y-auto pr-2 border-b border-slate-100 pb-4"></div>
-
             <div class="flex justify-end gap-3 pt-2">
-                <button onclick="fecharModalDetalhes()" class="px-5 py-2.5 bg-slate-200 text-slate-800 font-bold rounded-xl text-xs hover:bg-slate-300 transition-all">
-                    Fechar
-                </button>
+                <button onclick="fecharModalDetalhes()" class="px-5 py-2.5 bg-slate-200 text-slate-800 font-bold rounded-xl text-xs hover:bg-slate-300 transition-all">Fechar</button>
                 <a href="https://phsublime.com.br/gabaritos" target="_blank" class="btn-gabarito px-5 py-2.5 font-bold rounded-xl text-xs shadow flex items-center gap-1.5">
                     <i class="fa-solid fa-download"></i> Baixar Gabarito
                 </a>
@@ -440,22 +479,61 @@
         const WHATSAPP_ATENDIMENTO = '5521986147221';
         const CHAVE_PIX_OFICIAL = '58658668000100';
 
+        // MAPA COMPLETO DE TODAS AS PALAVRAS DA SUA LISTA
         const MAPA_PALAVRAS_CATEGORIA = {
+            'tubete': ['tubete', 'banner'],
+            'artes': ['arte', 'artes', 'promoção', 'promocao'],
+            'cartao': ['cartao', 'cartão', 'crt', 'transparente', 'pvc', 'couche', 'couché', 'opaline', 'duplo', 'mini', 'postal'],
+            'folheto': ['folheto', 'panfleto', 'imp', 'impressao', 'impressão', 'flyer', 'folder', 'cupom'],
+            'abada': ['abada', 'abadá', 'carnaval'],
             'adesivo': ['adesivo', 'vinil', 'adv', 'sign', 'rotulo', 'autocolante', 'microperfurado'],
-            'banner': ['banner', 'lona', 'faixa', 'sign', 'backlight', 'frontlight', 'roll up'],
-            'camisa': ['camisa', 'camiseta', 'polo', 'vestuario', 'moletom', 'avental', 'cms', 'mlt', 'avt'],
-            'cartao': ['cartao', 'cartão', 'crt', 'transparente', 'pvc', 'couche', 'opaline'],
-            'dtf': ['dtf', 'transfer', 'textil', 'termo'],
-            'folheto': ['folheto', 'panfleto', 'imp', 'impressao', 'flyer', 'folder'],
-            'copo': ['copo', 'taca', 'taça', 'balde', 'gin', 'ldr', 'bdg', 'cpa', 'caneca'],
-            'wind': ['wind', 'flag', 'pena', 'faca', 'vela'],
-            'acrilico': ['acrilico', 'trofeu', 'pacr', 'trof', 'placa pvc', 'plc'],
-            'bloco': ['bloco', 'talao', 'comanda', 'recibo'],
+            'banner': ['banner', 'lona', 'faixa', 'sign', 'backlight', 'frontlight', 'roll up', 'painel'],
+            'bloco': ['bloco', 'talao', 'talão', 'comanda', 'recibo', 'autocopiativo'],
+            'bolsa': ['bolsa', 'sacola', 'ecobag', 'tecido'],
+            'calendario': ['calendario', 'calendário', 'folhinha'],
+            'camisa': ['camisa', 'camiseta', 'polo', 'vestuario', 'moletom', 'avental', 'cms', 'mlt', 'avt', 'bermuda', 'short', 'bone', 'boné', 'viseira'],
+            'casa': ['puff', 'quadro', 'decoracao', 'decoração', 'puf', 'casa'],
+            'festas': ['festa', 'balao', 'totem', 'copo', 'taca', 'balde'],
+            'acrilico': ['acrilico', 'acrílico', 'trofeu', 'troféu', 'pacr', 'trof', 'placa', 'plc'],
             'agenda': ['agenda', 'planner', 'pln', 'agd', 'caderno'],
+            'figurinha': ['figurinha', 'album', 'álbum'],
+            'avental': ['avental'],
+            'copo': ['copo', 'taca', 'taça', 'balde', 'gin', 'ldr', 'bdg', 'cpa', 'caneca', 'porta copo'],
+            'canga': ['canga'],
+            'carne': ['carne', 'carnê', 'capa'],
+            'corte': ['corte'],
+            'cardapio': ['cardapio', 'cardápio'],
+            'cartaz': ['cartaz', 'poster', 'pôster'],
+            'bijuteria': ['bijuteria', 'cartela'],
+            'diploma': ['certificado', 'diploma'],
+            'coroa': ['coroa'],
+            'credencial': ['credencial', 'cracha', 'crachá'],
+            'display': ['display'],
+            'dtf': ['dtf', 'transfer', 'textil', 'termo'],
+            'embalagem': ['saco', 'kraft', 'embalagem', 'box', 'yakissoba', 'emb', 'fast food', 'presente'],
             'envelope': ['envelope', 'pasta'],
-            'embalagem': ['saco', 'kraft', 'embalagem', 'box', 'yakissoba', 'emb'],
-            'mochila': ['mochila', 'pirulito', 'mopi'],
-            'santinho': ['santinho', 'pragao', 'snt', 'eleitoral']
+            'ima': ['ima', 'ímã', 'geladeira'],
+            'laser': ['laser'],
+            'jogo': ['jogo', 'tabuleiro', 'americano'],
+            'marcador': ['marcador', 'pagina', 'página'],
+            'mascara': ['mascara', 'máscara'],
+            'mobile': ['mobile', 'móbile'],
+            'mochila': ['mochila', 'pirulito', 'cordao', 'cordão', 'mopi'],
+            'moleton': ['moletom', 'moleton'],
+            'mousepad': ['mouse', 'pad', 'mousepad'],
+            'orcamento': ['orcamento', 'orçamento'],
+            'papel': ['papel', 'bandeja', 'fotografico', 'fotográfico', 'sublimatico', 'sublimático'],
+            'photobook': ['photobook', 'foto'],
+            'ps pvc': ['ps', 'pvc', 'uv'],
+            'quadro': ['quadro', 'magnetico', 'magnético'],
+            'quebra cabeca': ['quebra', 'cabeça', 'cabeca'],
+            'raspadinha': ['raspadinha', 'rasp'],
+            'revista': ['revista', 'colorir'],
+            'sublimacao': ['sublimacao', 'sublimação'],
+            'suprimentos': ['suprimento', 'tinta', 'insumo'],
+            'timbrado': ['timbrado', 'receituario', 'receituário'],
+            'ventarola': ['ventarola', 'abanador', 'leque'],
+            'wind': ['wind', 'flag', 'pena', 'faca', 'vela']
         };
 
         let clienteIdentificado = null;
@@ -468,7 +546,20 @@
 
         let carrinho = [];
 
-        function limparNumeros(str) { return String(str || '').replace(/\D/g, ''); }
+        // FUNÇÃO DE SANFONA (EXPANDIR E FECHAR SUBMENUS)
+        function toggleSubmenu(id, categoria = '') {
+            const el = document.getElementById(id);
+            const icon = document.getElementById(`icon-${id}`);
+            if (el) {
+                el.classList.toggle('hidden');
+            }
+            if (icon) {
+                icon.classList.toggle('rotate-180');
+            }
+            if (categoria) {
+                filtrarCategoria(categoria);
+            }
+        }
 
         function formatarUrlImagem(url) {
             if (!url) return '';
@@ -484,7 +575,6 @@
                 carrinho = [];
             }
             atualizarBadgeCarrinho();
-            renderizarPaginaCarrinho();
         }
 
         function salvarCarrinho() {
@@ -632,7 +722,6 @@
                 return;
             }
 
-            // PAGINAÇÃO
             const totalPaginas = Math.ceil(filtrados.length / ITENS_POR_PAGINA);
             const inicio = (paginaAtual - 1) * ITENS_POR_PAGINA;
             const itensPagina = filtrados.slice(inicio, inicio + ITENS_POR_PAGINA);
@@ -669,7 +758,6 @@
                 container.appendChild(card);
             });
 
-            // BOTOES DE PAGINAÇÃO
             if (paginacaoBox && totalPaginas > 1) {
                 let htmlPaginacao = '';
                 for (let i = 1; i <= totalPaginas && i <= 10; i++) {
