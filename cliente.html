@@ -1096,36 +1096,46 @@
             if (aba === 'recompra') renderizarRecompra();
         }
 
+        // FUNÇÃO ATUALIZADA: PUXA OS PRODUTOS EM TEMPO REAL DO SUPABASE
         async function carregarEstoquePublico() {
-            catalogoEstoque = [
-                { id: 1, nome: 'Cartão de Visita 250g | 4/0 | Verniz UV Frente', categoria: 'Cartão', precoVenda: 21.56, ref: 'crt001', producao: '24 horas', imagem: '20250916_0_cartao4,0.jpg', descricao: '<p>Cartão de visita clássico em papel Couché 250g com verniz brilho na frente.</p>' },
-                { id: 2, nome: 'Troféu de Acrílico Personalizado 15x21cm', categoria: 'Acrílico', precoVenda: 68.00, ref: 'TROF004', producao: '48 horas', imagem: '20250911_0_20241111_0_troféu-15x21cm-impressão-total.png', descricao: '<p>Troféu em acrílico cristal com impressão colorida UV direta e base reforçada.</p>' },
-                { id: 3, nome: 'Placa de Acrílico A4 (Espelhado / Prata / Dourado)', categoria: 'Acrílico', precoVenda: 85.00, ref: 'PACR001', producao: '48 horas', imagem: '20250911_0_20241126_0_PACR001.png', descricao: '<p>Placa decorativa/corporativa em acrílico com corte laser de precisão.</p>' },
-                { id: 4, nome: 'Adesivo Vinil Brilho m² (Impressão Solvente)', categoria: 'Adesivo', precoVenda: 29.40, ref: 'sign01', producao: '24 horas', imagem: '20250911_0_20190313_imprimir_adesivo_personalizado.jpg', descricao: '<p>Adesivo vinil brilho resistente à água e ao sol para fachadas e rótulos.</p>' },
-                { id: 5, nome: 'Adesivo Microperfurado para Vitrines e Veículos', categoria: 'Adesivo', precoVenda: 48.00, ref: 'sign013', producao: '24 horas', imagem: '20250922_0_adesivo8mm.png', descricao: '<p>Vinil microperfurado para aplicação em vidros com transmissão de luz.</p>' },
-                { id: 6, nome: 'Adesivo de Parede Decorativo M²', categoria: 'Adesivo', precoVenda: 39.90, ref: 'adv009', producao: '24 horas', imagem: '20250911_0_20190313_adesivo_de_parede_personalizado_05.jpg', descricao: '<p>Adesivo decorativo fosco lavável para ambientes internos e arquitetura.</p>' },
-                { id: 7, nome: 'Placa PVC Expandido Adesivada 2mm / 3mm', categoria: 'Acrílico', precoVenda: 55.00, ref: 'plc001', producao: '24 horas', imagem: '20250911_0_20190314_imprimir_placa_de_pvc_personalizada_adesivada_01.jpg', descricao: '<p>Sinalização interna e externa em chapa de PVC rígido de alta qualidade.</p>' },
-                { id: 8, nome: 'Banner Lona Brilho 440g com Tubete e Corda', categoria: 'Banner', precoVenda: 27.44, ref: 'sign22', producao: '12 horas', imagem: '20250911_0_20190315_imprimir_banner_personalizado_02.jpg', descricao: '<p>Banner impresso em lona 440g montado com bastões e cordão para pendurar.</p>' },
-                { id: 9, nome: 'Lona Backlight para Painéis Iluminados', categoria: 'Banner', precoVenda: 58.00, ref: 'sign28', producao: '24 horas', imagem: '20250911_0_20190629_0_20190316_imprimir_lona_personalizada_backlight_sem_acabamento_01.jpg', descricao: '<p>Lona translúcida especial para backlight e caixas de luz publicitárias.</p>' },
-                { id: 10, nome: 'Wind Banner Completo Modelo Faca / Pena / Vela', categoria: 'Wind', precoVenda: 107.80, ref: 'wind001', producao: '24 horas', imagem: '20250911_0_20220928_0_windbanner-mini-modelo-faca-1.png', descricao: '<p>Wind Banner promocional com haste de alumínio/fibra e base reforçada.</p>' },
-                { id: 11, nome: 'Camisa Algodão Premium 30.1 Penteado', categoria: 'Camisa', precoVenda: 45.00, ref: 'cms001', producao: '48 horas', imagem: '20250911_0_20230705_0_CAMISETA.png', descricao: '<p>Camiseta macia 100% algodão 30.1 penteado para uniformes e eventos.</p>' },
-                { id: 12, nome: 'Camisa Polo para Revenda / Corporativa', categoria: 'Camisa', precoVenda: 55.00, ref: 'cms008', producao: '48 horas', imagem: '20260202_0_20260120_0_camisa_polo_para_revenda_branca.png', descricao: '<p>Camisa gola polo piquet bordada ou estampa digital para empresas.</p>' },
-                { id: 13, nome: 'Moletom Canguru com Capuz Personalizado', categoria: 'Camisa', precoVenda: 110.00, ref: 'mlt001', producao: '48 horas', imagem: '20250911_0_20220903_0_MOLETOMCANGURUPRETO.png', descricao: '<p>Moletom flanelado quentinho com bolso frontal e estampa digital.</p>' },
-                { id: 14, nome: 'Avental Profissional com Bolsos (Oxford)', categoria: 'Camisa', precoVenda: 32.00, ref: 'avt001', producao: '24 horas', imagem: '20250911_0_20241021_0_AVENTALcombolso.png', descricao: '<p>Avental para chefs, garçons, churrasqueiros e eventos comerciais.</p>' },
-                { id: 15, nome: 'DTF Transfer Têxtil Por Metro (60cm)', categoria: 'DTF', precoVenda: 75.00, ref: 'dtf009', producao: '12 horas', imagem: '20260119_0_20260118_0_dtf_por_metro_para_revenda.png', descricao: '<p>Impressão DTF por metro contínuo pronta para termo-transferência.</p>' },
-                { id: 16, nome: 'Saco Kraft Delivery Personalizado P/M/G', categoria: 'Embalagem', precoVenda: 85.00, ref: 'emb056', producao: '48 horas', imagem: '20250911_0_20200518_0_saco_personalizado_kraft_1cor.jpg', descricao: '<p>Embalagens e sacos de papel kraft para lanchonetes e delivery.</p>' },
-                { id: 17, nome: 'Box para Yakissoba Oriental (500ml / 850ml)', categoria: 'Embalagem', precoVenda: 92.00, ref: 'ykp005', producao: '48 horas', imagem: '20250911_0_20230120_0_BoxYakissobaOrigami500mlPACOTE.png', descricao: '<p>Caixas térmicas estanhadas à prova de vazamentos para culinária asiática.</p>' },
-                { id: 18, nome: 'Mochila Pirulito Promocional (Vários Tamanhos)', categoria: 'Mochila', precoVenda: 89.00, ref: 'mopi02', producao: '48 horas', imagem: '20260203_0_20251219_0_Mochila-Pirulito-Nauta-35x35.png', descricao: '<p>Mochila ergonômica leve para propaganda de rua com 2 placas rídicas.</p>' },
-                { id: 19, nome: 'Taça de Gin Personalizada (Sólida, Degradê ou Neon)', categoria: 'Copo', precoVenda: 14.50, ref: 'gin001', producao: '24 horas', imagem: '20250911_0_20220813_0_TaçaGinAmareloSólido.png', descricao: '<p>Taças acrílicas para festas, casamentos e eventos corporativos.</p>' },
-                { id: 20, nome: 'Copo Long Drink 350ml / Caldereta', categoria: 'Copo', precoVenda: 4.80, ref: 'ldr001', producao: '24 horas', imagem: '20250911_0_20220813_0_LongDrinkAmareloSólido.png', descricao: '<p>Copos acrílicos resistentes com personalização colorida ilimitada.</p>' },
-                { id: 21, nome: 'Balde de Gelo Alumínio 6L / 9L Personalizado', categoria: 'Copo', precoVenda: 45.00, ref: 'bdg001', producao: '24 horas', imagem: '20250911_0_20220813_0_AMARELOPERSO6L.png', descricao: '<p>Balde de alumínio pintura eletrostática e adesivo vinil impermeável.</p>' },
-                { id: 22, nome: 'Copo de Alumínio 300ml / 500ml / 800ml', categoria: 'Copo', precoVenda: 12.00, ref: 'cpa001', producao: '24 horas', imagem: '20250911_0_20220815_0_COPODEALUMINIO300MLBRANCA.png', descricao: '<p>Copos ecológicos de alumínio reutilizáveis para chopp e bebidas.</p>' },
-                { id: 23, nome: 'Agenda Capa Dura Floral 2026 / Escolar', categoria: 'Agenda', precoVenda: 48.00, ref: 'agd002', producao: '48 horas', imagem: '20250911_0_20240926_0_Agenda1DPP-Colorida.png', descricao: '<p>Agenda diária 1DPP/2DPP com miolo offset e encadernação wire-o.</p>' },
-                { id: 24, nome: 'Planner Comercial Financeiro / Semanal', categoria: 'Agenda', precoVenda: 52.00, ref: 'pln003', producao: '48 horas', imagem: '20250911_0_20221207_0_PLANNERCUTE-4X4.png', descricao: '<p>Planner de gestão pessoal e empresarial para controle financeiro.</p>' },
-                { id: 25, nome: 'Cartão Raspadinha Promocional', categoria: 'Raspadinha', precoVenda: 65.00, ref: 'rasp002', producao: '48 horas', imagem: '20250911_0_20250814_0_Thumb-Raspadinha-Circulo-4x4_Thumb01.png', descricao: '<p>Raspadinha com camada removível para sorteios e sorte no comércio.</p>' },
-                { id: 26, nome: 'Puff Baú Estampado Sublimado', categoria: 'Casa', precoVenda: 120.00, ref: 'puf001', producao: '72 horas', imagem: '20250911_0_20210401_0_PUFFBAÚ2.png', descricao: '<p>Puff baú dobrável reforçado com assento estofado e estampa digital.</p>' },
-                { id: 27, nome: 'Santinhos e Pragões Eleitorais (Milhar)', categoria: 'Eleitoral', precoVenda: 75.00, ref: 'snt001', producao: '24 horas', imagem: '20250911_0_20240520_0_SANTINHO.png', descricao: '<p>Santinhos promocionais em papel couchê em grande volume de impressão.</p>' }
-            ];
+            try {
+                mostrarToast("Carregando catálogo do Supabase...", "info");
+
+                const { data, error } = await supabaseClient
+                    .from('produtos')
+                    .select('*');
+
+                if (error) {
+                    console.error("Erro no Supabase:", error);
+                    mostrarToast("Erro ao carregar do banco de dados. Verifique a permissão RLS.", "erro");
+                } else if (data && data.length > 0) {
+                    catalogoEstoque = data.map((item, index) => {
+                        let preco = 0;
+                        if (item.Preco_Custo) {
+                            preco = parseFloat(String(item.Preco_Custo).replace(',', '.'));
+                        } else if (item.Preco_Venda) {
+                            preco = parseFloat(String(item.Preco_Venda).replace(',', '.'));
+                        }
+
+                        return {
+                            id: item.id || index + 1,
+                            nome: item.Tipo_Produto || item.Referencia || 'Produto Personalizado',
+                            categoria: item.Categorias_Secundarias || item.id_Categoria || 'Geral',
+                            precoVenda: isNaN(preco) || preco <= 0 ? 25.00 : preco,
+                            ref: item.Referencia || `REF-${index + 1}`,
+                            producao: '24 horas',
+                            imagem: item.Url || '',
+                            descricao: item.Descricao || `<p>Produto: <strong>${item.Tipo_Produto || 'Material Gráfico'}</strong></p><p>Categoria: ${item.Categorias_Secundarias || 'Geral'}</p><p>Entre em contato para enviar sua arte!</p>`
+                        };
+                    });
+                    
+                    mostrarToast(`${catalogoEstoque.length} produtos carregados!`);
+                }
+            } catch (err) {
+                console.error("Erro de conexão com o Supabase:", err);
+                mostrarToast("Erro de conexão.", "erro");
+            }
+
             renderizarCatalogo();
         }
 
@@ -1420,7 +1430,7 @@
 
         async function inicializarPortal() {
             renderizarBanners();
-            carregarEstoquePublico();
+            await carregarEstoquePublico();
 
             const termoSalvo = localStorage.getItem('phsublime_cliente_termo');
             const dadosSalvos = localStorage.getItem('phsublime_cliente_dados');
