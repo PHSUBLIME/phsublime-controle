@@ -58,7 +58,7 @@
 <body class="bg-slate-50 min-h-screen flex flex-col justify-between selection:bg-purple-200 selection:text-purple-900">
 
     <!-- CABEÇALHO PRINCIPAL DA LOJA -->
-    <header class="bg-purple-950 text-white shadow-xl sticky top-0 z-50 border-b-4 border-amber-400">
+    <header class="bg-purple-950 text-white shadow-xl relative z-30 border-b-4 border-amber-400">
         <div class="max-w-[1536px] mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
             
             <!-- LOGO PHSUBLIME -->
@@ -614,6 +614,25 @@
         const CHAVE_PIX_OFICIAL = '58658668000100';
         const NOME_BENEFICIARIO_PIX = 'Daniel Henrique Vieira de Sousa';
 
+        // MAPEAMENTO INTELIGENTE DE CATEGORIAS DA GRÁFICA
+        const MAPA_PALAVRAS_CATEGORIA = {
+            'adesivo': ['adesivo', 'vinil', 'adv', 'sign', 'rotulo', 'autocolante'],
+            'banner': ['banner', 'lona', 'faixa', 'sign', 'backlight', 'frontlight'],
+            'camisa': ['camisa', 'camiseta', 'polo', 'vestuario', 'moletom', 'avental', 'cms', 'mlt', 'avt'],
+            'cartao': ['cartao', 'cartão', 'crt', 'transparente', 'pvc', 'couche', 'couché'],
+            'dtf': ['dtf', 'transfer', 'textil', 'termo'],
+            'folheto': ['folheto', 'panfleto', 'imp', 'impressao', 'impressão', 'flyer', 'a4', 'a5', 'a6'],
+            'copo': ['copo', 'taca', 'taça', 'balde', 'gin', 'ldr', 'bdg', 'cpa', 'long drink', 'caldereta'],
+            'wind': ['wind', 'flag', 'pena', 'faca', 'vela'],
+            'acrilico': ['acrilico', 'acrílico', 'trofeu', 'troféu', 'pacr', 'trof', 'placa pvc', 'plc'],
+            'bloco': ['bloco', 'talao', 'talão', 'recibo', 'comprovante'],
+            'agenda': ['agenda', 'planner', 'pln', 'agd', 'diario'],
+            'envelope': ['envelope', 'pasta', 'oficio'],
+            'embalagem': ['saco', 'kraft', 'embalagem', 'box', 'yakissoba', 'emb', 'ykp', 'delivery'],
+            'casa': ['puff', 'quadro', 'decoracao', 'decoração', 'puf', 'casa'],
+            'eleitoral': ['santinho', 'pragao', 'pragão', 'snt', 'eleitoral', 'politica', 'política']
+        };
+
         let clienteIdentificado = null;
         let identificacaoTermo = '';
         let pedidosDoCliente = [];
@@ -644,7 +663,7 @@
         // Carrega o carrinho vinculado à conta do cliente (ou deixa vazio se não logado)
         function carregarCarrinho() {
             if (!clienteIdentificado) {
-                carrinho = []; // Se não estiver logado, o carrinho fica vazio
+                carrinho = [];
             } else {
                 const chave = obterChaveCarrinho();
                 carrinho = JSON.parse(localStorage.getItem(chave) || '[]');
@@ -655,7 +674,6 @@
             }
         }
 
-        // Salva as alterações no carrinho do cliente atual
         function salvarCarrinho() {
             const chave = obterChaveCarrinho();
             if (clienteIdentificado) {
@@ -720,7 +738,6 @@
             }
         });
 
-        // CADASTRO DE CLIENTE COMPLETO
         function abrirModalCadastro() {
             toggleUserDropdown();
             if (clienteIdentificado && (clienteIdentificado.cpf || clienteIdentificado.whatsapp)) {
@@ -753,7 +770,6 @@
             localStorage.setItem('phsublime_cliente_dados', JSON.stringify(clienteIdentificado));
             localStorage.setItem('phsublime_cliente_termo', cpf || whatsapp);
             
-            // Carrega e vincula o carrinho do cliente
             carregarCarrinho();
 
             fecharModalCadastro();
@@ -834,7 +850,6 @@
                     localStorage.setItem('phsublime_cliente_dados', JSON.stringify(clienteIdentificado));
                     localStorage.setItem('phsublime_cliente_termo', identificacaoTermo);
                     
-                    // Restaura os itens do carrinho do cliente logado
                     carregarCarrinho();
 
                     mostrarToast(`Bem-vindo(a), ${clienteIdentificado.nome.split(' ')[0]}!`);
@@ -869,7 +884,6 @@
             }
         }
 
-        // LOGOUT COMPLETO: RESETA O CARRINHO DA TELA
         function sairEBuscarOutro() {
             localStorage.removeItem('phsublime_cliente_termo');
             localStorage.removeItem('phsublime_cliente_dados');
@@ -877,7 +891,6 @@
             identificacaoTermo = '';
             pedidosDoCliente = [];
 
-            // Esvazia o carrinho e atualiza a interface
             carrinho = [];
             atualizarBadgeCarrinho();
             renderizarPaginaCarrinho();
@@ -1052,7 +1065,6 @@
             document.getElementById('cart-resumo-total').innerText = `R$ ${subtotalGeral.toFixed(2)}`;
         }
 
-        // FINALIZAR NO WHATSAPP E ESVAZIAR CARRINHO
         function finalizarCompraWhatsApp() {
             if (carrinho.length === 0) return mostrarToast("Carrinho vazio!", "alerta");
             let texto = `🚀 *NOVO PEDIDO - PHSUBLIME*\n\n`;
@@ -1073,7 +1085,6 @@
             
             window.open(`https://api.whatsapp.com/send?phone=${WHATSAPP_ATENDIMENTO}&text=${encodeURIComponent(texto)}`, '_blank');
 
-            // Limpa o carrinho após finalizar o pedido no WhatsApp
             carrinho = [];
             salvarCarrinho();
             renderizarPaginaCarrinho();
@@ -1096,7 +1107,7 @@
             if (aba === 'recompra') renderizarRecompra();
         }
 
-        // ESTOQUE PADRÃO DE SEGURANÇA (PARA NUNCA DEIXAR A VITRINE VAZIA)
+        // ESTOQUE PADRÃO DE SEGURANÇA
         function carregarEstoquePadrao() {
             catalogoEstoque = [
                 { id: 1, nome: 'Cartão de Visita 250g | 4/0 | Verniz UV Frente', categoria: 'Cartão', precoVenda: 21.56, ref: 'crt001', producao: '24 horas', imagem: '20250916_0_cartao4,0.jpg', descricao: '<p>Cartão de visita clássico em papel Couché 250g com verniz brilho na frente.</p>' },
@@ -1129,28 +1140,24 @@
             ];
         }
 
-        // FUNÇÃO INTELIGENTE DE CARREGAMENTO DO SUPABASE COM FALLBACK AUTOMÁTICO
+        // CARREGAMENTO INTELIGENTE DO SUPABASE
         async function carregarEstoquePublico() {
-            // 1. Carrega o catálogo padrão imediatamente para o site NUNCA ficar vazio
             carregarEstoquePadrao();
             renderizarCatalogo();
 
             try {
                 mostrarToast("Conectando ao Supabase...", "info");
-                categoriaFiltro = '';
 
-                // 2. Busca no Supabase
                 const { data, error } = await supabaseClient
                     .from('produtos')
                     .select('*')
-                    .limit(60);
+                    .limit(100);
 
                 if (error) {
                     console.error("Erro no Supabase:", error);
-                    mostrarToast("Exibindo catálogo da loja.", "info");
+                    mostrarToast("Exibindo catálogo padrão da gráfica.", "info");
                 } else if (data && data.length > 0) {
-                    // 3. Se encontrar no Supabase, atualiza a tela
-                    catalogoEstoque = data.map((item, index) => {
+                    const produtosMapeados = data.map((item, index) => {
                         let preco = 0;
                         const valPreco = item.Preco_Custo || item.Preco_Venda || item.Preco || 0;
                         if (valPreco) {
@@ -1172,7 +1179,9 @@
                         };
                     });
 
-                    mostrarToast(`${catalogoEstoque.length} produtos carregados do Supabase!`);
+                    // Adiciona os produtos do Supabase ao catálogo
+                    catalogoEstoque = [...produtosMapeados, ...catalogoEstoque];
+                    mostrarToast(`${produtosMapeados.length} produtos carregados do Supabase!`);
                     renderizarCatalogo();
                 }
             } catch (err) {
@@ -1194,15 +1203,27 @@
             const busca = (document.getElementById('input-busca-catalogo')?.value || '').toLowerCase();
 
             const filtrados = catalogoEstoque.filter(item => {
-                const txt = `${item.nome} ${item.categoria} ${item.ref || ''}`.toLowerCase();
-                return (!busca || txt.includes(busca)) && (!categoriaFiltro || txt.includes(categoriaFiltro));
+                const txt = `${item.nome} ${item.categoria} ${item.ref || ''} ${item.descricao || ''} ${item.imagem || ''}`.toLowerCase();
+
+                const bateuBusca = !busca || txt.includes(busca);
+
+                let bateuCategoria = true;
+                if (categoriaFiltro) {
+                    const palavrasChave = MAPA_PALAVRAS_CATEGORIA[categoriaFiltro] || [categoriaFiltro];
+                    bateuCategoria = palavrasChave.some(p => txt.includes(p));
+                }
+
+                return bateuBusca && bateuCategoria;
             });
 
             if (filtrados.length === 0) {
                 container.innerHTML = `
-                    <div class="col-span-full bg-white border border-slate-200 p-8 rounded-xl text-center space-y-2 shadow-sm">
-                        <i class="fa-solid fa-store text-3xl text-slate-300 block"></i>
-                        <h4 class="text-sm font-bold text-slate-800">Nenhum produto localizado para este filtro.</h4>
+                    <div class="col-span-full bg-white border border-slate-200 p-8 rounded-xl text-center space-y-3 shadow-sm">
+                        <i class="fa-solid fa-filter text-4xl text-purple-300 block"></i>
+                        <h4 class="text-sm font-bold text-slate-800">Nenhum produto encontrado nesta categoria.</h4>
+                        <button onclick="filtrarCategoria('')" class="px-4 py-2 bg-purple-900 text-white font-bold text-xs rounded-lg hover:bg-purple-800 transition-all">
+                            VER TODOS OS PRODUTOS
+                        </button>
                     </div>
                 `;
                 return;
@@ -1486,7 +1507,6 @@
                 atualizarHeaderELista();
             }
 
-            // Sincroniza o estado do carrinho dependendo se o cliente está logado ou não
             carregarCarrinho();
         }
 
