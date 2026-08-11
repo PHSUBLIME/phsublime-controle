@@ -1096,44 +1096,55 @@
             if (aba === 'recompra') renderizarRecompra();
         }
 
-        // FUNÇÃO ATUALIZADA: PUXA OS PRODUTOS EM TEMPO REAL DO SUPABASE
+        // FUNÇÃO OTIMIZADA: PUXA OS PRODUTOS EM TEMPO REAL DO SUPABASE (COM LIMITE LEVE)
         async function carregarEstoquePublico() {
             try {
-                mostrarToast("Carregando catálogo do Supabase...", "info");
+                mostrarToast("Carregando produtos do Supabase...", "info");
+                
+                // Reseta qualquer filtro ativo no carregamento inicial
+                categoriaFiltro = '';
 
+                // Puxa os primeiros 60 produtos de forma ultra-rápida sem sobrecarregar a rede
                 const { data, error } = await supabaseClient
                     .from('produtos')
-                    .select('*');
+                    .select('*')
+                    .limit(60);
+
+                console.log("Dados recebidos do Supabase:", data);
 
                 if (error) {
                     console.error("Erro no Supabase:", error);
-                    mostrarToast("Erro ao carregar do banco de dados. Verifique a permissão RLS.", "erro");
+                    mostrarToast("Erro Supabase: " + error.message, "erro");
                 } else if (data && data.length > 0) {
                     catalogoEstoque = data.map((item, index) => {
                         let preco = 0;
-                        if (item.Preco_Custo) {
-                            preco = parseFloat(String(item.Preco_Custo).replace(',', '.'));
-                        } else if (item.Preco_Venda) {
-                            preco = parseFloat(String(item.Preco_Venda).replace(',', '.'));
+                        const valPreco = item.Preco_Custo || item.Preco_Venda || item.Preco || 0;
+                        if (valPreco) {
+                            preco = parseFloat(String(valPreco).replace(',', '.'));
                         }
+
+                        const nomeProd = item.Tipo_Produto || item.Referencia || item.Material || item.Nome || `Produto #${item.id || index + 1}`;
+                        const catProd = item.Categorias_Secundarias || item.Tipo_Produto || item.id_Categoria || 'Gráfica';
 
                         return {
                             id: item.id || index + 1,
-                            nome: item.Tipo_Produto || item.Referencia || 'Produto Personalizado',
-                            categoria: item.Categorias_Secundarias || item.id_Categoria || 'Geral',
+                            nome: nomeProd,
+                            categoria: String(catProd),
                             precoVenda: isNaN(preco) || preco <= 0 ? 25.00 : preco,
                             ref: item.Referencia || `REF-${index + 1}`,
                             producao: '24 horas',
                             imagem: item.Url || '',
-                            descricao: item.Descricao || `<p>Produto: <strong>${item.Tipo_Produto || 'Material Gráfico'}</strong></p><p>Categoria: ${item.Categorias_Secundarias || 'Geral'}</p><p>Entre em contato para enviar sua arte!</p>`
+                            descricao: `<p>Produto: <strong>${escapeAttr(nomeProd)}</strong></p><p>Referência: ${escapeAttr(item.Referencia || 'N/A')}</p>`
                         };
                     });
                     
                     mostrarToast(`${catalogoEstoque.length} produtos carregados!`);
+                } else {
+                    mostrarToast("Tabela 'produtos' retornou 0 itens.", "alerta");
                 }
             } catch (err) {
-                console.error("Erro de conexão com o Supabase:", err);
-                mostrarToast("Erro de conexão.", "erro");
+                console.error("Erro na conexão:", err);
+                mostrarToast("Erro de conexão no navegador.", "erro");
             }
 
             renderizarCatalogo();
