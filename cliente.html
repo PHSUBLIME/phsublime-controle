@@ -607,7 +607,7 @@
     <!-- SCRIPT INTEGRAÇÃO SUPABASE & REGRAS DE NEGÓCIO -->
     <script>
         const SUPABASE_URL = 'https://qkcrimqakjsokdztzqxe.supabase.co';
-        const SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrY3JpbXFha2pzb2tkenR6cXhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4OTgwNzgsImV4cCI6MjEwMDQ3NDA3OH0.KvdqTEReKYEEFQVsxUgBZZkRlCb7bLgwKBuoaiZJ-8Y
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrY3JpbXFha2pzb2tkenR6cXhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4OTgwNzgsImV4cCI6MjEwMDQ3NDA3OH0.KvdqTEReKYEEFQVsxUgBZZkRlCb7bLgwKBuoaiZJ-8Y'; 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const WHATSAPP_ATENDIMENTO = '5521986147221';
@@ -1096,33 +1096,21 @@
             if (aba === 'recompra') renderizarRecompra();
         }
 
-        // FUNÇÃO DE BUSCA DIRETA REST (COM TRATAMENTO DE ERROS AJUSTADO)
+        // FUNÇÃO DE CARREGAMENTO DO SUPABASE
         async function carregarEstoquePublico() {
             try {
-                mostrarToast("Conectando ao banco de dados...", "info");
+                mostrarToast("Carregando produtos do Supabase...", "info");
                 categoriaFiltro = '';
 
-                // Requisição REST direta usando o cabeçalho apikey correto
-                const url = `${SUPABASE_URL}/rest/v1/produtos?select=*&limit=50`;
-                const resposta = await fetch(url, {
-                    method: 'GET',
-                    headers: {
-                        'apikey': SUPABASE_ANON_KEY
-                    }
-                });
+                const { data, error } = await supabaseClient
+                    .from('produtos')
+                    .select('*')
+                    .limit(60);
 
-                if (!resposta.ok) {
-                    const errTexto = await resposta.text();
-                    console.error("Erro HTTP Supabase:", resposta.status, errTexto);
-                    mostrarToast(`Erro ${resposta.status}: Verifique a chave anon no Supabase.`, "erro");
-                    renderizarCatalogo();
-                    return;
-                }
-
-                const data = await resposta.json();
-                console.log("Produtos carregados do Supabase:", data);
-
-                if (Array.isArray(data) && data.length > 0) {
+                if (error) {
+                    console.error("Erro no Supabase:", error);
+                    mostrarToast("Erro Supabase: " + error.message, "erro");
+                } else if (data && data.length > 0) {
                     catalogoEstoque = data.map((item, index) => {
                         let preco = 0;
                         const valPreco = item.Preco_Custo || item.Preco_Venda || item.Preco || 0;
@@ -1147,11 +1135,11 @@
 
                     mostrarToast(`${catalogoEstoque.length} produtos carregados!`);
                 } else {
-                    mostrarToast("Nenhum produto retornado da tabela.", "alerta");
+                    mostrarToast("Tabela 'produtos' está vazia.", "alerta");
                 }
             } catch (err) {
-                console.error("Erro de conexão no carregamento:", err);
-                mostrarToast("Falha de conexão com o Supabase.", "erro");
+                console.error("Erro ao carregar:", err);
+                mostrarToast("Erro de conexão.", "erro");
             }
 
             renderizarCatalogo();
