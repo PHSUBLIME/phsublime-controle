@@ -1096,26 +1096,33 @@
             if (aba === 'recompra') renderizarRecompra();
         }
 
-        // FUNÇÃO OTIMIZADA: PUXA OS PRODUTOS EM TEMPO REAL DO SUPABASE (COM LIMITE LEVE)
+        // FUNÇÃO DE BUSCA DIRETA REST (COM TRATAMENTO DE ERROS AJUSTADO)
         async function carregarEstoquePublico() {
             try {
-                mostrarToast("Carregando produtos do Supabase...", "info");
-                
-                // Reseta qualquer filtro ativo no carregamento inicial
+                mostrarToast("Conectando ao banco de dados...", "info");
                 categoriaFiltro = '';
 
-                // Puxa os primeiros 60 produtos de forma ultra-rápida sem sobrecarregar a rede
-                const { data, error } = await supabaseClient
-                    .from('produtos')
-                    .select('*')
-                    .limit(60);
+                // Requisição REST direta usando o cabeçalho apikey correto
+                const url = `${SUPABASE_URL}/rest/v1/produtos?select=*&limit=50`;
+                const resposta = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY
+                    }
+                });
 
-                console.log("Dados recebidos do Supabase:", data);
+                if (!resposta.ok) {
+                    const errTexto = await resposta.text();
+                    console.error("Erro HTTP Supabase:", resposta.status, errTexto);
+                    mostrarToast(`Erro ${resposta.status}: Verifique a chave anon no Supabase.`, "erro");
+                    renderizarCatalogo();
+                    return;
+                }
 
-                if (error) {
-                    console.error("Erro no Supabase:", error);
-                    mostrarToast("Erro Supabase: " + error.message, "erro");
-                } else if (data && data.length > 0) {
+                const data = await resposta.json();
+                console.log("Produtos carregados do Supabase:", data);
+
+                if (Array.isArray(data) && data.length > 0) {
                     catalogoEstoque = data.map((item, index) => {
                         let preco = 0;
                         const valPreco = item.Preco_Custo || item.Preco_Venda || item.Preco || 0;
@@ -1137,14 +1144,14 @@
                             descricao: `<p>Produto: <strong>${escapeAttr(nomeProd)}</strong></p><p>Referência: ${escapeAttr(item.Referencia || 'N/A')}</p>`
                         };
                     });
-                    
+
                     mostrarToast(`${catalogoEstoque.length} produtos carregados!`);
                 } else {
-                    mostrarToast("Tabela 'produtos' retornou 0 itens.", "alerta");
+                    mostrarToast("Nenhum produto retornado da tabela.", "alerta");
                 }
             } catch (err) {
-                console.error("Erro na conexão:", err);
-                mostrarToast("Erro de conexão no navegador.", "erro");
+                console.error("Erro de conexão no carregamento:", err);
+                mostrarToast("Falha de conexão com o Supabase.", "erro");
             }
 
             renderizarCatalogo();
