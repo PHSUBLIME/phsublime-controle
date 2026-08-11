@@ -625,7 +625,50 @@
         let abaFreteAtiva = 'entrega';
         let formaPagamentoEscolhida = 'Pix';
 
-        let carrinho = JSON.parse(localStorage.getItem('phsublime_carrinho_v2') || '[]');
+        // GESTÃO DINÂMICA DO CARRINHO VINCULADO AO CLIENTE
+        let carrinho = [];
+
+        function limparNumeros(str) {
+            return String(str || '').replace(/\D/g, '');
+        }
+
+        // Retorna a chave única do cliente para salvar seu carrinho
+        function obterChaveCarrinho() {
+            if (clienteIdentificado) {
+                const idUser = clienteIdentificado.cpf || clienteIdentificado.whatsapp || clienteIdentificado.id || 'cliente';
+                return `phsublime_carrinho_usr_${limparNumeros(idUser)}`;
+            }
+            return `phsublime_carrinho_visitante`;
+        }
+
+        // Carrega o carrinho vinculado à conta do cliente (ou deixa vazio se não logado)
+        function carregarCarrinho() {
+            if (!clienteIdentificado) {
+                carrinho = []; // Se não estiver logado, o carrinho fica vazio
+            } else {
+                const chave = obterChaveCarrinho();
+                carrinho = JSON.parse(localStorage.getItem(chave) || '[]');
+            }
+            atualizarBadgeCarrinho();
+            if (typeof renderizarPaginaCarrinho === 'function') {
+                renderizarPaginaCarrinho();
+            }
+        }
+
+        // Salva as alterações no carrinho do cliente atual
+        function salvarCarrinho() {
+            const chave = obterChaveCarrinho();
+            if (clienteIdentificado) {
+                localStorage.setItem(chave, JSON.stringify(carrinho));
+            }
+            atualizarBadgeCarrinho();
+        }
+
+        function atualizarBadgeCarrinho() {
+            const badge = document.getElementById('badge-carrinho-qtd');
+            const totalQtd = carrinho.reduce((acc, i) => acc + i.qtd, 0);
+            if (badge) badge.innerText = totalQtd;
+        }
 
         function toggleMenuCategorias() {
             const drawer = document.getElementById('drawer-categorias');
@@ -710,6 +753,9 @@
             localStorage.setItem('phsublime_cliente_dados', JSON.stringify(clienteIdentificado));
             localStorage.setItem('phsublime_cliente_termo', cpf || whatsapp);
             
+            // Carrega e vincula o carrinho do cliente
+            carregarCarrinho();
+
             fecharModalCadastro();
             mostrarToast(`Cadastro salvo com sucesso! Bem-vindo(a), ${nome.split(' ')[0]}!`);
             atualizarHeaderELista();
@@ -734,10 +780,6 @@
 
             fecharModalIdentificacao();
             await buscarPedidosECliente(termo, senhaDigitada);
-        }
-
-        function limparNumeros(str) {
-            return String(str || '').replace(/\D/g, '');
         }
 
         async function buscarPedidosECliente(termoOriginal, senhaDigitada = '') {
@@ -791,10 +833,15 @@
                     clienteIdentificado = clienteEncontrado;
                     localStorage.setItem('phsublime_cliente_dados', JSON.stringify(clienteIdentificado));
                     localStorage.setItem('phsublime_cliente_termo', identificacaoTermo);
+                    
+                    // Restaura os itens do carrinho do cliente logado
+                    carregarCarrinho();
+
                     mostrarToast(`Bem-vindo(a), ${clienteIdentificado.nome.split(' ')[0]}!`);
                 } else {
                     mostrarToast("Cliente não encontrado! Verifique o CPF/WhatsApp ou faça seu cadastro.", "alerta");
                     clienteIdentificado = null;
+                    carregarCarrinho();
                     atualizarHeaderELista();
                     return;
                 }
@@ -822,26 +869,22 @@
             }
         }
 
+        // LOGOUT COMPLETO: RESETA O CARRINHO DA TELA
         function sairEBuscarOutro() {
             localStorage.removeItem('phsublime_cliente_termo');
             localStorage.removeItem('phsublime_cliente_dados');
             clienteIdentificado = null;
             identificacaoTermo = '';
             pedidosDoCliente = [];
+
+            // Esvazia o carrinho e atualiza a interface
+            carrinho = [];
+            atualizarBadgeCarrinho();
+            renderizarPaginaCarrinho();
+
             atualizarHeaderELista();
             toggleUserDropdown();
             mostrarToast("Sessão encerrada com segurança.");
-        }
-
-        function salvarCarrinho() {
-            localStorage.setItem('phsublime_carrinho_v2', JSON.stringify(carrinho));
-            atualizarBadgeCarrinho();
-        }
-
-        function atualizarBadgeCarrinho() {
-            const badge = document.getElementById('badge-carrinho-qtd');
-            const totalQtd = carrinho.reduce((acc, i) => acc + i.qtd, 0);
-            if (badge) badge.innerText = totalQtd;
         }
 
         function adicionarAoCarrinho(id, nome, preco, ref = 'crt003', producao = '24 horas') {
@@ -1009,6 +1052,7 @@
             document.getElementById('cart-resumo-total').innerText = `R$ ${subtotalGeral.toFixed(2)}`;
         }
 
+        // FINALIZAR NO WHATSAPP E ESVAZIAR CARRINHO
         function finalizarCompraWhatsApp() {
             if (carrinho.length === 0) return mostrarToast("Carrinho vazio!", "alerta");
             let texto = `🚀 *NOVO PEDIDO - PHSUBLIME*\n\n`;
@@ -1026,7 +1070,14 @@
                 if (item.obs) texto += `   • Obs: ${item.obs}\n`;
             });
             texto += `\n💰 *TOTAL:* R$ ${total.toFixed(2)}\n🔑 *Chave Pix CNPJ:* ${CHAVE_PIX_OFICIAL}\n\nGostaria de confirmar meu pedido!`;
+            
             window.open(`https://api.whatsapp.com/send?phone=${WHATSAPP_ATENDIMENTO}&text=${encodeURIComponent(texto)}`, '_blank');
+
+            // Limpa o carrinho após finalizar o pedido no WhatsApp
+            carrinho = [];
+            salvarCarrinho();
+            renderizarPaginaCarrinho();
+            mostrarToast("Pedido enviado! Seu carrinho foi esvaziado.");
         }
 
         function alternarAba(aba) {
@@ -1062,7 +1113,7 @@
                 { id: 13, nome: 'Moletom Canguru com Capuz Personalizado', categoria: 'Camisa', precoVenda: 110.00, ref: 'mlt001', producao: '48 horas', imagem: '20250911_0_20220903_0_MOLETOMCANGURUPRETO.png', descricao: '<p>Moletom flanelado quentinho com bolso frontal e estampa digital.</p>' },
                 { id: 14, nome: 'Avental Profissional com Bolsos (Oxford)', categoria: 'Camisa', precoVenda: 32.00, ref: 'avt001', producao: '24 horas', imagem: '20250911_0_20241021_0_AVENTALcombolso.png', descricao: '<p>Avental para chefs, garçons, churrasqueiros e eventos comerciais.</p>' },
                 { id: 15, nome: 'DTF Transfer Têxtil Por Metro (60cm)', categoria: 'DTF', precoVenda: 75.00, ref: 'dtf009', producao: '12 horas', imagem: '20260119_0_20260118_0_dtf_por_metro_para_revenda.png', descricao: '<p>Impressão DTF por metro contínuo pronta para termo-transferência.</p>' },
-                { id: 16, name: 'Saco Kraft Delivery Personalizado P/M/G', categoria: 'Embalagem', precoVenda: 85.00, ref: 'emb056', producao: '48 horas', imagem: '20250911_0_20200518_0_saco_personalizado_kraft_1cor.jpg', descricao: '<p>Embalagens e sacos de papel kraft para lanchonetes e delivery.</p>' },
+                { id: 16, nome: 'Saco Kraft Delivery Personalizado P/M/G', categoria: 'Embalagem', precoVenda: 85.00, ref: 'emb056', producao: '48 horas', imagem: '20250911_0_20200518_0_saco_personalizado_kraft_1cor.jpg', descricao: '<p>Embalagens e sacos de papel kraft para lanchonetes e delivery.</p>' },
                 { id: 17, nome: 'Box para Yakissoba Oriental (500ml / 850ml)', categoria: 'Embalagem', precoVenda: 92.00, ref: 'ykp005', producao: '48 horas', imagem: '20250911_0_20230120_0_BoxYakissobaOrigami500mlPACOTE.png', descricao: '<p>Caixas térmicas estanhadas à prova de vazamentos para culinária asiática.</p>' },
                 { id: 18, nome: 'Mochila Pirulito Promocional (Vários Tamanhos)', categoria: 'Mochila', precoVenda: 89.00, ref: 'mopi02', producao: '48 horas', imagem: '20260203_0_20251219_0_Mochila-Pirulito-Nauta-35x35.png', descricao: '<p>Mochila ergonômica leve para propaganda de rua com 2 placas rídicas.</p>' },
                 { id: 19, nome: 'Taça de Gin Personalizada (Sólida, Degradê ou Neon)', categoria: 'Copo', precoVenda: 14.50, ref: 'gin001', producao: '24 horas', imagem: '20250911_0_20220813_0_TaçaGinAmareloSólido.png', descricao: '<p>Taças acrílicas para festas, casamentos e eventos corporativos.</p>' },
@@ -1369,7 +1420,6 @@
 
         async function inicializarPortal() {
             renderizarBanners();
-            atualizarBadgeCarrinho();
             carregarEstoquePublico();
 
             const termoSalvo = localStorage.getItem('phsublime_cliente_termo');
@@ -1384,6 +1434,9 @@
             } else {
                 atualizarHeaderELista();
             }
+
+            // Sincroniza o estado do carrinho dependendo se o cliente está logado ou não
+            carregarCarrinho();
         }
 
         window.onload = inicializarPortal;
