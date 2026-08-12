@@ -1815,7 +1815,7 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-2.5 text-xs pt-1">
+                       <div class="grid grid-cols-1 md:grid-cols-5 gap-2.5 text-xs pt-1">
                             <div>
                                 <label class="block text-neutral-400 font-medium mb-1">Custo / M² (R$)</label>
                                 <input type="number" step="0.01" id="item-custo-unitario" oninput="recalcularDespesaEValorItem()" placeholder="27.00" class="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-rose-300 font-medium focus:outline-none focus:border-yellow-400">
@@ -1824,6 +1824,10 @@
                                 <label class="block text-yellow-400 font-bold mb-1">Preço Venda / M² (R$)</label>
                                 <input type="number" step="0.01" id="item-venda-unitario" oninput="recalcularDespesaEValorItem()" placeholder="65.00" class="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-yellow-300 font-bold focus:outline-none focus:border-yellow-400">
                             </div>
+                           <div>
+    <label class="block text-purple-400 font-bold mb-1">🎨 Arte Item (R$)</label>
+    <input type="number" step="0.01" id="item-arte" oninput="recalcularDespesaEValorItem()" placeholder="0.00" class="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-purple-300 font-bold focus:outline-none focus:border-yellow-400">
+</div>
                             <div>
                                 <label class="block text-rose-400 font-semibold mb-1">Despesa Total Item (R$)</label>
                                 <input type="number" step="0.01" id="item-despesa" placeholder="0.00" class="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-rose-400 font-bold focus:outline-none focus:border-rose-400">
@@ -3331,6 +3335,7 @@ function renderizarKanban() {
         const alt = parseFloat(document.getElementById('item-altura').value) || 0;
         const custoUnit = parseFloat(document.getElementById('item-custo-unitario').value) || 0;
         const vendaUnit = parseFloat(document.getElementById('item-venda-unitario').value) || 0;
+        const valorArteItem = parseFloat(document.getElementById('item-arte')?.value) || 0;
         const tipoCobranca = document.getElementById('item-tipo-cobranca')?.value || 'Unidade';
 
         const isM2 = (tipoCobranca === 'MetroQuadrado');
@@ -3339,7 +3344,8 @@ function renderizarKanban() {
         const totalDespesa = areaM2 * custoUnit * qtd;
         document.getElementById('item-despesa').value = totalDespesa > 0 ? totalDespesa.toFixed(2) : '0.00';
 
-        const totalVenda = areaM2 * vendaUnit * qtd;
+        // Soma o valor da Arte do Item no total do produto
+        const totalVenda = (areaM2 * vendaUnit * qtd) + valorArteItem;
         document.getElementById('item-valor').value = totalVenda > 0 ? totalVenda.toFixed(2) : '0.00';
     }
 
@@ -3876,6 +3882,7 @@ function renderizarKanban() {
         document.getElementById('item-acabamento').value = '';
         document.getElementById('item-custo-unitario').value = '';
         document.getElementById('item-venda-unitario').value = '';
+        if (document.getElementById('item-arte')) document.getElementById('item-arte').value = '';
         document.getElementById('item-valor').value = '';
         document.getElementById('item-despesa').value = '';
 
@@ -3925,6 +3932,7 @@ function renderizarKanban() {
             estoqueId: estoqueSelId || (estoqueMatch ? estoqueMatch.id : null),
             servico: servico,
             material: document.getElementById('item-material').value.trim() || servico,
+            valorArte: parseFloat(document.getElementById('item-arte')?.value) || 0,
             qtd: qtdSolicitada,
             largura: document.getElementById('item-largura').value.trim(),
             altura: document.getElementById('item-altura').value.trim(),
@@ -3960,6 +3968,7 @@ function renderizarKanban() {
         document.getElementById('item-largura').value = item.largura || '';
         document.getElementById('item-altura').value = item.altura || '';
         document.getElementById('item-acabamento').value = item.acabamento || '';
+        if (document.getElementById('item-arte')) document.getElementById('item-arte').value = item.valorArte ? item.valorArte : '';
         document.getElementById('item-custo-unitario').value = item.custoUnitario ? item.custoUnitario : '';
         document.getElementById('item-venda-unitario').value = item.vendaUnitario ? item.vendaUnitario : '';
         document.getElementById('item-valor').value = item.valor ? item.valor : '';
@@ -4006,9 +4015,10 @@ function renderizarKanban() {
             const tr = document.createElement('tr');
             tr.className = indexItemEdicao === idx ? "bg-yellow-400/10 border-l-2 border-yellow-400" : "hover:bg-neutral-800/40 transition-all";
             tr.innerHTML = `
-                <td class="p-2.5">
+               <td class="p-2.5">
                     <strong class="text-white">${escapeAttr(item.servico)}</strong>
                     ${item.material ? `<span class="block text-[10px] text-neutral-400">${escapeAttr(item.material)}</span>` : ''}
+                    ${item.valorArte > 0 ? `<span class="inline-block mt-0.5 px-1.5 py-0.5 text-[9px] font-bold rounded bg-purple-500/20 text-purple-300 border border-purple-500/40">🎨 Arte: R$ ${parseFloat(item.valorArte).toFixed(2)}</span>` : ''}
                 </td>
                 <td class="p-2.5 text-xs text-neutral-300">
                     ${escapeAttr(medidas)}<span class="text-neutral-500 text-[10px]">${escapeAttr(acabamento)}</span>
