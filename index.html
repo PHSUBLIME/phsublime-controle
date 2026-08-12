@@ -208,16 +208,20 @@
                     </span>
                     <span id="badge-estoque-alerta" class="bg-rose-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full hidden">0</span>
                 </button>
+<button onclick="navegar('historico')" id="btn-historico" class="nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl font-semibold text-sm transition-all text-neutral-400 hover:text-white hover:bg-neutral-800">
+    <i class="fa-solid fa-clock-rotate-left text-base"></i> Histórico
+</button>
 
-                <button onclick="navegar('historico')" id="btn-historico" class="nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl font-semibold text-sm transition-all text-neutral-400 hover:text-white hover:bg-neutral-800">
-                    <i class="fa-solid fa-clock-rotate-left text-base"></i> Histórico
-                </button>
+<button onclick="navegar('loja')" id="btn-loja" class="nav-btn flex items-center justify-between w-full px-4 py-3 rounded-xl font-semibold text-sm transition-all text-neutral-400 hover:text-white hover:bg-neutral-800">
+    <span class="flex items-center gap-3">
+        <i class="fa-solid fa-store text-base text-yellow-400"></i> Produtos da Loja
+    </span>
+</button>
 
-                <button onclick="fazerLogout()" class="nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl font-semibold text-sm transition-all text-rose-500 hover:bg-rose-950/40 mt-4 border border-rose-900/40">
-                    <i class="fa-solid fa-right-from-bracket text-base"></i> Sair do Sistema
-                </button>
-            </nav>
-        </div>
+<button onclick="fazerLogout()" class="nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl font-semibold text-sm transition-all text-rose-500 hover:bg-rose-950/40 mt-4 border border-rose-900/40">
+    <i class="fa-solid fa-right-from-bracket text-base"></i> Sair do Sistema
+</button>
+</nav>
 
         <div class="mt-8 pt-4 border-t border-neutral-800 px-2 text-xs text-neutral-500">
             <p>© 2022 <strong class="text-yellow-400">PHSUBLIME</strong></p>
@@ -894,6 +898,44 @@
             </div>
         </section>
 
+        <!-- ================= SEÇÃO: PRODUTOS DA LOJA ================= -->
+        <section id="secao-loja" class="secao-conteudo hidden space-y-6">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-neutral-900 p-6 rounded-2xl border border-neutral-800 shadow-2xl">
+                <div>
+                    <h2 class="text-2xl font-black text-yellow-400 flex items-center gap-2">
+                        <i class="fa-solid fa-store text-yellow-400"></i> Gestão de Produtos da Loja Online
+                    </h2>
+                    <p class="text-neutral-400 text-sm mt-1">Cadastre e edite os produtos, preços e fotos que aparecem para os clientes no seu site.</p>
+                </div>
+
+                <button onclick="abrirModalProdutoLoja()" class="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-4 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-yellow-950/30">
+                    <i class="fa-solid fa-plus"></i> + Novo Produto da Loja
+                </button>
+            </div>
+
+            <!-- BARRA DE PESQUISA -->
+            <div class="bg-neutral-900 p-4 rounded-2xl border border-neutral-800 flex items-center gap-3">
+                <i class="fa-solid fa-magnifying-glass text-yellow-400 text-lg ml-2"></i>
+                <input type="text" id="input-pesquisar-prod-loja" onkeyup="renderizarProdutosLoja()" placeholder="Pesquisar produto da loja por nome, categoria, referência..." class="w-full bg-transparent text-white focus:outline-none text-sm placeholder-neutral-500">
+            </div>
+
+            <!-- TABELA DE PRODUTOS DA LOJA -->
+            <div class="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 overflow-x-auto">
+                <table class="w-full text-left text-sm text-neutral-300">
+                    <thead class="text-xs uppercase bg-neutral-800 text-yellow-400 border-b border-neutral-700">
+                        <tr>
+                            <th class="p-3">Imagem</th>
+                            <th class="p-3">Nome do Produto</th>
+                            <th class="p-3">Categoria</th>
+                            <th class="p-3">Ref. / SKU</th>
+                            <th class="p-3">Preço Venda</th>
+                            <th class="p-3 text-right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-neutral-800" id="tabela-produtos-loja-body"></tbody>
+                </table>
+            </div>
+        </section>
     </main>
 
     <!-- ================= MODAIS ================= -->
@@ -2090,6 +2132,87 @@
         </div>
     </div>
 
+    <!-- MODAL PRODUTO DA LOJA ONLINE -->
+    <div id="modal-produto-loja" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-neutral-900 border border-neutral-800 rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center border-b border-neutral-800 pb-3">
+                <h3 class="text-xl font-bold text-yellow-400 flex items-center gap-2" id="modal-prod-loja-titulo">
+                    <i class="fa-solid fa-box-open"></i> Novo Produto para o Site
+                </h3>
+                <button onclick="fecharModalProdutoLoja()" class="text-neutral-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <form id="form-produto-loja" onsubmit="salvarProdutoLoja(event)" class="space-y-3 text-sm">
+                <input type="hidden" id="prod-loja-id">
+
+                <div>
+                    <label class="block text-neutral-400 text-xs font-semibold mb-1">Nome do Produto <span class="text-rose-400">*</span></label>
+                    <input type="text" id="prod-loja-nome" required placeholder="Ex: Banner com tubete 40x60cm, Cartão de Visita Couché" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-yellow-400">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-yellow-400 text-xs font-bold mb-1">Categoria na Loja</label>
+                        <select id="prod-loja-categoria" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-yellow-400">
+                            <option value="Banner com tubete">Banner com tubete</option>
+                            <option value="ARTES">ARTES</option>
+                            <option value="Cartão de Visita">Cartão de Visita</option>
+                            <option value="Folheto, Folder & Flyer">Folheto, Folder & Flyer</option>
+                            <option value="Adesivo">Adesivo</option>
+                            <option value="Banner, Faixa, Lona & Painel">Banner, Faixa & Lona</option>
+                            <option value="Canecas, Copos & Taças">Canecas & Copos</option>
+                            <option value="Camisa, Camiseta & Blusa">Camisas & Vestuário</option>
+                            <option value="Blocos & Comandas">Blocos & Comandas</option>
+                            <option value="Gráfica Geral">Outros / Gráfica Geral</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-neutral-400 text-xs font-semibold mb-1">Código Ref. / SKU</label>
+                        <input type="text" id="prod-loja-ref" placeholder="Ex: sign101fp" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-yellow-400">
+                    </div>
+                    <div>
+                        <label class="block text-neutral-400 text-xs font-semibold mb-1">Prazo de Produção</label>
+                        <input type="text" id="prod-loja-prazo" placeholder="Ex: 2 dias úteis" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-yellow-400">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-yellow-400 text-xs font-bold mb-1">Preço Venda (R$) <span class="text-rose-400">*</span></label>
+                        <input type="number" step="0.01" id="prod-loja-preco-venda" required placeholder="0.00" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-2 text-yellow-400 font-bold focus:outline-none focus:border-yellow-400">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 text-xs font-semibold mb-1">Preço "De" (R$ Promocional)</label>
+                        <input type="number" step="0.01" id="prod-loja-preco-de" placeholder="0.00" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-2 text-slate-300 focus:outline-none focus:border-yellow-400">
+                    </div>
+                    <div>
+                        <label class="block text-rose-400 text-xs font-semibold mb-1">Preço Custo (R$)</label>
+                        <input type="number" step="0.01" id="prod-loja-preco-custo" placeholder="0.00" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-2 text-rose-300 focus:outline-none focus:border-yellow-400">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-neutral-400 text-xs font-semibold mb-1">URL / Link da Imagem do Produto</label>
+                    <input type="text" id="prod-loja-imagem" placeholder="https://exemplo.com/foto-do-produto.jpg" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-yellow-400">
+                </div>
+
+                <div>
+                    <label class="block text-blue-400 text-xs font-semibold mb-1">Link para Download do Gabarito (Opcional)</label>
+                    <input type="text" id="prod-loja-gabarito" placeholder="https://exemplo.com/gabarito.ai" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-blue-400">
+                </div>
+
+                <div>
+                    <label class="block text-neutral-400 text-xs font-semibold mb-1">Descrição e Detalhes do Produto</label>
+                    <textarea id="prod-loja-descricao" rows="3" placeholder="Insira informações sobre material, acabamento, tamanho..." class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-yellow-400"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-3 border-t border-neutral-800">
+                    <button type="button" onclick="fecharModalProdutoLoja()" class="px-4 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 rounded-xl font-medium text-sm">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-black font-bold rounded-xl text-sm">Salvar Produto</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <!-- MODAL ANÁLISE DE FRETE DROPSHIP (CONSULTA INDEPENDENTE) -->
     <div id="modal-analise-frete" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[990] hidden flex items-center justify-center p-4">
         <div class="bg-neutral-900 border border-neutral-800 rounded-2xl max-w-2xl w-full p-6 space-y-5 shadow-2xl overflow-y-auto max-h-[90vh]">
@@ -2279,6 +2402,7 @@
             estoque: [],
             historicoFechamentos: [],
             orcamentos: [],
+            produtosLoja: [],
             vendasChart: null,
             servicosChart: null,
             abaPedidoFiltro: 'todos',
@@ -2301,14 +2425,15 @@
 
         async function carregarDados() {
             try {
-                const [resCli, resPed, resDesp, resFech, resEst, resOrc] = await Promise.all([
-                    supabaseClient.from('clientes').select('*'),
-                    supabaseClient.from('pedidos').select('*'),
-                    supabaseClient.from('despesas').select('*').order('id', { ascending: false }),
-                    supabaseClient.from('fechamentos').select('*').order('id', { ascending: false }),
-                    supabaseClient.from('estoque').select('*').order('id', { ascending: false }).limit(1000000),
-                    supabaseClient.from('orcamentos').select('*').order('id', { ascending: false })
-                ]);
+              const [resCli, resPed, resDesp, resFech, resEst, resOrc, resProd] = await Promise.all([
+            supabaseClient.from('clientes').select('*'),
+            supabaseClient.from('pedidos').select('*'),
+            supabaseClient.from('despesas').select('*').order('id', { ascending: false }),
+            supabaseClient.from('fechamentos').select('*').order('id', { ascending: false }),
+            supabaseClient.from('estoque').select('*').order('id', { ascending: false }).limit(1000000),
+            supabaseClient.from('orcamentos').select('*').order('id', { ascending: false }),
+            supabaseClient.from('produtos').select('*').order('id', { ascending: false })
+        ]);
 
                 if (resCli.data) appData.clientes = resCli.data;
                 if (resPed.data) {
@@ -2318,6 +2443,7 @@
                 if (resDesp.data) appData.despesasOutras = resDesp.data;
                 if (resFech.data) appData.historicoFechamentos = resFech.data;
                 if (resEst.data) appData.estoque = resEst.data;
+                if (resProd && resProd.data) appData.produtosLoja = resProd.data;
                 if (resOrc.data) appData.orcamentos = resOrc.data;
 
             } catch(e) {
@@ -2493,6 +2619,7 @@ appData.pedidos.forEach(p => {
             renderizarDespesas();
             renderizarMovimentacoesFinanceiras();
             renderizarHistoricoFechamentos();
+            renderizarProdutosLoja();
             atualizarGraficos();
         }
 function renderizarKanban() {
@@ -6425,6 +6552,142 @@ async function reverterBaixaParcela(id, dataInicialOriginal, numParcela) {
         }
     }
 
+        // ================= FUNÇÕES DE GESTÃO DA LOJA ONLINE =================
+        function renderizarProdutosLoja() {
+            const tbody = document.getElementById('tabela-produtos-loja-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const filtroText = (document.getElementById('input-pesquisar-prod-loja')?.value || '').toLowerCase();
+            const produtos = appData.produtosLoja || [];
+
+            if (produtos.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-neutral-500 text-xs italic">Nenhum produto cadastrado para a loja ainda. Clique em "+ Novo Produto da Loja".</td></tr>`;
+                return;
+            }
+
+            produtos.forEach(p => {
+                const buscaTexto = `${p.nome || p.Nome || ''} ${p.categoria || p.Categorias_Secundarias || ''} ${p.ref || p.Referencia || ''}`.toLowerCase();
+                if (filtroText && !buscaTexto.includes(filtroText)) return;
+
+                const nomeProd = p.nome || p.Nome || 'Produto Sem Nome';
+                const catProd = p.categoria || p.Categorias_Secundarias || 'Geral';
+                const refProd = p.ref || p.Referencia || '-';
+                const prazoProd = p.prazoProducao || p.Prazo_Producao || '';
+                const precoVal = parseFloat(p.precoVenda || p.Preco_Venda || p.preco || 0);
+                const imgProd = p.imagem || p.Url || '';
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-neutral-800/40 transition-all";
+                
+                tr.innerHTML = `
+                    <td class="p-3">
+                        ${imgProd ? `<img src="${escapeAttr(imgProd)}" class="w-10 h-10 object-contain rounded border border-neutral-700 bg-neutral-950 p-1">` : `<i class="fa-solid fa-box-open text-xl text-neutral-600"></i>`}
+                    </td>
+                    <td class="p-3">
+                        <strong class="text-white text-sm block">${escapeAttr(nomeProd)}</strong>
+                        ${prazoProd ? `<span class="text-[10px] text-neutral-400"><i class="fa-solid fa-clock text-[9px]"></i> ${escapeAttr(prazoProd)}</span>` : ''}
+                    </td>
+                    <td class="p-3 text-xs text-yellow-400 font-bold">${escapeAttr(catProd)}</td>
+                    <td class="p-3 text-xs font-mono text-neutral-300">${escapeAttr(refProd)}</td>
+                    <td class="p-3 font-black text-emerald-400">R$ ${precoVal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td class="p-3 text-right space-x-1">
+                        <button onclick="editarProdutoLoja(${p.id})" class="bg-neutral-800 hover:bg-neutral-700 text-yellow-400 p-2 rounded-lg text-xs" title="Editar">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button onclick="excluirProdutoLoja(${p.id})" class="bg-rose-950/50 hover:bg-rose-900 text-rose-400 p-2 rounded-lg text-xs" title="Excluir">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function abrirModalProdutoLoja(id = null) {
+            document.getElementById('form-produto-loja').reset();
+            document.getElementById('prod-loja-id').value = id || '';
+
+            if (id) {
+                const prod = (appData.produtosLoja || []).find(p => p.id == id);
+                if (prod) {
+                    document.getElementById('modal-prod-loja-titulo').innerHTML = `<i class="fa-solid fa-pen"></i> Editar Produto do Site`;
+                    document.getElementById('prod-loja-nome').value = prod.nome || prod.Nome || '';
+                    document.getElementById('prod-loja-categoria').value = prod.categoria || prod.Categorias_Secundarias || 'Banner com tubete';
+                    document.getElementById('prod-loja-ref').value = prod.ref || prod.Referencia || '';
+                    document.getElementById('prod-loja-prazo').value = prod.prazoProducao || prod.Prazo_Producao || '';
+                    document.getElementById('prod-loja-preco-venda').value = prod.precoVenda || prod.Preco_Venda || 0;
+                    document.getElementById('prod-loja-preco-de').value = prod.precoDe || 0;
+                    document.getElementById('prod-loja-preco-custo').value = prod.precoCusto || prod.Preco_Custo || 0;
+                    document.getElementById('prod-loja-imagem').value = prod.imagem || prod.Url || '';
+                    document.getElementById('prod-loja-gabarito').value = prod.gabaritoUrl || prod.Gabarito_Url || '';
+                    document.getElementById('prod-loja-descricao').value = prod.descricao || prod.Descricao || '';
+                }
+            } else {
+                document.getElementById('modal-prod-loja-titulo').innerHTML = `<i class="fa-solid fa-box-open"></i> Novo Produto para o Site`;
+            }
+
+            document.getElementById('modal-produto-loja').classList.remove('hidden');
+        }
+
+        function fecharModalProdutoLoja() {
+            document.getElementById('modal-produto-loja').classList.add('hidden');
+        }
+
+        function editarProdutoLoja(id) {
+            abrirModalProdutoLoja(id);
+        }
+
+        async function salvarProdutoLoja(e) {
+            if (e) e.preventDefault();
+            const idInput = document.getElementById('prod-loja-id').value;
+            const nome = document.getElementById('prod-loja-nome').value.trim();
+
+            if (!nome) {
+                mostrarToast("Digite o nome do produto!", "erro");
+                return;
+            }
+
+            const idSeguro = idInput ? parseInt(idInput) : Math.floor(100000000 + Math.random() * 900000000);
+
+            const itemData = {
+                id: idSeguro,
+                nome: nome,
+                categoria: document.getElementById('prod-loja-categoria').value,
+                ref: document.getElementById('prod-loja-ref').value.trim(),
+                prazoProducao: document.getElementById('prod-loja-prazo').value.trim(),
+                precoVenda: parseFloat(document.getElementById('prod-loja-preco-venda').value || 0),
+                precoDe: parseFloat(document.getElementById('prod-loja-preco-de').value || 0),
+                precoCusto: parseFloat(document.getElementById('prod-loja-preco-custo').value || 0),
+                imagem: document.getElementById('prod-loja-imagem').value.trim(),
+                gabaritoUrl: document.getElementById('prod-loja-gabarito').value.trim(),
+                descricao: document.getElementById('prod-loja-descricao').value.trim()
+            };
+
+            const { data, error } = await supabaseClient.from('produtos').upsert([itemData]);
+
+            if (!error) {
+                mostrarToast(idInput ? "Produto da loja atualizado!" : "Novo produto salvo na loja!");
+                fecharModalProdutoLoja();
+                await carregarDados();
+            } else {
+                console.error("Erro Supabase:", error);
+                mostrarToast(`Erro ao salvar no banco: ${error.message}`, "erro");
+            }
+        }
+
+        async function excluirProdutoLoja(id) {
+            const confirmou = await confirmarAcao("Excluir Produto da Loja", "Deseja realmente remover este produto do seu site?", "Sim, Excluir");
+            if (confirmou) {
+                const { error } = await supabaseClient.from('produtos').delete().eq('id', id);
+                if (!error) {
+                    await carregarDados();
+                    mostrarToast("Produto removido do site.");
+                } else {
+                    mostrarToast(`Erro: ${error.message}`, "erro");
+                }
+            }
+        }
     window.onload = verificarSessao;
 
     function abrirModalMassaEstoque() {
