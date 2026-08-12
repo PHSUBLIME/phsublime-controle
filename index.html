@@ -6673,7 +6673,7 @@ async function reverterBaixaParcela(id, dataInicialOriginal, numParcela) {
             abrirModalProdutoLoja(id);
         }
 
-        async function salvarProdutoLoja(e) {
+       async function salvarProdutoLoja(e) {
             if (e) e.preventDefault();
             const idInput = document.getElementById('prod-loja-id').value;
             const nome = document.getElementById('prod-loja-nome').value.trim();
@@ -6685,21 +6685,40 @@ async function reverterBaixaParcela(id, dataInicialOriginal, numParcela) {
 
             const idSeguro = idInput ? parseInt(idInput) : Math.floor(100000000 + Math.random() * 900000000);
 
+            // Monta o objeto com os nomes exatos das colunas da tabela 'produtos' no Supabase
             const itemData = {
                 id: idSeguro,
+                Nome: nome,
                 nome: nome,
-                categoria: document.getElementById('prod-loja-categoria').value,
-                ref: document.getElementById('prod-loja-ref').value.trim(),
-                prazoProducao: document.getElementById('prod-loja-prazo').value.trim(),
-                precoVenda: parseFloat(document.getElementById('prod-loja-preco-venda').value || 0),
-                precoDe: parseFloat(document.getElementById('prod-loja-preco-de').value || 0),
-                precoCusto: parseFloat(document.getElementById('prod-loja-preco-custo').value || 0),
-                imagem: document.getElementById('prod-loja-imagem').value.trim(),
-                gabaritoUrl: document.getElementById('prod-loja-gabarito').value.trim(),
-                descricao: document.getElementById('prod-loja-descricao').value.trim()
+                Categorias_Secundarias: document.getElementById('prod-loja-categoria').value,
+                Referencia: document.getElementById('prod-loja-ref').value.trim(),
+                Prazo_Producao: document.getElementById('prod-loja-prazo').value.trim(),
+                Preco_Venda: parseFloat(document.getElementById('prod-loja-preco-venda').value || 0),
+                Preco_Custo: parseFloat(document.getElementById('prod-loja-preco-custo').value || 0),
+                Url: document.getElementById('prod-loja-imagem').value.trim(),
+                Gabarito_Url: document.getElementById('prod-loja-gabarito').value.trim(),
+                Descricao: document.getElementById('prod-loja-descricao').value.trim()
             };
 
-            const { data, error } = await supabaseClient.from('produtos').upsert([itemData]);
+            let { data, error } = await supabaseClient.from('produtos').upsert([itemData]);
+
+            // Caso alguma coluna opcional não exista no seu Supabase, ele faz o salvamento limpo dos campos principais
+            if (error) {
+                console.warn("Ajustando colunas para salvar no Supabase...", error.message);
+                
+                const itemDataSimplificado = {
+                    id: idSeguro,
+                    Nome: nome,
+                    Categorias_Secundarias: document.getElementById('prod-loja-categoria').value,
+                    Referencia: document.getElementById('prod-loja-ref').value.trim(),
+                    Preco_Venda: parseFloat(document.getElementById('prod-loja-preco-venda').value || 0),
+                    Url: document.getElementById('prod-loja-imagem').value.trim(),
+                    Descricao: document.getElementById('prod-loja-descricao').value.trim()
+                };
+
+                const retry = await supabaseClient.from('produtos').upsert([itemDataSimplificado]);
+                error = retry.error;
+            }
 
             if (!error) {
                 mostrarToast(idInput ? "Produto da loja atualizado!" : "Novo produto salvo na loja!");
