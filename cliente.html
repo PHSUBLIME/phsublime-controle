@@ -6,7 +6,7 @@
     <title>PHSUBLIME - Sua Gráfica Online Digital</title>
 
     <!-- FAVICON -->
-    <link rel="icon" type="image/png" href="https://phsublime.com.br/FIVICOM.png">
+    <link rel="icon" type="image/x-icon" href="https://phsublime.sistograf.net/storage/logos/favicon.ico">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -52,7 +52,7 @@
             <!-- LOGO PHSUBLIME -->
             <a href="javascript:void(0)" onclick="alternarAba('catalogo')" class="flex items-center gap-3 group shrink-0">
                 <div class="w-10 h-10 sm:w-12 sm:h-12 shrink-0 flex items-center justify-center bg-white rounded-xl p-1 shadow-md group-hover:scale-105 transition-all">
-                    <img src="https://phsublime.com.br/FIVICOM.png" alt="PHSUBLIME" class="w-full h-full object-contain" onerror="this.outerHTML='<i class=\'fa-solid fa-crown text-purple-900 text-xl sm:text-2xl\'></i>'">
+                    <img src="https://phsublime.sistograf.net/storage/logos/logosistema.png" alt="PHSUBLIME" class="w-full h-full object-contain" onerror="this.outerHTML='<i class=\'fa-solid fa-crown text-purple-900 text-xl sm:text-2xl\'></i>'">
                 </div>
                 <div>
                     <div class="flex items-center gap-2">
@@ -69,7 +69,7 @@
             <div class="w-full md:w-1/3 relative">
                 <div class="flex items-center bg-white rounded-lg overflow-hidden shadow-inner border border-slate-300">
                     <input type="text" id="input-busca-catalogo" onkeyup="buscarComDebounce()" placeholder="Buscar produtos, lonas, cartões, copos, DTF..." class="w-full px-4 py-2.5 text-slate-800 text-xs sm:text-sm focus:outline-none">
-                    <button onclick="pesquisarProdutos()" class="bg-amber-400 hover:bg-amber-300 text-purple-950 px-4 py-2.5 font-bold transition-all flex items-center gap-1.5">
+                    <button onclick="buscarComDebounce()" class="bg-amber-400 hover:bg-amber-300 text-purple-950 px-4 py-2.5 font-bold transition-all flex items-center gap-1.5">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
                 </div>
@@ -77,41 +77,18 @@
 
             <!-- ÁREA DE USUÁRIO, MEUS PEDIDOS, CARRINHO E MENU -->
             <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-                
-                <!-- DROPDOWN DE USUÁRIO -->
-                <div id="header-user-info" class="relative">
-                    <button onclick="toggleUserDropdown()" class="flex items-center gap-1.5 text-white hover:text-amber-400 font-bold text-xs transition-all py-2">
-                        <i class="fa-regular fa-circle-user text-base"></i>
-                        <span id="txt-user-nome">Olá, Entrar</span>
-                        <i class="fa-solid fa-caret-down text-[10px]"></i>
-                    </button>
-
-                    <div id="user-menu-dropdown" class="hidden absolute right-0 top-full mt-2 w-64 max-w-[85vw] bg-white text-slate-800 rounded-xl shadow-2xl border border-slate-200 z-[100] overflow-hidden text-xs">
-                        <div id="user-menu-dropdown-items"></div>
-                    </div>
-                </div>
-
-                <!-- ÍCONE MEUS PEDIDOS -->
-                <button onclick="alternarAba('pedidos')" class="flex items-center gap-2 hover:text-amber-400 text-xs font-bold transition-all text-left">
-                    <i class="fa-solid fa-desktop text-lg"></i>
-                    <div class="hidden lg:block leading-tight">
-                        <span class="block text-[11px] font-black uppercase tracking-wider">MEUS PEDIDOS</span>
-                        <span id="txt-pedidos-producao-count" class="block text-[9px] text-purple-200 font-normal">0 EM PRODUÇÃO</span>
-                    </div>
-                </button>
-
                 <!-- BOTÃO DO CARRINHO DE COMPRAS -->
-                <button onclick="alternarAba('carrinho')" class="relative bg-amber-400 hover:bg-amber-300 text-purple-950 font-black text-xs p-2.5 rounded-xl transition-all shadow-md flex items-center justify-center">
+                <button onclick="alternarAba('carrinho')" class="relative bg-amber-400 hover:bg-amber-300 text-purple-950 font-black text-xs p-2.5 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
                     <i class="fa-solid fa-cart-shopping text-base"></i>
-                    <span id="badge-carrinho-qtd" class="absolute -top-2 -right-2 bg-purple-900 text-white font-bold px-1.5 py-0.5 rounded-full text-[10px] border-2 border-purple-950">0</span>
+                    <span class="hidden sm:inline">CARRINHO</span>
+                    <span id="badge-carrinho-qtd" class="bg-purple-900 text-white font-bold px-1.5 py-0.5 rounded-full text-[10px] border border-purple-950">0</span>
                 </button>
 
-                <!-- BOTÃO MENU (3 BARRINHAS) -->
-                <button onclick="toggleMenuCategorias()" class="flex items-center gap-1.5 bg-purple-900 hover:bg-purple-800 border border-purple-700 px-3 py-2.5 rounded-xl text-amber-400 font-bold text-xs transition-all shadow-md">
-                    <i class="fa-solid fa-bars text-base"></i>
-                    <span class="hidden sm:inline">MENU</span>
-                </button>
-
+                <!-- BOTÃO WHATSAPP CONTATO -->
+                <a href="https://wa.me/5521986147221" target="_blank" class="bg-emerald-500 hover:bg-emerald-400 text-white font-black text-xs px-3 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-1.5">
+                    <i class="fa-brands fa-whatsapp text-base"></i>
+                    <span class="hidden md:inline">(21) 98614-7221</span>
+                </a>
             </div>
 
         </div>
@@ -119,23 +96,24 @@
         <!-- MENU DE NAVEGAÇÃO COMPACTO -->
         <nav class="bg-purple-900 border-t border-purple-800/60 text-xs font-bold text-slate-100">
             <div class="max-w-[1536px] mx-auto px-2 sm:px-4 flex items-center justify-between">
-                <div class="grid grid-cols-3 lg:flex items-center w-full lg:w-auto text-[10px] sm:text-xs">
-                    <button onclick="alternarAba('catalogo')" id="tab-nav-catalogo" class="px-2 sm:px-4 py-2.5 hover:bg-purple-800 text-amber-400 border-b-2 border-amber-400 transition-all flex items-center justify-center gap-1.5 text-center">
-                        <i class="fa-solid fa-store"></i> <span class="truncate">CATÁLOGO</span>
+                <div class="flex items-center text-[10px] sm:text-xs">
+                    <button onclick="alternarAba('catalogo')" id="tab-nav-catalogo" class="px-3 sm:px-4 py-2.5 hover:bg-purple-800 text-amber-400 border-b-2 border-amber-400 transition-all flex items-center justify-center gap-1.5 text-center">
+                        <i class="fa-solid fa-store"></i> <span>INÍCIO</span>
                     </button>
-                    
-                    <button onclick="alternarAba('pedidos')" id="tab-nav-pedidos" class="px-2 sm:px-4 py-2.5 hover:bg-purple-800 hover:text-amber-400 transition-all flex items-center justify-center gap-1.5 text-center">
-                        <i class="fa-solid fa-truck-ramp-box"></i> <span class="truncate">RASTREAR</span>
+                    <button onclick="filtrarCategoria('banner')" class="px-3 sm:px-4 py-2.5 hover:bg-purple-800 hover:text-amber-400 transition-all flex items-center justify-center gap-1.5 text-center">
+                        <i class="fa-solid fa-scroll"></i> <span>BANNERS</span>
                     </button>
-                    
-                    <button onclick="alternarAba('recompra')" id="tab-nav-recompra" class="px-2 sm:px-4 py-2.5 hover:bg-purple-800 hover:text-amber-400 transition-all flex items-center justify-center gap-1.5 text-center">
-                        <i class="fa-solid fa-rotate-right"></i> <span class="truncate">MINHAS COMPRAS</span>
+                    <button onclick="filtrarCategoria('cartao')" class="px-3 sm:px-4 py-2.5 hover:bg-purple-800 hover:text-amber-400 transition-all flex items-center justify-center gap-1.5 text-center">
+                        <i class="fa-solid fa-id-card"></i> <span>CARTÕES DE VISITA</span>
+                    </button>
+                    <button onclick="filtrarCategoria('copo')" class="px-3 sm:px-4 py-2.5 hover:bg-purple-800 hover:text-amber-400 transition-all flex items-center justify-center gap-1.5 text-center">
+                        <i class="fa-solid fa-wine-glass"></i> <span>COPOS E CANECAS</span>
                     </button>
                 </div>
 
                 <div class="hidden lg:flex items-center gap-2 text-[11px] text-amber-300 font-semibold px-2">
-                    <a id="link-whats-nav" href="https://api.whatsapp.com/send?phone=5521986147221" target="_blank" class="hover:underline flex items-center gap-1 text-emerald-400">
-                        <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp: (21) 98614-7221
+                    <a href="https://wa.me/5521986147221" target="_blank" class="hover:underline flex items-center gap-1 text-emerald-400">
+                        <i class="fa-brands fa-whatsapp text-sm"></i> Atendimento Rápido WhatsApp
                     </a>
                 </div>
             </div>
@@ -148,10 +126,9 @@
         <!-- ================= SEÇÃO 1: CATÁLOGO / VITRINE ================= -->
         <div id="secao-catalogo" class="space-y-8">
             
-            <!-- BANNERS PROMOCIONAIS -->
+            <!-- BANNERS PROMOCIONAIS / CARROSSEL -->
             <div class="space-y-4">
-                <!-- CARROSSEL DINÂMICO -->
-                <div class="max-w-4xl mx-auto relative w-full overflow-hidden rounded-xl shadow-md bg-purple-950 group">
+                <div class="max-w-5xl mx-auto relative w-full overflow-hidden rounded-xl shadow-md bg-purple-950 group">
                     <div id="banner-slider-container" class="flex transition-transform duration-500 ease-in-out w-full"></div>
 
                     <button onclick="mudarBanner(-1)" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-amber-400 hover:text-purple-950 text-white w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all z-10 opacity-80 group-hover:opacity-100">
@@ -165,7 +142,7 @@
                     <div id="banner-dots" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10"></div>
                 </div>
 
-                <!-- CARDS PROMOCIONAIS -->
+                <!-- CARDS PROMOCIONAIS SUPERIORES -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-4 rounded-xl border border-blue-700 shadow-md flex items-center justify-between">
                         <div>
@@ -193,7 +170,7 @@
                 </div>
             </div>
 
-            <!-- LAYOUT PRINCIPAL EM 2 COLUNAS (FOTO 1 MODELO) -->
+            <!-- LAYOUT PRINCIPAL EM 2 COLUNAS -->
             <div class="flex flex-col lg:flex-row gap-6 pt-2">
                 
                 <!-- SIDEBAR ESQUERDA COMPLETA COM SANFONA (ACORDEÃO) -->
@@ -217,9 +194,9 @@
                                 </a>
                             </li>
 
-                            <!-- CARTÃO DE VISITA COM SUBMENU EXPANSÍVEL -->
+                            <!-- CARTÃO DE VISITA EXPANSÍVEL -->
                             <li>
-                                <div onclick="toggleSubmenu('sub-cartao-mv', 'cartao')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between cursor-pointer select-none">
+                                <div onclick="toggleSubmenu('sub-cartao-mv')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between cursor-pointer select-none">
                                     <span>Cartão de Visita</span>
                                     <i id="icon-sub-cartao-mv" class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform"></i>
                                 </div>
@@ -228,8 +205,6 @@
                                     <li><a href="javascript:void(0)" onclick="filtrarCategoria('cartao 300g')" class="py-1.5 block hover:text-purple-900">• Cartão de Visita 300g</a></li>
                                     <li><a href="javascript:void(0)" onclick="filtrarCategoria('verniz')" class="py-1.5 block hover:text-purple-900">• Cartão Verniz UV / Laminação</a></li>
                                     <li><a href="javascript:void(0)" onclick="filtrarCategoria('pvc')" class="py-1.5 block hover:text-purple-900">• Cartão de Visita PVC</a></li>
-                                    <li><a href="javascript:void(0)" onclick="filtrarCategoria('opaline')" class="py-1.5 block hover:text-purple-900">• Cartão de Visita Opaline</a></li>
-                                    <li><a href="javascript:void(0)" onclick="filtrarCategoria('reciclado')" class="py-1.5 block hover:text-purple-900">• Cartão de Visita Reciclado</a></li>
                                 </ul>
                             </li>
 
@@ -246,96 +221,27 @@
                         </ul>
                     </div>
 
-                    <!-- TODOS OS PRODUTOS (LISTA COMPLETA 65+ ITENS) -->
+                    <!-- TODOS OS PRODUTOS -->
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                         <div class="bg-purple-900 text-white font-black text-xs px-4 py-2.5 uppercase tracking-wider">
                             TODOS OS PRODUTOS
                         </div>
-                        <ul class="divide-y divide-slate-100 text-xs font-semibold text-slate-700 max-h-[600px] overflow-y-auto">
+                        <ul class="divide-y divide-slate-100 text-xs font-semibold text-slate-700 max-h-[500px] overflow-y-auto">
                             <li><a href="javascript:void(0)" onclick="filtrarCategoria('')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between font-bold text-purple-900"><span>Ver Todo o Catálogo</span> <i class="fa-solid fa-border-all text-[10px]"></i></a></li>
                             <li><a href="javascript:void(0)" onclick="filtrarCategoria('mochila pirulito')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Mochila Pirulito</span></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('tubete')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Banner com tubete</span> <span class="tag-promocao">PROMOÇÃO</span></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('artes')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>ARTES</span> <span class="tag-promocao">PROMOÇÃO</span></a></li>
-                            
-                            <!-- CARTÃO DE VISITA EXPANSÍVEL -->
-                            <li>
-                                <div onclick="toggleSubmenu('sub-cartao-tp', 'cartao')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between cursor-pointer select-none">
-                                    <span>Cartão de Visita</span>
-                                    <i id="icon-sub-cartao-tp" class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform"></i>
-                                </div>
-                                <ul id="sub-cartao-tp" class="hidden pl-6 bg-slate-50 divide-y divide-slate-100 text-[11px] text-slate-600">
-                                    <li><a href="javascript:void(0)" onclick="filtrarCategoria('cartao 250g')" class="py-1.5 block hover:text-purple-900">• Cartão 250g</a></li>
-                                    <li><a href="javascript:void(0)" onclick="filtrarCategoria('cartao 300g')" class="py-1.5 block hover:text-purple-900">• Cartão 300g</a></li>
-                                    <li><a href="javascript:void(0)" onclick="filtrarCategoria('verniz')" class="py-1.5 block hover:text-purple-900">• Verniz UV / Laminação</a></li>
-                                    <li><a href="javascript:void(0)" onclick="filtrarCategoria('pvc')" class="py-1.5 block hover:text-purple-900">• Cartão PVC</a></li>
-                                </ul>
-                            </li>
-
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('folheto')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Folheto, Folder & Flyer</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('abada')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Abadá Carnaval</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('acrilico')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Acrílico</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('adesivo')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Adesivo</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('agenda')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Agendas, Cadernos e Planners</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('figurinha')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Álbum de Figurinhas Fotográfico</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('avental')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Avental</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('banner')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Banner, Faixa, Lona e Painel</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('bermuda')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Bermuda & Short</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('bloco')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Blocos e Comandas</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('bolsa')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Bolsa em Tecido</span> <span class="tag-novo">NOVO</span></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('bone')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Bonés e Viseiras</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('calendario')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Calendários e Folhinha</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('camisa')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Camisa, Camiseta e Blusa</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('copo')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Canecas, Copos e Taças</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('canga')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Cangas</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('carne')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Capa de Carnê</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('corte')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Capa de Corte</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('cardapio')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Cardápio</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('cartao duplo')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Cartão Duplo</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('cartao mini')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Cartão Mini</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('cartao postal')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Cartão Postal</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('cartaz')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Cartaz e Poster</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('bijuteria')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Cartela Para Bijuteria</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('casa')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Casa & Decoração</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('diploma')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Certificado e Diploma</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('coroa')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Coroa de Papel</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('credencial')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Credenciais</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('display')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Display</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('dtf')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>DTF Transfer Digital</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('embalagem')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Embalagens Fast Food</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('embalagem presente')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Embalagens Presente</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('envelope')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Envelope</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('festas')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Festas</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('cupom')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Folheto Cupom de Desconto</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('ima')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Ímã de Geladeira</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('laser')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Impressão Laser</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('jogo americano')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Jogo Americano</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('jogo tabuleiro')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Jogo de Tabuleiro</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('marcador')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Marcador de Página</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('mascara')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Máscara em Tecido</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('mobile')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Móbile</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('mochila cordao')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Mochila de Cordão</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('moleton')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Moletons</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('mousepad')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Mouse Pad Personalizado</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('orcamento')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Orçamento Aprovado</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('papel bandeja')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Papel Bandeja</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('papel e adesivo')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Papel e Adesivo Para Impressão</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('papel fotografico')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Papel Fotográfico</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('papel sublimatico')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Papel Sublimático</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('pastas')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Pastas</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('photobook')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Photobook</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('planner')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Planner</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('porta copo')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Porta Copo</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('ps pvc')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>PS | PVC com Impressão UV</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('quadro decorativo')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Quadro Decorativo Personalizado</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('quadro magnetico')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Quadro Magnético</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('quebra cabeca')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Quebra-Cabeça</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('raspadinha')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Raspadinha</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('revista')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Revista de Colorir</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('sublimacao')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Sublimação</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('suprimentos')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Suprimentos</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('timbrado')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Timbrado e Receituários</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('ventarola')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Ventarola, Abanador e Leque</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
-                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('wind')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Wind Banner</span> <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('tubete')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Banner com tubete</span></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('artes')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>ARTES</span></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('cartao')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Cartão de Visita</span></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('folheto')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Folheto, Folder & Flyer</span></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('acrilico')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Acrílico</span></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('adesivo')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Adesivo</span></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('agenda')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Agendas, Cadernos e Planners</span></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('banner')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Banner, Faixa, Lona e Painel</span></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('bloco')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Blocos e Comandas</span></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('copo')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Canecas, Copos e Taças</span></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('dtf')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>DTF Transfer Digital</span></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('raspadinha')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Raspadinha</span></a></li>
+                            <li><a href="javascript:void(0)" onclick="filtrarCategoria('ventarola')" class="px-4 py-2 hover:bg-purple-50 flex items-center justify-between"><span>Ventarola, Abanador e Leque</span></a></li>
                         </ul>
                     </div>
                 </aside>
@@ -358,7 +264,7 @@
             </div>
         </div>
 
-        <!-- OUTRAS SEÇÕES (CARRINHO, RASTREIO, MINHAS COMPRAS) -->
+        <!-- ================= SEÇÃO 2: CARRINHO DE COMPRAS ================= -->
         <div id="secao-carrinho" class="hidden space-y-6">
             <div id="carrinho-vazio-msg" class="hidden bg-white border border-slate-200 p-12 rounded-xl text-center space-y-3 shadow-sm">
                 <i class="fa-solid fa-cart-flatbed text-5xl text-slate-300 block"></i>
@@ -367,6 +273,7 @@
                     VER PRODUTOS DISPONÍVEIS
                 </button>
             </div>
+
             <div id="carrinho-conteudo-box" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 <div class="lg:col-span-8 space-y-6">
                     <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
@@ -389,6 +296,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="lg:col-span-4 space-y-5">
                     <div class="bg-white border-2 border-purple-900 rounded-xl shadow-lg p-5 space-y-4">
                         <h3 class="text-sm font-black text-purple-950 uppercase font-heading border-b border-slate-100 pb-2.5">Resumo do Pedido</h3>
@@ -399,26 +307,10 @@
                             </div>
                         </div>
                         <button onclick="finalizarCompraWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 uppercase">
-                            <i class="fa-brands fa-whatsapp text-xl"></i> FINALIZAR PEDIDO
+                            <i class="fa-brands fa-whatsapp text-xl"></i> FINALIZAR PEDIDO VIA WHATSAPP
                         </button>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <div id="secao-pedidos" class="hidden space-y-6">
-            <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
-                <h3 class="text-lg font-black text-purple-950 font-heading mb-1 flex items-center gap-2">
-                    <i class="fa-solid fa-magnifying-glass-location text-amber-500"></i> Rastreio de Pedidos
-                </h3>
-            </div>
-        </div>
-
-        <div id="secao-recompra" class="hidden space-y-6">
-            <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
-                <h3 class="text-lg font-black text-purple-950 font-heading flex items-center gap-2">
-                    <i class="fa-solid fa-rotate-right text-amber-500"></i> Repetir Pedidos
-                </h3>
             </div>
         </div>
 
@@ -427,16 +319,32 @@
     <!-- RODAPÉ DA LOJA -->
     <footer class="bg-purple-950 text-white border-t-4 border-amber-400 pt-10 pb-6 mt-12 text-xs">
         <div class="max-w-[1536px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-center text-[11px] text-purple-300">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-slate-300">
+                <div>
+                    <h4 class="font-black text-amber-400 uppercase mb-2">PHSUBLIME GRÁFICA</h4>
+                    <p class="text-[11px] leading-relaxed">Sua gráfica digital online com impressão rápida de Banners, Cartões, Adesivos, Camisetas e Brindes no Rio de Janeiro.</p>
+                </div>
+                <div>
+                    <h4 class="font-black text-amber-400 uppercase mb-2">SUPORTE AO CLIENTE</h4>
+                    <p class="text-[11px]">Seg. a Sex. das 8:00 às 18:00</p>
+                    <p class="text-[11px]">E-mail: phsublime5149@gmail.com</p>
+                    <p class="text-[11px]">Telefone: (21) 98614-7221</p>
+                </div>
+                <div>
+                    <h4 class="font-black text-amber-400 uppercase mb-2">FORMAS DE PAGAMENTO</h4>
+                    <p class="text-[11px]">PIX, Cartão de Crédito e Mercado Pago.</p>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-center text-[11px] text-purple-300 border-t border-purple-900 pt-4">
                 <p>© Copyright 2026 PHSUBLIME - Todos os direitos reservados</p>
-                <a id="link-whats-rodape" href="https://api.whatsapp.com/send?phone=5521986147221" target="_blank" class="inline-flex items-center gap-1.5 text-emerald-400 font-bold hover:underline">
+                <a href="https://wa.me/5521986147221" target="_blank" class="inline-flex items-center gap-1.5 text-emerald-400 font-bold hover:underline">
                     <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp: (21) 98614-7221
                 </a>
             </div>
         </div>
     </footer>
 
-    <!-- MODAL DE DETALHES -->
+    <!-- MODAL DE DETALHES DO PRODUTO -->
     <div id="modal-detalhes-produto" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[998] hidden flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-white rounded-2xl max-w-2xl w-full p-6 space-y-5 shadow-2xl relative border border-purple-200 my-8">
             <button onclick="fecharModalDetalhes()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-xl font-bold"><i class="fa-solid fa-xmark"></i></button>
@@ -454,10 +362,10 @@
             <div id="txt-modal-descricao-html" class="conteudo-html-descricao max-h-72 overflow-y-auto pr-2 border-b border-slate-100 pb-4"></div>
             <div class="flex justify-end gap-3 pt-2">
                 <button onclick="fecharModalDetalhes()" class="px-5 py-2.5 bg-slate-200 text-slate-800 font-bold rounded-xl text-xs hover:bg-slate-300 transition-all">Fechar</button>
-                <a href="https://phsublime.com.br/gabaritos" target="_blank" class="btn-gabarito px-5 py-2.5 font-bold rounded-xl text-xs shadow flex items-center gap-1.5">
+                <a href="https://phsublime.sistograf.net/storage/produtos/2490/arquivos/20250930_Captura-de-tela-2024-09-12-095957.ai" download class="btn-gabarito px-5 py-2.5 font-bold rounded-xl text-xs shadow flex items-center gap-1.5">
                     <i class="fa-solid fa-download"></i> Baixar Gabarito
                 </a>
-                <button id="btn-modal-adicionar-carrinho" onclick="" class="btn-comprar px-6 py-2.5 text-white font-black rounded-xl text-xs shadow-md transition-all flex items-center gap-2 uppercase">
+                <button id="btn-modal-adicionar-carrinho" onclick="" class="btn-comprar text-white font-black px-6 py-2.5 rounded-xl text-xs shadow-md transition-all flex items-center gap-2 uppercase">
                     COMPRAR AGORA <i class="fa-solid fa-cart-shopping"></i>
                 </button>
             </div>
@@ -470,96 +378,92 @@
         <span id="toast-message" class="font-medium text-sm">Ação realizada!</span>
     </div>
 
-    <!-- SCRIPT INTEGRAÇÃO SUPABASE & REGRAS DE NEGÓCIO -->
+    <!-- SCRIPT DA LOJA E INTEGRAÇÃO SUPABASE -->
     <script>
         const SUPABASE_URL = 'https://qkcrimqakjsokdztzqxe.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrY3JpbXFha2pzb2tkenR6cXhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4OTgwNzgsImV4cCI6MjEwMDQ3NDA3OH0.KvdqTEReKYEEFQVsxUgBZZkRlCb7bLgwKBuoaiZJ-8Y'; 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const WHATSAPP_ATENDIMENTO = '5521986147221';
-        const CHAVE_PIX_OFICIAL = '58658668000100';
 
-        // MAPA COMPLETO DE TODAS AS PALAVRAS DA SUA LISTA
+        // CARROSSEL DE BANNERS EXTRAÍDOS DOS SEUS ARQUIVOS
+        const bannersCarrossel = [
+            { img: 'https://phsublime.sistograf.net/storage/banners/animacao/20250909_OFERTAS ESPECIAIS.jpg' },
+            { img: 'https://phsublime.sistograf.net/storage/banners/animacao/20250909_sss.gif' },
+            { img: 'https://phsublime.sistograf.net/storage/banners/animacao/20260105_banner site.gif' },
+            { img: 'https://phsublime.sistograf.net/storage/banners/animacao/20260115_banner site d.jpg' }
+        ];
+
+        let bannerIndiceAtual = 0;
+
+        function renderizarBanners() {
+            const container = document.getElementById('banner-slider-container');
+            const dots = document.getElementById('banner-dots');
+            if (!container) return;
+
+            container.innerHTML = '';
+            dots.innerHTML = '';
+
+            bannersCarrossel.forEach((b, i) => {
+                const item = document.createElement('div');
+                item.className = "min-w-full flex-shrink-0 cursor-pointer";
+                item.innerHTML = `<img src="${b.img}" alt="Banner ${i+1}" class="w-full h-auto object-cover max-h-[350px]">`;
+                container.appendChild(item);
+
+                const dot = document.createElement('button');
+                dot.className = `w-2.5 h-2.5 rounded-full transition-all ${i === 0 ? 'bg-amber-400 w-6' : 'bg-white/60'}`;
+                dot.onclick = () => irParaBanner(i);
+                dots.appendChild(dot);
+            });
+        }
+
+        function mudarBanner(direcao) {
+            bannerIndiceAtual = (bannerIndiceAtual + direcao + bannersCarrossel.length) % bannersCarrossel.length;
+            irParaBanner(bannerIndiceAtual);
+        }
+
+        function irParaBanner(indice) {
+            bannerIndiceAtual = indice;
+            const container = document.getElementById('banner-slider-container');
+            if (container) {
+                container.style.transform = `translateX(-${indice * 100}%)`;
+            }
+            const dots = document.querySelectorAll('#banner-dots button');
+            dots.forEach((dot, idx) => {
+                dot.className = `w-2.5 h-2.5 rounded-full transition-all ${idx === indice ? 'bg-amber-400 w-6' : 'bg-white/60'}`;
+            });
+        }
+
+        setInterval(() => mudarBanner(1), 5000);
+
+        // MAPA COMPLETO DE CATEGORIAS
         const MAPA_PALAVRAS_CATEGORIA = {
-            'tubete': ['tubete', 'banner'],
+            'tubete': ['tubete', 'banner com tubete'],
             'artes': ['arte', 'artes', 'promoção', 'promocao'],
             'cartao': ['cartao', 'cartão', 'crt', 'transparente', 'pvc', 'couche', 'couché', 'opaline', 'duplo', 'mini', 'postal'],
-            'folheto': ['folheto', 'panfleto', 'imp', 'impressao', 'impressão', 'flyer', 'folder', 'cupom'],
+            'folheto': ['folheto', 'panfleto', 'flyer', 'folder', 'cupom'],
             'abada': ['abada', 'abadá', 'carnaval'],
             'adesivo': ['adesivo', 'vinil', 'adv', 'sign', 'rotulo', 'autocolante', 'microperfurado'],
             'banner': ['banner', 'lona', 'faixa', 'sign', 'backlight', 'frontlight', 'roll up', 'painel'],
-            'bloco': ['bloco', 'talao', 'talão', 'comanda', 'recibo', 'autocopiativo'],
-            'bolsa': ['bolsa', 'sacola', 'ecobag', 'tecido'],
+            'bloco': ['bloco', 'comanda', 'recibo', 'autocopiativo'],
+            'bolsa': ['bolsa', 'sacola', 'tecido'],
             'calendario': ['calendario', 'calendário', 'folhinha'],
-            'camisa': ['camisa', 'camiseta', 'polo', 'vestuario', 'moletom', 'avental', 'cms', 'mlt', 'avt', 'bermuda', 'short', 'bone', 'boné', 'viseira'],
-            'casa': ['puff', 'quadro', 'decoracao', 'decoração', 'puf', 'casa'],
-            'festas': ['festa', 'balao', 'totem', 'copo', 'taca', 'balde'],
-            'acrilico': ['acrilico', 'acrílico', 'trofeu', 'troféu', 'pacr', 'trof', 'placa', 'plc'],
-            'agenda': ['agenda', 'planner', 'pln', 'agd', 'caderno'],
-            'figurinha': ['figurinha', 'album', 'álbum'],
-            'avental': ['avental'],
-            'copo': ['copo', 'taca', 'taça', 'balde', 'gin', 'ldr', 'bdg', 'cpa', 'caneca', 'porta copo'],
-            'canga': ['canga'],
-            'carne': ['carne', 'carnê', 'capa'],
-            'corte': ['corte'],
-            'cardapio': ['cardapio', 'cardápio'],
-            'cartaz': ['cartaz', 'poster', 'pôster'],
-            'bijuteria': ['bijuteria', 'cartela'],
-            'diploma': ['certificado', 'diploma'],
-            'coroa': ['coroa'],
-            'credencial': ['credencial', 'cracha', 'crachá'],
-            'display': ['display'],
-            'dtf': ['dtf', 'transfer', 'textil', 'termo'],
-            'embalagem': ['saco', 'kraft', 'embalagem', 'box', 'yakissoba', 'emb', 'fast food', 'presente'],
-            'envelope': ['envelope', 'pasta'],
-            'ima': ['ima', 'ímã', 'geladeira'],
-            'laser': ['laser'],
-            'jogo': ['jogo', 'tabuleiro', 'americano'],
-            'marcador': ['marcador', 'pagina', 'página'],
-            'mascara': ['mascara', 'máscara'],
-            'mobile': ['mobile', 'móbile'],
-            'mochila': ['mochila', 'pirulito', 'cordao', 'cordão', 'mopi'],
-            'moleton': ['moletom', 'moleton'],
-            'mousepad': ['mouse', 'pad', 'mousepad'],
-            'orcamento': ['orcamento', 'orçamento'],
-            'papel': ['papel', 'bandeja', 'fotografico', 'fotográfico', 'sublimatico', 'sublimático'],
-            'photobook': ['photobook', 'foto'],
-            'ps pvc': ['ps', 'pvc', 'uv'],
-            'quadro': ['quadro', 'magnetico', 'magnético'],
-            'quebra cabeca': ['quebra', 'cabeça', 'cabeca'],
-            'raspadinha': ['raspadinha', 'rasp'],
-            'revista': ['revista', 'colorir'],
-            'sublimacao': ['sublimacao', 'sublimação'],
-            'suprimentos': ['suprimento', 'tinta', 'insumo'],
-            'timbrado': ['timbrado', 'receituario', 'receituário'],
-            'ventarola': ['ventarola', 'abanador', 'leque'],
-            'wind': ['wind', 'flag', 'pena', 'faca', 'vela']
+            'camisa': ['camisa', 'camiseta', 'moletom', 'avental', 'bermuda', 'short', 'bone', 'boné', 'viseira'],
+            'casa': ['puff', 'quadro', 'almofada', 'decoracao'],
+            'festas': ['festa', 'copo', 'taca', 'balde'],
+            'acrilico': ['acrilico', 'acrílico', 'trofeu', 'troféu', 'placa'],
+            'agenda': ['agenda', 'planner', 'caderno'],
+            'copo': ['copo', 'taca', 'taça', 'balde', 'gin', 'caneca', 'long drink', 'twister'],
+            'dtf': ['dtf', 'transfer'],
+            'raspadinha': ['raspadinha'],
+            'ventarola': ['ventarola', 'abanador', 'leque']
         };
 
-        let clienteIdentificado = null;
-        let identificacaoTermo = '';
-        let pedidosDoCliente = [];
         let catalogoEstoque = [];
         let categoriaFiltro = '';
         let paginaAtual = 1;
         const ITENS_POR_PAGINA = 24;
-
-        let carrinho = [];
-
-        // FUNÇÃO DE SANFONA (EXPANDIR E FECHAR SUBMENUS)
-        function toggleSubmenu(id, categoria = '') {
-            const el = document.getElementById(id);
-            const icon = document.getElementById(`icon-${id}`);
-            if (el) {
-                el.classList.toggle('hidden');
-            }
-            if (icon) {
-                icon.classList.toggle('rotate-180');
-            }
-            if (categoria) {
-                filtrarCategoria(categoria);
-            }
-        }
+        let carrinho = JSON.parse(localStorage.getItem('phsublime_carrinho') || '[]');
 
         function formatarUrlImagem(url) {
             if (!url) return '';
@@ -567,21 +471,8 @@
             return `https://phsublime.com.br/${url.startsWith('/') ? url.slice(1) : url}`;
         }
 
-        function carregarCarrinho() {
-            if (clienteIdentificado) {
-                const idUser = clienteIdentificado.cpf || clienteIdentificado.whatsapp || 'cliente';
-                carrinho = JSON.parse(localStorage.getItem(`phsublime_carrinho_usr_${limparNumeros(idUser)}`) || '[]');
-            } else {
-                carrinho = [];
-            }
-            atualizarBadgeCarrinho();
-        }
-
         function salvarCarrinho() {
-            if (clienteIdentificado) {
-                const idUser = clienteIdentificado.cpf || clienteIdentificado.whatsapp || 'cliente';
-                localStorage.setItem(`phsublime_carrinho_usr_${limparNumeros(idUser)}`, JSON.stringify(carrinho));
-            }
+            localStorage.setItem('phsublime_carrinho', JSON.stringify(carrinho));
             atualizarBadgeCarrinho();
         }
 
@@ -595,7 +486,7 @@
             return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         }
 
-        function mostrarToast(msg, tipo = 'sucesso') {
+        function mostrarToast(msg) {
             const toast = document.getElementById('toast');
             const msgEl = document.getElementById('toast-message');
             if (msgEl) msgEl.innerText = msg;
@@ -605,18 +496,21 @@
             }
         }
 
+        // CARREGAR PRODUTOS DOS SEUS ARQUIVOS (DADOS REAIS DE EXEMPLO)
         function carregarEstoquePadrao() {
             catalogoEstoque = [
-                { id: 1, nome: 'Cartão de Visita 250g | Verniz UV Frente', categoria: 'Cartão', precoVenda: 21.56, ref: 'crt001', imagem: 'https://phsublime.com.br/20250916_0_cartao4,0.jpg' },
-                { id: 2, nome: 'Troféu de Acrílico Personalizado 15x21cm', categoria: 'Acrílico', precoVenda: 68.00, ref: 'TROF004', imagem: 'https://phsublime.com.br/20250911_0_20241111_0_troféu-15x21cm-impressão-total.png' },
-                { id: 3, nome: 'Placa de Acrílico A4 Espelhado Prata 2mm', categoria: 'Acrílico', precoVenda: 85.00, ref: 'PACR001', imagem: 'https://phsublime.com.br/20250911_0_20241126_0_PACR001.png' },
-                { id: 4, nome: 'Adesivo Vinil Brilho m² Solvente', categoria: 'Adesivo', precoVenda: 29.40, ref: 'sign01', imagem: 'https://phsublime.com.br/20250911_0_20190313_imprimir_adesivo_personalizado.jpg' },
-                { id: 5, nome: 'Adesivo Microperfurado para Vitrines e Veículos', categoria: 'Adesivo', precoVenda: 48.00, ref: 'sign013', imagem: 'https://phsublime.com.br/20250922_0_adesivo8mm.png' },
-                { id: 6, nome: 'Banner Lona Brilho 440g com Tubete e Corda', categoria: 'Banner', precoVenda: 27.44, ref: 'sign22', imagem: 'https://phsublime.com.br/20250911_0_20190315_imprimir_banner_personalizado_02.jpg' },
-                { id: 7, nome: 'Taça de Gin Degradê 650ml', categoria: 'Copo', precoVenda: 15.87, ref: 'gin001', imagem: 'https://phsublime.com.br/20220813_0_TaçaGinAmareloSólido.png' },
-                { id: 8, nome: 'Caneca de Cerâmica Branca 325ml', categoria: 'Copo', precoVenda: 46.23, ref: 'cnc001', imagem: 'https://phsublime.com.br/20230120_0_CanecaCeramica.png' },
-                { id: 9, nome: 'Folheto 150g 10x14cm 4/4 Colorido', categoria: 'Folheto', precoVenda: 69.57, ref: 'imp001', imagem: 'https://phsublime.com.br/20200518_0_folheto.jpg' },
-                { id: 10, nome: 'Roll UP Lona + Base 80x210cm', categoria: 'Banner', precoVenda: 580.57, ref: 'roll001', imagem: 'https://phsublime.com.br/20220928_0_rollup.png' }
+                { id: 2490, nome: 'Mini Banner 240g 25x35cm', categoria: 'Banner', precoVenda: 21.90, ref: 'sign101fp', imagem: 'https://phsublime.sistograf.net/storage/produtos/2490/img/20250917_0_8.jpg', descricao: '<p><strong>KIT 10 MINI BANNERS PERSONALIZADOS – LONA 300g</strong><br>Tamanho: 25x35 cm cada banner<br>Impressão: Digital em alta definição.<br>Acabamento: Hastes plásticas superior e inferior + cordão para pendurar.</p>' },
+                { id: 2477, nome: 'Raspadinha | Modelo Trevo | 4/4', categoria: 'Raspadinha', precoVenda: 0.93, ref: 'rasp001', imagem: 'https://phsublime.sistograf.net/storage/produtos/2477/img/20250911_0_20250815_0_Thumb-Raspadinha-Trevo-4x4Thumb01.png', descricao: '<p>Raspadinha personalizada Modelo Trevo 4x4 cores.</p>' },
+                { id: 1406, nome: 'Copo Long Drink | 350ml | Rosa', categoria: 'Copo', precoVenda: 4.79, ref: 'ldr001', imagem: 'https://phsublime.sistograf.net/storage/produtos/1406/img/20250911_0_20220813_0_LongDrinkRosaBebêSólido.png', descricao: '<p>Copo Long Drink 350ml Rosa Sólido com personalização.</p>' },
+                { id: 1438, nome: 'Copo Twister | 575ml | Vermelho Cristal', categoria: 'Copo', precoVenda: 6.67, ref: 'tws001', imagem: 'https://phsublime.sistograf.net/storage/produtos/1438/img/20250911_0_20220813_0_VermelhoTransparente.png', descricao: '<p>Copo Twister 575ml Vermelho Cristal Transparente.</p>' },
+                { id: 1777, nome: 'Agenda Colors | 2 Dias por página | 1/1 - 200 Páginas', categoria: 'Agenda', precoVenda: 18.59, ref: 'agd001', imagem: 'https://phsublime.sistograf.net/storage/produtos/1777/img/20250911_0_20240926_0_Agenda2DPP-Colorida.png', descricao: '<p>Agenda Colors 2 Dias por página caprichada com 200 páginas.</p>' },
+                { id: 1618, nome: 'Agenda Candy | 1 Dia por página | 1/1 - 380 Páginas', categoria: 'Agenda', precoVenda: 41.82, ref: 'agd002', imagem: 'https://phsublime.sistograf.net/storage/produtos/1618/img/20250911_0_20240926_0_Agenda1DPP-Candy.png', descricao: '<p>Agenda Candy 1 Dia por página com 380 páginas.</p>' },
+                { id: 1868, nome: 'Camisa Premium Plus Size | Azul Marinho', categoria: 'Camisa', precoVenda: 57.85, ref: 'cms001', imagem: 'https://phsublime.sistograf.net/storage/produtos/1868/img/20250911_0_20230923_0_PlusSizeazulmarinho.png', descricao: '<p>Camisa Premium Plus Size Azul Marinho.</p>' },
+                { id: 1893, nome: 'Camisa Oversized | Preta', categoria: 'Camisa', precoVenda: 69.46, ref: 'cms002', imagem: 'https://phsublime.sistograf.net/storage/produtos/1893/img/20250911_0_20230925_0_oversizepreta.png', descricao: '<p>Camisa Oversized Preta de alta qualidade.</p>' },
+                { id: 1173, nome: 'Almofada Com Enchimento | 45x45cm | 4/4 Cores', categoria: 'Casa', precoVenda: 65.05, ref: 'alm001', imagem: 'https://phsublime.sistograf.net/storage/produtos/1173/img/20250911_0_20210929_0_ALMOFADA_2.png', descricao: '<p>Almofada personalizada com enchimento 45x45cm.</p>' },
+                { id: 1224, nome: 'Cartela 300g | 45x80mm | 4/0 | UV 1/0', categoria: 'Cartela', precoVenda: 139.11, ref: 'ctl001', imagem: 'https://phsublime.sistograf.net/storage/produtos/1224/img/20250911_0_20220223_0_modelo44-0.png', descricao: '<p>Cartela para Bijuteria 300g com verniz UV.</p>' },
+                { id: 1041, nome: 'Folheto 115g | 21x30cm | 4/4', categoria: 'Folheto', precoVenda: 278.28, ref: 'flh001', imagem: 'https://phsublime.sistograf.net/storage/produtos/1041/img/20250911_0_20190326_imprimir-folheto-21x30-115g-04.jpg', descricao: '<p>Folheto Couchê 115g tamanho A4 (21x30cm).</p>' },
+                { id: 774, nome: 'Ventarola 250g | 4/4 | UV 1/0', categoria: 'Ventarola', precoVenda: 348.48, ref: 'vnt001', imagem: 'https://phsublime.sistograf.net/storage/produtos/774/img/20250911_0_20200107_0_imprimir-ventarola-pesonalizada-para-revendeda-250g.png', descricao: '<p>Ventarola personalizada 250g com verniz UV.</p>' }
             ];
         }
 
@@ -625,43 +519,44 @@
             renderizarCatalogo();
 
             try {
-                mostrarToast("Conectando ao banco de dados Supabase...", "info");
-
                 const { data, error } = await supabaseClient
                     .from('produtos')
                     .select('*')
                     .limit(500);
 
-                if (error) {
-                    console.error("Erro no Supabase:", error);
-                } else if (data && data.length > 0) {
+                if (!error && data && data.length > 0) {
                     const produtosMapeados = data.map((item, index) => {
                         let preco = 0;
                         const valPreco = item.Preco_Custo || item.Preco_Venda || item.Preco || 0;
                         if (valPreco) preco = parseFloat(String(valPreco).replace(',', '.'));
 
                         const nomeProd = item.Tipo_Produto || item.Referencia || item.Material || item.Nome || `Produto #${item.id || index + 1}`;
-                        const catProd = item.Categorias_Secundarias || item.Tipo_Produto || item.id_Categoria || 'Gráfica';
+                        const catProd = item.Categorias_Secundarias || item.Tipo_Produto || 'Gráfica';
 
                         return {
-                            id: item.id || index + 1,
+                            id: item.id || index + 1000,
                             nome: String(nomeProd),
                             categoria: String(catProd),
                             precoVenda: isNaN(preco) || preco <= 0 ? 25.00 : preco,
                             ref: String(item.Referencia || `REF-${index + 1}`),
-                            producao: '24 horas',
                             imagem: formatarUrlImagem(item.Url || item.imagem || ''),
                             descricao: `<p>Produto: <strong>${escapeAttr(nomeProd)}</strong></p>`
                         };
                     });
 
-                    catalogoEstoque = [...produtosMapeados, ...catalogoEstoque];
-                    mostrarToast(`${catalogoEstoque.length} produtos carregados!`);
+                    catalogoEstoque = [...catalogoEstoque, ...produtosMapeados];
                     renderizarCatalogo();
                 }
             } catch (err) {
-                console.error("Erro no carregamento:", err);
+                console.error("Supabase offline ou sem banco no momento.", err);
             }
+        }
+
+        function toggleSubmenu(id) {
+            const el = document.getElementById(id);
+            const icon = document.getElementById(`icon-${id}`);
+            if (el) el.classList.toggle('hidden');
+            if (icon) icon.classList.toggle('rotate-180');
         }
 
         function filtrarCategoria(cat) {
@@ -705,14 +600,14 @@
             });
 
             if (txtContador) {
-                txtContador.innerText = `${filtrados.length} produtos disponíveis`;
+                txtContador.innerText = `${filtrados.length} produtos exibidos`;
             }
 
             if (filtrados.length === 0) {
                 container.innerHTML = `
                     <div class="col-span-full bg-white border border-slate-200 p-8 rounded-xl text-center space-y-3 shadow-sm">
                         <i class="fa-solid fa-filter text-4xl text-purple-300 block"></i>
-                        <h4 class="text-sm font-bold text-slate-800">Nenhum produto encontrado nesta categoria.</h4>
+                        <h4 class="text-sm font-bold text-slate-800">Nenhum produto encontrado.</h4>
                         <button onclick="filtrarCategoria('')" class="px-4 py-2 bg-purple-900 text-white font-bold text-xs rounded-lg hover:bg-purple-800 transition-all">
                             VER TODOS OS PRODUTOS
                         </button>
@@ -729,28 +624,28 @@
             itensPagina.forEach(item => {
                 const preco = parseFloat(item.precoVenda || 0);
                 const card = document.createElement('div');
-                card.className = "bg-white border border-slate-200 rounded-xl p-5 space-y-4 shadow-sm hover:shadow-md transition-all flex flex-col justify-between";
+                card.className = "bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-sm hover:shadow-md transition-all flex flex-col justify-between";
                 
                 const htmlImagem = item.imagem 
-                    ? `<img src="${escapeAttr(item.imagem)}" alt="${escapeAttr(item.nome)}" class="w-full h-full object-cover rounded-xl" onerror="this.outerHTML='<i class=\'fa-solid fa-box-open text-4xl text-purple-900/30\'></i>'">`
+                    ? `<img src="${escapeAttr(item.imagem)}" alt="${escapeAttr(item.nome)}" class="w-full h-full object-contain p-2" onerror="this.outerHTML='<i class=\'fa-solid fa-box-open text-4xl text-purple-900/30\'></i>'">`
                     : `<i class="fa-solid fa-box-open text-4xl text-purple-900/30"></i>`;
 
                 card.innerHTML = `
                     <div class="space-y-3">
-                        <div class="w-full h-44 bg-slate-100 rounded-xl border border-slate-200 flex flex-col items-center justify-center text-slate-400 p-1 cursor-pointer overflow-hidden" onclick="abrirModalDetalhes(${item.id})">
+                        <div class="w-full h-44 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400 p-1 cursor-pointer overflow-hidden" onclick="abrirModalDetalhes(${item.id})">
                             ${htmlImagem}
                         </div>
-                        <h4 class="text-sm font-black text-purple-950 font-heading leading-snug line-clamp-2 cursor-pointer hover:text-purple-700" onclick="abrirModalDetalhes(${item.id})">${escapeAttr(item.nome)}</h4>
-                        <span class="text-[10px] text-slate-400 block">a partir de:</span>
+                        <h4 class="text-xs font-black text-purple-950 font-heading leading-snug line-clamp-2 cursor-pointer hover:text-purple-700 text-center" onclick="abrirModalDetalhes(${item.id})">${escapeAttr(item.nome)}</h4>
+                        <span class="text-[10px] text-slate-400 block text-center">a partir de:</span>
                     </div>
                     <div class="pt-2 border-t border-slate-100 space-y-2">
                         <div class="text-center"><strong class="text-red-600 font-black text-lg">R$ ${preco.toFixed(2)}</strong></div>
                         <div class="grid grid-cols-2 gap-2">
-                            <a href="https://phsublime.com.br/gabaritos" target="_blank" class="btn-gabarito text-xs py-2 rounded-lg font-bold flex items-center justify-center gap-1">
-                                <i class="fa-solid fa-download"></i> Gabarito
-                            </a>
-                            <button onclick="adicionarAoCarrinho(${item.id}, '${escapeAttr(item.nome)}', ${preco}, '${escapeAttr(item.ref || 'crt003')}')" class="btn-comprar text-white font-black text-xs py-2 rounded-lg shadow uppercase flex items-center justify-center gap-1">
-                                COMPRAR <i class="fa-solid fa-cart-shopping"></i>
+                            <button onclick="abrirModalDetalhes(${item.id})" class="btn-gabarito text-[11px] py-2 rounded-lg font-bold flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-eye"></i> Ver Detalhes
+                            </button>
+                            <button onclick="adicionarAoCarrinho(${item.id})" class="btn-comprar text-white font-black text-[11px] py-2 rounded-lg shadow uppercase flex items-center justify-center gap-1">
+                                COMPRAR 🚀
                             </button>
                         </div>
                     </div>
@@ -779,14 +674,161 @@
             window.scrollTo({ top: 300, behavior: 'smooth' });
         }
 
+        function abrirModalDetalhes(id) {
+            const item = catalogoEstoque.find(p => p.id === id);
+            if (!item) return;
+
+            document.getElementById('txt-modal-categoria').innerText = item.categoria || 'PRODUTO';
+            document.getElementById('txt-modal-titulo').innerText = item.nome;
+            document.getElementById('txt-modal-preco').innerText = `R$ ${parseFloat(item.precoVenda).toFixed(2)}`;
+            document.getElementById('txt-modal-ref').innerText = `Ref: ${item.ref || 'sign101fp'}`;
+            document.getElementById('txt-modal-descricao-html').innerHTML = item.descricao || '<p>Produto de excelente qualidade gráfica PHSUBLIME.</p>';
+
+            const boxImg = document.getElementById('box-imagem-modal');
+            boxImg.innerHTML = item.imagem 
+                ? `<img src="${escapeAttr(item.imagem)}" class="w-full h-full object-contain p-2">`
+                : `<i class="fa-solid fa-box-open text-4xl text-purple-900/30"></i>`;
+
+            const btnAdd = document.getElementById('btn-modal-adicionar-carrinho');
+            btnAdd.onclick = () => {
+                adicionarAoCarrinho(item.id);
+                fecharModalDetalhes();
+            };
+
+            document.getElementById('modal-detalhes-produto').classList.remove('hidden');
+        }
+
+        function fecharModalDetalhes() {
+            document.getElementById('modal-detalhes-produto').classList.add('hidden');
+        }
+
+        function adicionarAoCarrinho(id) {
+            const item = catalogoEstoque.find(p => p.id === id);
+            if (!item) return;
+
+            const existente = carrinho.find(c => c.id === id);
+            if (existente) {
+                existente.qtd += 1;
+            } else {
+                carrinho.push({
+                    id: item.id,
+                    nome: item.nome,
+                    preco: item.precoVenda,
+                    qtd: 1,
+                    imagem: item.imagem
+                });
+            }
+
+            salvarCarrinho();
+            mostrarToast(`${item.nome} adicionado ao carrinho!`);
+        }
+
+        function removerDoCarrinho(id) {
+            carrinho = carrinho.filter(c => c.id !== id);
+            salvarCarrinho();
+            renderizarCarrinho();
+        }
+
+        function alterarQtdCarrinho(id, qtd) {
+            const item = carrinho.find(c => c.id === id);
+            if (item) {
+                item.qtd = Math.max(1, qtd);
+                salvarCarrinho();
+                renderizarCarrinho();
+            }
+        }
+
+        function renderizarCarrinho() {
+            const tabela = document.getElementById('tabela-itens-carrinho');
+            const msgVazio = document.getElementById('carrinho-vazio-msg');
+            const boxConteudo = document.getElementById('carrinho-conteudo-box');
+            const badge = document.getElementById('txt-carrinho-count-badge');
+            const subtotalEl = document.getElementById('cart-resumo-subtotal');
+            const totalEl = document.getElementById('cart-resumo-total');
+
+            if (!tabela) return;
+
+            if (carrinho.length === 0) {
+                msgVazio.classList.remove('hidden');
+                boxConteudo.classList.add('hidden');
+                return;
+            }
+
+            msgVazio.classList.add('hidden');
+            boxConteudo.classList.remove('hidden');
+
+            tabela.innerHTML = '';
+            let total = 0;
+
+            carrinho.forEach(item => {
+                const subtotal = item.preco * item.qtd;
+                total += subtotal;
+
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-100 hover:bg-slate-50";
+                tr.innerHTML = `
+                    <td class="py-3 px-4 flex items-center gap-3">
+                        <img src="${item.imagem}" class="w-12 h-12 object-contain rounded border bg-white p-1" onerror="this.outerHTML='<i class=\'fa-solid fa-image text-slate-300\'></i>'">
+                        <div>
+                            <strong class="font-bold text-slate-800 block leading-tight">${escapeAttr(item.nome)}</strong>
+                            <span class="text-[10px] text-slate-400">R$ ${item.preco.toFixed(2)} un.</span>
+                        </div>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        <div class="flex items-center justify-center gap-1">
+                            <button onclick="alterarQtdCarrinho(${item.id}, ${item.qtd - 1})" class="w-6 h-6 bg-slate-200 text-slate-700 rounded font-bold">-</button>
+                            <span class="w-8 text-center font-bold">${item.qtd}</span>
+                            <button onclick="alterarQtdCarrinho(${item.id}, ${item.qtd + 1})" class="w-6 h-6 bg-slate-200 text-slate-700 rounded font-bold">+</button>
+                        </div>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        <button onclick="removerDoCarrinho(${item.id})" class="text-red-500 hover:text-red-700 font-bold">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                    <td class="py-3 px-4 text-right font-black text-slate-800">
+                        R$ ${subtotal.toFixed(2)}
+                    </td>
+                `;
+                tabela.appendChild(tr);
+            });
+
+            if (badge) badge.innerText = `${carrinho.length} item(ns)`;
+            if (subtotalEl) subtotalEl.innerText = `R$ ${total.toFixed(2)}`;
+            if (totalEl) totalEl.innerText = `R$ ${total.toFixed(2)}`;
+        }
+
+        function finalizarCompraWhatsApp() {
+            if (carrinho.length === 0) return;
+
+            let texto = `*NOVO PEDIDO - PHSUBLIME GRÁFICA*\n\n`;
+            let total = 0;
+
+            carrinho.forEach((item, index) => {
+                const sub = item.preco * item.qtd;
+                total += sub;
+                texto += `${index + 1}. *${item.nome}*\n   Qtd: ${item.qtd}x | Subtotal: R$ ${sub.toFixed(2)}\n\n`;
+            });
+
+            texto += `*TOTAL DO PEDIDO: R$ ${total.toFixed(2)}*\n\nAguardo as instruções para pagamento e envio do arquivo da arte!`;
+
+            const link = `https://wa.me/${WHATSAPP_ATENDIMENTO}?text=${encodeURIComponent(texto)}`;
+            window.open(link, '_blank');
+        }
+
         function alternarAba(aba) {
-            ['catalogo', 'carrinho', 'pedidos', 'recompra'].forEach(a => document.getElementById(`secao-${a}`)?.classList.add('hidden'));
+            ['catalogo', 'carrinho'].forEach(a => document.getElementById(`secao-${a}`)?.classList.add('hidden'));
             document.getElementById(`secao-${aba}`)?.classList.remove('hidden');
+
+            if (aba === 'carrinho') {
+                renderizarCarrinho();
+            }
         }
 
         async function inicializarPortal() {
+            renderizarBanners();
             await carregarEstoquePublico();
-            carregarCarrinho();
+            atualizarBadgeCarrinho();
         }
 
         window.onload = inicializarPortal;
