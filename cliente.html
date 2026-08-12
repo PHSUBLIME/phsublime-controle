@@ -336,7 +336,7 @@
     <!-- SCRIPT DA LOJA E INTEGRAÇÃO SUPABASE -->
     <script>
         const SUPABASE_URL = 'https://qkcrimqakjsokdztzqxe.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrY3JpbXFha2pzb2tkenR6cXhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4OTgwNzgsImV4cCI6MjEwMDQ3NDA3OH0.KvdqTEReKYEEFQVsxUgBZZkRlCb7bLgwKBuoaiZJ-8Y'; 
+        const SUPABASE_ANON_KEY = 'sb_publishable_mF--YXTFkjyjbQ7Uw7Qq1w_ODzsJPA1'; 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const WHATSAPP_ATENDIMENTO = '5521986147221';
@@ -422,7 +422,7 @@
 
         function formatarUrlImagem(url) {
             if (!url) return '';
-            if (url.startsWith('http://') || url.startsWith('https://')) return url;
+            if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
             return `https://phsublime.com.br/${url.startsWith('/') ? url.slice(1) : url}`;
         }
 
