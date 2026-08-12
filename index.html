@@ -2192,9 +2192,20 @@
                 </div>
 
                 <div>
-                    <label class="block text-neutral-400 text-xs font-semibold mb-1">URL / Link da Imagem do Produto</label>
-                    <input type="text" id="prod-loja-imagem" placeholder="https://exemplo.com/foto-do-produto.jpg" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-yellow-400">
-                </div>
+    <label class="block text-neutral-400 text-xs font-semibold mb-1">Foto do Produto (JPG ou PNG)</label>
+    <div class="flex items-center gap-3">
+        <input type="file" id="prod-loja-file" accept="image/png, image/jpeg, image/webp" onchange="previewFotoProdutoLoja(this)" class="hidden">
+        <button type="button" onclick="document.getElementById('prod-loja-file').click()" class="bg-neutral-800 hover:bg-neutral-700 text-yellow-400 border border-neutral-700 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2">
+            <i class="fa-solid fa-file-image"></i> Escolher Foto (JPG / PNG)
+        </button>
+        <input type="hidden" id="prod-loja-imagem">
+        <span id="txt-nome-foto-selecionada" class="text-xs text-neutral-400 italic">Nenhuma foto selecionada</span>
+    </div>
+    <!-- PRÉ-VISUALIZAÇÃO DA FOTO -->
+    <div id="box-preview-foto" class="mt-2 hidden">
+        <img id="img-preview-foto" src="" class="w-20 h-20 object-contain rounded-xl border border-neutral-700 bg-neutral-950 p-1">
+    </div>
+</div>
 
                 <div>
                     <label class="block text-blue-400 text-xs font-semibold mb-1">Link para Download do Gabarito (Opcional)</label>
@@ -6604,6 +6615,21 @@ async function reverterBaixaParcela(id, dataInicialOriginal, numParcela) {
             });
         }
 
+        function previewFotoProdutoLoja(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                document.getElementById('txt-nome-foto-selecionada').innerText = file.name;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64Img = e.target.result;
+                    document.getElementById('prod-loja-imagem').value = base64Img;
+                    document.getElementById('img-preview-foto').src = base64Img;
+                    document.getElementById('box-preview-foto').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
         function abrirModalProdutoLoja(id = null) {
             document.getElementById('form-produto-loja').reset();
             document.getElementById('prod-loja-id').value = id || '';
@@ -6619,7 +6645,16 @@ async function reverterBaixaParcela(id, dataInicialOriginal, numParcela) {
                     document.getElementById('prod-loja-preco-venda').value = prod.precoVenda || prod.Preco_Venda || 0;
                     document.getElementById('prod-loja-preco-de').value = prod.precoDe || 0;
                     document.getElementById('prod-loja-preco-custo').value = prod.precoCusto || prod.Preco_Custo || 0;
-                    document.getElementById('prod-loja-imagem').value = prod.imagem || prod.Url || '';
+                   const imgVal = prod.imagem || prod.Url || '';
+                    document.getElementById('prod-loja-imagem').value = imgVal;
+                    if (imgVal) {
+                        document.getElementById('img-preview-foto').src = imgVal;
+                        document.getElementById('box-preview-foto').classList.remove('hidden');
+                        document.getElementById('txt-nome-foto-selecionada').innerText = "Foto carregada";
+                    } else {
+                        document.getElementById('box-preview-foto').classList.add('hidden');
+                        document.getElementById('txt-nome-foto-selecionada').innerText = "Nenhuma foto selecionada";
+                    }
                     document.getElementById('prod-loja-gabarito').value = prod.gabaritoUrl || prod.Gabarito_Url || '';
                     document.getElementById('prod-loja-descricao').value = prod.descricao || prod.Descricao || '';
                 }
