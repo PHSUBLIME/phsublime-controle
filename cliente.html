@@ -492,7 +492,7 @@
                         const valPreco = item.Preco_Custo || item.Preco_Venda || item.Preco || 0;
                         if (valPreco) preco = parseFloat(String(valPreco).replace(',', '.'));
 
-                        const nomeProd = item.Tipo_Produto || item.Referencia || item.Material || item.Nome || `Produto #${item.id || index + 1}`;
+                       const nomeProd = item.Nome || item.nome || item.Tipo_Produto || item.Material || item.Referencia || `Produto #${item.id || index + 1}`;
                         const catProd = item.Categorias_Secundarias || item.Tipo_Produto || 'Gráfica';
 
                         return {
@@ -559,7 +559,7 @@
                 const bateuBusca = !busca || txt.includes(busca);
 
                 let bateuCategoria = true;
-                if (categoriaFiltro) {
+                if (categoriaFiltro && !busca) {
                     const palavras = MAPA_PALAVRAS_CATEGORIA[categoriaFiltro] || [categoriaFiltro];
                     bateuCategoria = palavras.some(p => txt.includes(p));
                 }
