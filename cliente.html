@@ -553,6 +553,26 @@
             }, 300);
         }
 
+        // Função de Relevância que coloca a busca exata em 1º lugar
+        function calcularRelevancia(item, busca) {
+            if (!busca) return 0;
+            const nome = (item.nome || '').toLowerCase().trim();
+            const cat = (item.categoria || '').toLowerCase().trim();
+            const ref = (item.ref || '').toLowerCase().trim();
+            const query = busca.toLowerCase().trim();
+
+            if (nome === query) return 1000;
+            if (nome.startsWith(query)) return 500;
+
+            const regexPalavraExata = new RegExp('\\b' + query + '\\b', 'i');
+            if (regexPalavraExata.test(nome)) return 300;
+
+            if (nome.includes(query)) return 100;
+            if (cat.includes(query) || ref.includes(query)) return 50;
+
+            return 0;
+        }
+
         function renderizarCatalogo() {
             const container = document.getElementById('container-catalogo-grid');
             const paginacaoBox = document.getElementById('container-paginacao');
@@ -561,9 +581,9 @@
 
             container.innerHTML = '';
 
-            const busca = (document.getElementById('input-busca-catalogo')?.value || '').toLowerCase();
+            const busca = (document.getElementById('input-busca-catalogo')?.value || '').toLowerCase().trim();
 
-            const filtrados = catalogoEstoque.filter(item => {
+            let filtrados = catalogoEstoque.filter(item => {
                 const txt = `${item.nome} ${item.categoria} ${item.ref || ''}`.toLowerCase();
                 const bateuBusca = !busca || txt.includes(busca);
 
@@ -575,6 +595,11 @@
 
                 return bateuBusca && bateuCategoria;
             });
+
+            // Ordena para colocar o resultado exato no topo da tela (1º lugar)
+            if (busca) {
+                filtrados.sort((a, b) => calcularRelevancia(b, busca) - calcularRelevancia(a, busca));
+            }
 
             if (txtContador) {
                 txtContador.innerText = `${filtrados.length} produtos disponíveis`;
