@@ -33,10 +33,12 @@
                 color: #000000 !important; 
             }
             
+            /* ESCONDE TUDO QUE É DA PÁGINA DE FUNDO */
             aside, main, header, nav, .no-print, .secao-conteudo { 
                 display: none !important; 
             }
             
+            /* EXIBE EXCLUSIVAMENTE O MODAL DO COMPROVANTE ABERTO */
             #modal-comprovante-pedido:not(.hidden),
             #modal-comprovante-orcamento:not(.hidden) {
                 position: absolute !important;
@@ -395,6 +397,107 @@
 
         </section>
 
+        <!-- ================= SEÇÃO: FILA DE PRODUÇÃO (KANBAN) ================= -->
+        <section id="secao-kanban" class="secao-conteudo hidden space-y-6">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-neutral-900 p-6 rounded-2xl border border-neutral-800 shadow-2xl">
+                <div>
+                    <h2 class="text-2xl font-black text-yellow-400 flex items-center gap-2">
+                        <i class="fa-solid fa-layer-group text-yellow-400"></i> Fila de Produção & Prazos
+                    </h2>
+                    <p class="text-neutral-400 text-sm mt-1">Acompanhe o fluxo dos trabalhos em tempo real, do pedido novo até a entrega final.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="abrirModalPedido()" class="bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-yellow-950/30">
+                        <i class="fa-solid fa-plus"></i> + Novo Pedido
+                    </button>
+                </div>
+            </div>
+
+            <!-- QUADRO KANBAN EM 4 COLUNAS -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
+                
+                <!-- COLUNA 1: CRIAÇÃO DE ARTE -->
+                <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-2xl space-y-3">
+                    <div class="flex justify-between items-center border-b border-neutral-800 pb-2">
+                        <h3 class="text-xs font-black uppercase text-purple-400 tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-palette"></i> 1. Criação de Arte
+                        </h3>
+                        <span id="kanban-count-aguardando" class="bg-neutral-800 text-purple-400 font-bold text-xs px-2.5 py-0.5 rounded-full border border-neutral-700">0</span>
+                    </div>
+                    <div id="kanban-col-aguardando" class="space-y-3 min-h-[150px]"></div>
+                </div>
+
+                <!-- COLUNA 2: PRODUÇÃO / IMPRESSÃO -->
+                <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-2xl space-y-3">
+                    <div class="flex justify-between items-center border-b border-neutral-800 pb-2">
+                        <h3 class="text-xs font-black uppercase text-amber-400 tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-print"></i> 2. Produção / Impressão
+                        </h3>
+                        <span id="kanban-count-producao" class="bg-neutral-800 text-amber-400 font-bold text-xs px-2.5 py-0.5 rounded-full border border-neutral-700">0</span>
+                    </div>
+                    <div id="kanban-col-producao" class="space-y-3 min-h-[150px]"></div>
+                </div>
+
+                <!-- COLUNA 3: PRONTO P/ RETIRADA OU ENTREGA -->
+                <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-2xl space-y-3">
+                    <div class="flex justify-between items-center border-b border-neutral-800 pb-2">
+                        <h3 class="text-xs font-black uppercase text-blue-400 tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-boxes-packing"></i> 3. Pronto p/ Entrega
+                        </h3>
+                        <span id="kanban-count-pronto" class="bg-neutral-800 text-blue-400 font-bold text-xs px-2.5 py-0.5 rounded-full border border-neutral-700">0</span>
+                    </div>
+                    <div id="kanban-col-pronto" class="space-y-3 min-h-[150px]"></div>
+                </div>
+
+                <!-- COLUNA 4: ENTREGUES / CONCLUÍDOS -->
+                <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-2xl space-y-3">
+                    <div class="flex justify-between items-center border-b border-neutral-800 pb-2">
+                        <h3 class="text-xs font-black uppercase text-emerald-400 tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-circle-check"></i> 4. Concluído
+                        </h3>
+                        <span id="kanban-count-entregue" class="bg-neutral-800 text-emerald-400 font-bold text-xs px-2.5 py-0.5 rounded-full border border-neutral-700">0</span>
+                    </div>
+                    <div id="kanban-col-entregue" class="space-y-3 min-h-[150px] max-h-[600px] overflow-y-auto"></div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ================= SEÇÃO: ENTREGAS DE HOJE ================= -->
+        <section id="secao-entregas" class="secao-conteudo hidden space-y-6">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-neutral-900 p-6 rounded-2xl border border-neutral-800 shadow-2xl">
+                <div>
+                    <h2 class="text-2xl font-black text-yellow-400 flex items-center gap-2">
+                        <i class="fa-solid fa-truck-ramp-box text-yellow-400"></i> Pedidos Agendados para Entrega Hoje
+                    </h2>
+                    <p class="text-neutral-400 text-sm mt-1">Acompanhe e notifique os clientes com pedidos com entrega prevista para hoje.</p>
+                </div>
+               <div class="flex items-center gap-3">
+                    <button onclick="abrirModalAnaliseFrete()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-blue-950/40">
+                        <i class="fa-solid fa-calculator"></i> Auditoria Plano Dropship
+                    </button>
+
+                    <div class="flex items-center gap-3 bg-neutral-800 px-4 py-2.5 rounded-xl border border-neutral-700">
+                        <span class="text-xs text-neutral-400 font-bold uppercase">Total Agendado Hoje:</span>
+                        <span class="text-xl font-black text-yellow-400" id="kpi-entregas-hoje-count">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="container-pedidos-atrasados" class="hidden space-y-3">
+                <div class="bg-rose-950/80 border-2 border-rose-500 p-4 rounded-2xl flex items-center gap-3 animate-pulse shadow-lg shadow-rose-950/50">
+                    <i class="fa-solid fa-triangle-exclamation text-rose-400 text-2xl"></i>
+                    <div>
+                        <h3 class="text-sm font-black text-rose-400 uppercase tracking-wide">🚨 ATENÇÃO: PEDIDOS COM ENTREGA ATRASADA!</h3>
+                        <p class="text-xs text-neutral-200 mt-0.5">Os pedidos abaixo têm data de entrega passada e ainda não foram marcados como Entregue.</p>
+                    </div>
+                </div>
+                <div id="lista-atrasados-container" class="grid grid-cols-1 gap-4"></div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4" id="lista-entregas-hoje-container"></div>
+        </section>
+
         <!-- ================= SEÇÃO: CLIENTES ================= -->
         <section id="secao-clientes" class="secao-conteudo hidden space-y-6">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-neutral-900 p-6 rounded-2xl border border-neutral-800">
@@ -464,7 +567,42 @@
                 </div>
             </div>
 
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-neutral-900 p-5 rounded-2xl border border-neutral-800">
+                    <p class="text-xs font-bold text-yellow-400 uppercase">Pedidos Novos (Aguardando)</p>
+                    <h3 class="text-3xl font-black text-white mt-1" id="kpi-pedidos-novos">0</h3>
+                </div>
+                <div class="bg-neutral-900 p-5 rounded-2xl border border-neutral-800">
+                    <p class="text-xs font-bold text-amber-400 uppercase">Em Produção</p>
+                    <h3 class="text-3xl font-black text-white mt-1" id="kpi-pedidos-producao">0</h3>
+                </div>
+                <div class="bg-neutral-900 p-5 rounded-2xl border border-neutral-800">
+                    <p class="text-xs font-bold text-emerald-400 uppercase">Total de Pedidos</p>
+                    <h3 class="text-3xl font-black text-white mt-1" id="kpi-pedidos-total">0</h3>
+                </div>
+            </div>
+
+            <div class="bg-neutral-900 p-4 rounded-2xl border border-neutral-800 flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                    <button onclick="filtrarPedidosAba('todos')" id="btn-filtro-todos" class="px-4 py-2 rounded-xl text-xs font-bold bg-yellow-400 text-black">Todos</button>
+                    <button onclick="filtrarPedidosAba('hoje')" id="btn-filtro-hoje" class="px-4 py-2 rounded-xl text-xs font-bold bg-neutral-800 text-neutral-300 hover:text-white">Hoje</button>
+                    <button onclick="filtrarPedidosAba('prontos')" id="btn-filtro-prontos" class="px-4 py-2 rounded-xl text-xs font-bold bg-neutral-800 text-neutral-300 hover:text-white flex items-center gap-1.5">
+                        <i class="fa-solid fa-boxes-packing text-yellow-400"></i> 📦 Prontos p/ Retirada
+                    </button>
+                    <div class="flex items-center gap-1 bg-neutral-800 px-3 py-1.5 rounded-xl border border-neutral-700">
+                        <span class="text-xs text-neutral-400">Data:</span>
+                        <input type="date" id="filtro-data-especifica" onchange="renderizarPedidos()" class="bg-transparent text-xs text-white focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="w-full md:w-80 bg-neutral-800 px-3 py-2 rounded-xl border border-neutral-700 flex items-center gap-2">
+                    <i class="fa-solid fa-magnifying-glass text-yellow-400"></i>
+                    <input type="text" id="input-pesquisar-pedido" onkeyup="renderizarPedidos()" placeholder="Pesquisar pedido, código externo, cliente..." class="bg-transparent text-white focus:outline-none text-xs w-full">
+                </div>
+            </div>
+
             <div class="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 overflow-x-auto">
+                <h3 class="text-base font-bold text-yellow-400 mb-4 uppercase tracking-wide">Lista de Pedidos do Mês Ativo</h3>
                 <table class="w-full text-left text-sm text-neutral-300">
                     <thead class="text-xs uppercase bg-neutral-800 text-yellow-400 border-b border-neutral-700">
                         <tr>
@@ -488,6 +626,209 @@
             </div>
         </section>
 
+        <!-- ================= SEÇÃO: ORÇAMENTOS ================= -->
+        <section id="secao-orcamentos" class="secao-conteudo hidden space-y-6">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-neutral-900 p-6 rounded-2xl border border-neutral-800">
+                <div>
+                    <h2 class="text-2xl font-black text-yellow-400 flex items-center gap-2">
+                        <i class="fa-solid fa-file-signature text-yellow-400"></i> Gerenciamento de Orçamentos & Propostas
+                    </h2>
+                    <p class="text-neutral-400 text-sm mt-1">Crie orçamentos rápidos para clientes cadastrados ou avulsos do WhatsApp.</p>
+                </div>
+
+                <button onclick="abrirModalOrcamento()" class="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-5 py-3 rounded-xl text-sm transition-all shadow-lg shadow-yellow-950/30">
+                    <i class="fa-solid fa-plus text-base"></i> + Novo Orçamento
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-neutral-900 p-5 rounded-2xl border border-neutral-800">
+                    <p class="text-xs font-bold text-yellow-400 uppercase">Orçamentos Pendentes</p>
+                    <h3 class="text-3xl font-black text-white mt-1" id="kpi-orcamentos-pendentes">0</h3>
+                </div>
+                <div class="bg-neutral-900 p-5 rounded-2xl border border-neutral-800">
+                    <p class="text-xs font-bold text-emerald-400 uppercase">Convertidos em Pedido</p>
+                    <h3 class="text-3xl font-black text-emerald-400 mt-1" id="kpi-orcamentos-convertidos">0</h3>
+                </div>
+                <div class="bg-neutral-900 p-5 rounded-2xl border border-neutral-800">
+                    <p class="text-xs font-bold text-amber-400 uppercase">Total Orçado no Mês</p>
+                    <h3 class="text-3xl font-black text-white mt-1" id="kpi-orcamentos-total-valor">R$ 0,00</h3>
+                </div>
+            </div>
+
+            <div class="bg-neutral-900 p-4 rounded-2xl border border-neutral-800 flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div class="w-full md:w-80 bg-neutral-800 px-3 py-2 rounded-xl border border-neutral-700 flex items-center gap-2">
+                    <i class="fa-solid fa-magnifying-glass text-yellow-400"></i>
+                    <input type="text" id="input-pesquisar-orcamento" onkeyup="renderizarOrcamentos()" placeholder="Pesquisar orçamento, cliente, whats..." class="bg-transparent text-white focus:outline-none text-xs w-full">
+                </div>
+            </div>
+
+            <div class="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 overflow-x-auto">
+                <table class="w-full text-left text-sm text-neutral-300">
+                    <thead class="text-xs uppercase bg-neutral-800 text-yellow-400 border-b border-neutral-700">
+                        <tr>
+                            <th class="p-3">ID / Data</th>
+                            <th class="p-3">Cliente</th>
+                            <th class="p-3">WhatsApp</th>
+                            <th class="p-3">Itens Orçados</th>
+                            <th class="p-3">Total (R$)</th>
+                            <th class="p-3">Status</th>
+                            <th class="p-3 text-right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-neutral-800" id="tabela-orcamentos-body"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ================= SEÇÃO: CONTROLE DE DESPESAS ================= -->
+        <section id="secao-despesas" class="secao-conteudo hidden space-y-6">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-neutral-900 p-6 rounded-2xl border border-neutral-800">
+                <div>
+                    <h2 class="text-2xl font-black text-yellow-400 flex items-center gap-2">
+                        <i class="fa-solid fa-file-invoice-dollar text-yellow-400"></i> Controle de Despesas
+                    </h2>
+                    <p class="text-neutral-400 text-sm mt-1">Calculado e atualizado automaticamente com base nos pedidos ativos, compras de insumos e parcelamentos.</p>
+                </div>
+
+                <button onclick="abrirModalNovaDespesa()" class="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-4 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-yellow-950/30">
+                    <i class="fa-solid fa-plus"></i> + Nova Despesa
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-neutral-900 p-5 rounded-2xl border border-neutral-800">
+                    <p class="text-xs font-bold text-yellow-400 uppercase">Despesas / Outros</p>
+                    <h3 class="text-3xl font-black text-white mt-1" id="desp-kpi-outros">R$ 0,00</h3>
+                    <p class="text-xs text-neutral-500 mt-2">Compras avulsas e parcelas do mês</p>
+                </div>
+                <div class="bg-neutral-900 p-5 rounded-2xl border border-neutral-800">
+                    <p class="text-xs font-bold text-amber-400 uppercase">Despesa dos Pedidos</p>
+                    <h3 class="text-3xl font-black text-white mt-1" id="desp-kpi-pedidos">R$ 0,00</h3>
+                    <p class="text-xs text-neutral-500 mt-2">Custo de produção dos pedidos</p>
+                </div>
+                <div class="bg-neutral-900 p-5 rounded-2xl border border-neutral-800">
+                    <p class="text-xs font-bold text-rose-400 uppercase">Despesa Total</p>
+                    <h3 class="text-3xl font-black text-rose-400 mt-1" id="desp-kpi-total">R$ 0,00</h3>
+                    <p class="text-xs text-rose-400/80 mt-2">Soma geral de saídas</p>
+                </div>
+            </div>
+
+            <div class="bg-neutral-900 p-4 rounded-2xl border border-neutral-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <button onclick="filtrarDespesasAba('mes')" id="btn-desp-mes" class="px-4 py-2 rounded-xl text-xs font-bold bg-yellow-400 text-black shadow-md transition-all">
+                        📅 Mês Ativo
+                    </button>
+                    <button onclick="filtrarDespesasAba('todas')" id="btn-desp-todas" class="px-4 py-2 rounded-xl text-xs font-bold bg-neutral-800 text-neutral-300 hover:text-white flex items-center gap-1.5 transition-all">
+                        <i class="fa-solid fa-credit-card text-yellow-400"></i> 💳 Compras Parceladas (Visão Limpa)
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-3 w-full sm:w-80 bg-neutral-800 px-3 py-2 rounded-xl border border-neutral-700">
+                    <i class="fa-solid fa-magnifying-glass text-yellow-400"></i>
+                    <input type="text" id="input-pesquisar-despesa" onkeyup="renderizarDespesas()" placeholder="Pesquisar por produto, loja, cadastrado por..." class="w-full bg-transparent text-white focus:outline-none text-xs placeholder-neutral-500">
+                </div>
+            </div>
+
+            <div class="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 overflow-x-auto">
+                <table class="w-full text-left text-sm text-neutral-300">
+                    <thead class="text-xs uppercase bg-neutral-800 text-yellow-400 border-b border-neutral-700" id="tabela-despesas-head">
+                        <tr>
+                            <th class="p-3">Produto / Origem</th>
+                            <th class="p-3">Data Compra</th>
+                            <th class="p-3">Registrado Por</th>
+                            <th class="p-3">Tipo Pagamento</th>
+                            <th class="p-3">Loja/Fornecedor</th>
+                            <th class="p-3">Total Gasto</th>
+                            <th class="p-3 text-right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-neutral-800" id="tabela-despesas-body"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ================= SEÇÃO: FINANCEIRO ================= -->
+        <section id="secao-financeiro" class="secao-conteudo hidden space-y-6">
+            <div class="bg-neutral-900 p-6 rounded-2xl border border-neutral-800">
+                <h2 class="text-2xl font-black text-yellow-400 flex items-center gap-2">
+                    <i class="fa-solid fa-wallet text-yellow-400"></i> Visão Financeira (Mês Ativo)
+                </h2>
+                <p class="text-neutral-400 text-sm mt-1">Fluxo de caixa e distribuição de lucros do mês ativo em tempo real.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="bg-neutral-900 p-5 rounded-2xl border border-neutral-800 hover:border-yellow-400/30 transition-all">
+                    <p class="text-xs text-neutral-400 uppercase font-bold">Total Receitas (Entradas Realizadas)</p>
+                    <h3 class="text-3xl font-black text-emerald-400 mt-2" id="fin-entradas">R$ 0,00</h3>
+                    <p class="text-xs text-neutral-500 mt-2">Soma dos pagamentos e sinais recebidos</p>
+                </div>
+
+                <div class="bg-neutral-900 p-5 rounded-2xl border border-neutral-800 hover:border-yellow-400/30 transition-all">
+                    <p class="text-xs text-amber-400 uppercase font-bold">Saldo Pendente a Receber</p>
+                    <h3 class="text-3xl font-black text-amber-400 mt-2" id="fin-pendente-receber">R$ 0,00</h3>
+                    <p class="text-xs text-neutral-500 mt-2">Valores de pedidos a serem quitados na entrega</p>
+                </div>
+
+                <div class="bg-neutral-900 p-5 rounded-2xl border border-neutral-800 hover:border-yellow-400/30 transition-all">
+                    <p class="text-xs text-neutral-400 uppercase font-bold">Total Despesas (Saídas)</p>
+                    <h3 class="text-3xl font-black text-rose-400 mt-2" id="fin-saidas">R$ 0,00</h3>
+                    <p class="text-xs text-neutral-500 mt-2">Custos de pedidos e compras avulsas</p>
+                </div>
+
+                <div class="bg-neutral-900 p-5 rounded-2xl border border-neutral-800 hover:border-yellow-400/30 transition-all">
+                    <p class="text-xs text-neutral-400 uppercase font-bold">Lucro Total Realizado</p>
+                    <h3 class="text-3xl font-black text-yellow-400 mt-2" id="fin-saldo">R$ 0,00</h3>
+                    <p class="text-xs text-neutral-500 mt-2">Entradas Realizadas - Despesas</p>
+                </div>
+
+                <div class="bg-neutral-900 p-5 rounded-2xl border border-neutral-800 hover:border-yellow-400/30 transition-all">
+                    <p class="text-xs text-blue-400 uppercase font-bold">10% Lucro (Reserva / Investimento)</p>
+                    <h3 class="text-3xl font-black text-blue-400 mt-2" id="fin-lucro-10">R$ 0,00</h3>
+                    <p class="text-xs text-neutral-500 mt-2">10% retidos do Lucro Realizado</p>
+                </div>
+
+                <div class="bg-neutral-900 p-5 rounded-2xl border border-neutral-800 hover:border-yellow-400/30 transition-all">
+                    <p class="text-xs text-emerald-400 uppercase font-bold">Lucro Líquido Disponível</p>
+                    <h3 class="text-3xl font-black text-emerald-400 mt-2" id="fin-lucro-liquido">R$ 0,00</h3>
+                    <p class="text-xs text-neutral-500 mt-2">Lucro Realizado - 10% de Reserva</p>
+                </div>
+            </div>
+
+            <div class="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 space-y-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-yellow-400 flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-yellow-400"></i> Histórico Geral de Movimentações (Mês Ativo)
+                        </h3>
+                        <p class="text-xs text-neutral-400 mt-0.5">Consolidado de entradas (vendas/sinais) e saídas (custos e despesas).</p>
+                    </div>
+
+                    <div class="w-full md:w-80 bg-neutral-800 px-3 py-2 rounded-xl border border-neutral-700 flex items-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass text-yellow-400"></i>
+                        <input type="text" id="input-pesquisar-financeiro" onkeyup="renderizarMovimentacoesFinanceiras()" placeholder="Pesquisar categoria, descrição, tipo..." class="bg-transparent text-white focus:outline-none text-xs w-full placeholder-neutral-500">
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-neutral-300">
+                        <thead class="text-xs uppercase bg-neutral-800 text-yellow-400 border-b border-neutral-700">
+                            <tr>
+                                <th class="p-3">Data</th>
+                                <th class="p-3">Tipo</th>
+                                <th class="p-3">Categoria</th>
+                                <th class="p-3">Descrição</th>
+                                <th class="p-3">Valor</th>
+                                <th class="p-3">Método</th>
+                                <th class="p-3 text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-neutral-800" id="tabela-financeiro-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
         <!-- ================= SEÇÃO: ESTOQUE E INSUMOS ================= -->
         <section id="secao-estoque" class="secao-conteudo hidden space-y-6">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-neutral-900 p-6 rounded-2xl border border-neutral-800 shadow-2xl">
@@ -505,6 +846,27 @@
                     <button onclick="abrirModalEstoque()" class="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-4 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-yellow-950/30">
                         <i class="fa-solid fa-plus"></i> + Novo Item
                     </button>
+                </div>
+            </div>
+
+            <!-- CARDS DE MÉTRICAS DO ESTOQUE -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-neutral-900 p-5 rounded-2xl border border-neutral-800">
+                    <p class="text-xs font-bold text-yellow-400 uppercase">Total de Itens Cadastrados</p>
+                    <h3 class="text-3xl font-black text-white mt-1" id="est-kpi-total-itens">0</h3>
+                    <p class="text-xs text-neutral-500 mt-1">Insumos e materiais</p>
+                </div>
+
+                <div class="bg-neutral-900 p-5 rounded-2xl border border-neutral-800">
+                    <p class="text-xs font-bold text-rose-400 uppercase">Comprar Urgente (Abaixo do Mínimo)</p>
+                    <h3 class="text-3xl font-black text-rose-400 mt-1" id="est-kpi-alerta-count">0</h3>
+                    <p class="text-xs text-rose-400/80 mt-1">Necessitam reposição</p>
+                </div>
+
+                <div class="bg-neutral-900 p-5 rounded-2xl border border-neutral-800">
+                    <p class="text-xs font-bold text-emerald-400 uppercase">Valor Estimado em Estoque</p>
+                    <h3 class="text-3xl font-black text-emerald-400 mt-1" id="est-kpi-valor-total">R$ 0,00</h3>
+                    <p class="text-xs text-neutral-500 mt-1">Patrimônio acumulado em materiais</p>
                 </div>
             </div>
 
@@ -526,6 +888,17 @@
                     </thead>
                     <tbody class="divide-y divide-neutral-800" id="tabela-estoque-body"></tbody>
                 </table>
+            </div>
+        </section>
+
+        <!-- ================= SEÇÃO: HISTÓRICO ================= -->
+        <section id="secao-historico" class="secao-conteudo hidden space-y-6">
+            <div class="bg-neutral-900 p-6 rounded-2xl border border-neutral-800">
+                <h2 class="text-2xl font-black text-yellow-400">Histórico de Fechamentos Mensais</h2>
+                <p class="text-neutral-400 text-sm mt-1">Consulte todas as movimentações e relatórios de meses encerrados.</p>
+            </div>
+            <div class="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 space-y-3" id="historico-fechamentos">
+                <p class="text-sm text-neutral-500">Nenhum mês fechado até o momento.</p>
             </div>
         </section>
 
@@ -865,7 +1238,9 @@
             estoque: [],
             historicoFechamentos: [],
             orcamentos: [],
-            produtosLoja: []
+            produtosLoja: [],
+            vendasChart: null,
+            servicosChart: null
         };
 
         function escapeAttr(str) {
@@ -875,16 +1250,22 @@
 
         async function carregarDados() {
             try {
-                const [resCli, resPed, resEst, resProd] = await Promise.all([
+                const [resCli, resPed, resDesp, resFech, resEst, resOrc, resProd] = await Promise.all([
                     supabaseClient.from('clientes').select('*'),
                     supabaseClient.from('pedidos').select('*'),
+                    supabaseClient.from('despesas').select('*').order('id', { ascending: false }),
+                    supabaseClient.from('fechamentos').select('*').order('id', { ascending: false }),
                     supabaseClient.from('estoque').select('*').order('id', { ascending: false }).limit(1000000),
+                    supabaseClient.from('orcamentos').select('*').order('id', { ascending: false }),
                     supabaseClient.from('produtos').select('*').order('id', { ascending: false })
                 ]);
 
                 if (resCli.data) appData.clientes = resCli.data;
                 if (resPed.data) appData.pedidos = resPed.data;
+                if (resDesp.data) appData.despesasOutras = resDesp.data;
+                if (resFech.data) appData.historicoFechamentos = resFech.data;
                 if (resEst.data) appData.estoque = resEst.data;
+                if (resOrc.data) appData.orcamentos = resOrc.data;
                 if (resProd && resProd.data) appData.produtosLoja = resProd.data;
 
             } catch(e) {
@@ -895,10 +1276,121 @@
         }
 
         function atualizarInterfaceCompleta() {
+            // Atualizar contadores do Dashboard
+            let fatDia = 0, pedDiaCount = 0, producaoCount = 0, pendentesCount = 0, entreguesDiaCount = 0;
+            let totalReceitaRealizada = 0, totalDespesaGeral = 0;
+            const hojeStr = appData.dataAtual;
+
+            (appData.pedidos || []).forEach(p => {
+                const pTotal = parseFloat(p.total || 0);
+                if (p.status !== 'Cancelado') {
+                    const pPago = parseFloat(p.valorPago !== undefined ? p.valorPago : (p.statusPagamento === 'Pago 100%' ? pTotal : 0));
+                    totalReceitaRealizada += pPago;
+                    if (p.data === hojeStr) fatDia += pPago;
+                }
+                if (p.data === hojeStr && p.status !== 'Cancelado') pedDiaCount++;
+                if (p.status === 'Em Produção') producaoCount++;
+                if (p.status === 'AGUARDANDO') pendentesCount++;
+                if (p.status === 'Entregue' || p.status === 'Concluído') entreguesDiaCount++;
+            });
+
+            const elFatDia = document.getElementById('dash-faturamento-dia');
+            if (elFatDia) elFatDia.innerText = `R$ ${fatDia.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            
+            const elPedDia = document.getElementById('dash-pedidos-dia');
+            if (elPedDia) elPedDia.innerText = pedDiaCount;
+
+            const elEmProd = document.getElementById('dash-em-producao');
+            if (elEmProd) elEmProd.innerText = producaoCount;
+
+            const elPend = document.getElementById('dash-pendentes');
+            if (elPend) elPend.innerText = pendentesCount;
+
+            const elEntregues = document.getElementById('dash-entregues');
+            if (elEntregues) elEntregues.innerText = entreguesDiaCount;
+
+            const elClientesCount = document.getElementById('dash-clientes-count');
+            if (elClientesCount) elClientesCount.innerText = appData.clientes.length;
+
+            renderizarKanban();
+            renderizarEntregasHoje();
             renderizarClientes();
             renderizarPedidos();
+            renderizarOrcamentos();
+            renderizarDespesas();
+            renderizarFinanceiro();
             renderizarEstoque();
+            renderizarHistorico();
             renderizarProdutosLoja();
+        }
+
+        // --- RENDERIZAR KANBAN ---
+        function renderizarKanban() {
+            const colA = document.getElementById('kanban-col-aguardando');
+            const colP = document.getElementById('kanban-col-producao');
+            const colR = document.getElementById('kanban-col-pronto');
+            const colE = document.getElementById('kanban-col-entregue');
+
+            if (!colA || !colP || !colR || !colE) return;
+
+            colA.innerHTML = ''; colP.innerHTML = ''; colR.innerHTML = ''; colE.innerHTML = '';
+
+            let cA = 0, cP = 0, cR = 0, cE = 0;
+
+            appData.pedidos.forEach(p => {
+                if (p.status === 'Cancelado') return;
+                const card = document.createElement('div');
+                card.className = "bg-neutral-950 border border-neutral-800 p-3 rounded-xl space-y-2 text-xs";
+                card.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <strong class="text-yellow-400">#${p.id}</strong>
+                        <span class="text-[10px] text-neutral-400">${escapeAttr(p.data)}</span>
+                    </div>
+                    <p class="text-white font-bold">${escapeAttr(p.clienteNome)}</p>
+                    <p class="text-neutral-400 text-[11px]">R$ ${parseFloat(p.total||0).toFixed(2)}</p>
+                `;
+
+                if (p.status === 'AGUARDANDO' || p.status === 'Criação de Arte') { colA.appendChild(card); cA++; }
+                else if (p.status === 'Em Produção') { colP.appendChild(card); cP++; }
+                else if (p.status === 'Pronto p/ Retirada') { colR.appendChild(card); cR++; }
+                else if (p.status === 'Concluído' || p.status === 'Entregue') { colE.appendChild(card); cE++; }
+            });
+
+            const elCA = document.getElementById('kanban-count-aguardando'); if(elCA) elCA.innerText = cA;
+            const elCP = document.getElementById('kanban-count-producao'); if(elCP) elCP.innerText = cP;
+            const elCR = document.getElementById('kanban-count-pronto'); if(elCR) elCR.innerText = cR;
+            const elCE = document.getElementById('kanban-count-entregue'); if(elCE) elCE.innerText = cE;
+        }
+
+        // --- RENDERIZAR ENTREGAS DE HOJE ---
+        function renderizarEntregasHoje() {
+            const container = document.getElementById('lista-entregas-hoje-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const hojeStr = appData.dataAtual;
+            const entregasHoje = appData.pedidos.filter(p => p.dataEntrega === hojeStr && p.status !== 'Cancelado');
+
+            const kpiCount = document.getElementById('kpi-entregas-hoje-count');
+            if (kpiCount) kpiCount.innerText = entregasHoje.length;
+
+            if (entregasHoje.length === 0) {
+                container.innerHTML = `<p class="text-center text-neutral-500 text-xs italic py-6">Nenhuma entrega agendada para hoje.</p>`;
+                return;
+            }
+
+            entregasHoje.forEach(p => {
+                const card = document.createElement('div');
+                card.className = "bg-neutral-900 border border-neutral-800 p-4 rounded-xl flex justify-between items-center text-xs";
+                card.innerHTML = `
+                    <div>
+                        <strong class="text-yellow-400 block text-sm">#${p.id} - ${escapeAttr(p.clienteNome)}</strong>
+                        <span class="text-neutral-400">Total: R$ ${parseFloat(p.total||0).toFixed(2)}</span>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-full bg-yellow-400/10 text-yellow-400 border border-yellow-400/30 font-bold">${escapeAttr(p.status)}</span>
+                `;
+                container.appendChild(card);
+            });
         }
 
         // --- RENDERIZAR CLIENTES ---
@@ -959,6 +1451,97 @@
             atualizarBotaoExcluirMassa('pedido');
         }
 
+        // --- RENDERIZAR ORÇAMENTOS ---
+        function renderizarOrcamentos() {
+            const tbody = document.getElementById('tabela-orcamentos-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            appData.orcamentos.forEach(o => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-white">#ORC-${o.id}</td>
+                    <td class="p-3 font-semibold text-yellow-400">${escapeAttr(o.clienteNome || 'Cliente Avulso')}</td>
+                    <td class="p-3 text-xs text-emerald-400">${escapeAttr(o.clienteWhatsapp || '-')}</td>
+                    <td class="p-3 text-xs text-neutral-300">Orçamento</td>
+                    <td class="p-3 font-black text-white">R$ ${parseFloat(o.total||0).toFixed(2)}</td>
+                    <td class="p-3"><span class="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded text-xs font-bold">${escapeAttr(o.status || 'Pendente')}</span></td>
+                    <td class="p-3 text-right">
+                        <button onclick="excluirOrcamento('${o.id}')" class="bg-rose-950/50 hover:bg-rose-900 text-rose-400 p-2 rounded-lg text-xs"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- RENDERIZAR DESPESAS ---
+        function renderizarDespesas() {
+            const tbody = document.getElementById('tabela-despesas-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            appData.despesasOutras.forEach(d => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-white">${escapeAttr(d.nome)}</td>
+                    <td class="p-3 text-neutral-400 text-xs">${escapeAttr(d.data)}</td>
+                    <td class="p-3 text-xs font-bold text-yellow-400">${escapeAttr(d.registradoPor || 'Atendente')}</td>
+                    <td class="p-3 text-xs text-neutral-400">${escapeAttr(d.tipoPagamento || 'Pix')}</td>
+                    <td class="p-3 text-neutral-300 text-xs">${escapeAttr(d.loja || '-')}</td>
+                    <td class="p-3 font-bold text-rose-400">R$ ${parseFloat(d.valor||0).toFixed(2)}</td>
+                    <td class="p-3 text-right">
+                        <button onclick="excluirDespesaAvulsa('${d.id}')" class="bg-rose-950/50 hover:bg-rose-900 text-rose-400 p-2 rounded-lg text-xs"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- RENDERIZAR FINANCEIRO ---
+        function renderizarFinanceiro() {
+            const tbody = document.getElementById('tabela-financeiro-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            let totalE = 0, totalS = 0;
+
+            appData.pedidos.forEach(p => {
+                const val = parseFloat(p.total || 0);
+                totalE += val;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-3 text-xs text-white">${escapeAttr(p.data)}</td>
+                    <td class="p-3"><span class="px-2 py-0.5 text-[10px] rounded-full font-bold bg-emerald-500/10 text-emerald-400">Entrada</span></td>
+                    <td class="p-3 text-xs text-yellow-400">Venda Pedido</td>
+                    <td class="p-3 text-xs text-neutral-200">Pedido #${p.id} - ${escapeAttr(p.clienteNome)}</td>
+                    <td class="p-3 font-black text-emerald-400">+ R$ ${val.toFixed(2)}</td>
+                    <td class="p-3 text-xs text-neutral-400">Pix</td>
+                    <td class="p-3 text-right"><span class="text-xs text-neutral-500">Ok</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            appData.despesasOutras.forEach(d => {
+                const val = parseFloat(d.valor || 0);
+                totalS += val;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-3 text-xs text-white">${escapeAttr(d.data)}</td>
+                    <td class="p-3"><span class="px-2 py-0.5 text-[10px] rounded-full font-bold bg-rose-500/10 text-rose-400">Saída</span></td>
+                    <td class="p-3 text-xs text-yellow-400">Despesa</td>
+                    <td class="p-3 text-xs text-neutral-200">${escapeAttr(d.nome)}</td>
+                    <td class="p-3 font-black text-rose-400">- R$ ${val.toFixed(2)}</td>
+                    <td class="p-3 text-xs text-neutral-400">${escapeAttr(d.tipoPagamento||'Pix')}</td>
+                    <td class="p-3 text-right"><span class="text-xs text-neutral-500">Ok</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            const elE = document.getElementById('fin-entradas'); if(elE) elE.innerText = `R$ ${totalE.toFixed(2)}`;
+            const elS = document.getElementById('fin-saidas'); if(elS) elS.innerText = `R$ ${totalS.toFixed(2)}`;
+            const elSaldo = document.getElementById('fin-saldo'); if(elSaldo) elSaldo.innerText = `R$ ${(totalE - totalS).toFixed(2)}`;
+        }
+
         // ================= FUNÇÕES DO MÓDULO: ESTOQUE =================
         function renderizarEstoque() {
             const tbody = document.getElementById('tabela-estoque-body');
@@ -966,7 +1549,6 @@
             tbody.innerHTML = '';
 
             const filtroText = (document.getElementById('input-pesquisar-estoque')?.value || '').toLowerCase();
-
             const estoqueOrdenado = [...appData.estoque].sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
 
             estoqueOrdenado.forEach(item => {
@@ -1025,6 +1607,31 @@
             });
 
             atualizarBotaoExcluirMassa('estoque');
+        }
+
+        // --- RENDERIZAR HISTÓRICO ---
+        function renderizarHistorico() {
+            const container = document.getElementById('historico-fechamentos');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (!appData.historicoFechamentos || appData.historicoFechamentos.length === 0) {
+                container.innerHTML = `<p class="text-sm text-neutral-500">Nenhum mês fechado até o momento.</p>`;
+                return;
+            }
+
+            appData.historicoFechamentos.forEach(f => {
+                const div = document.createElement('div');
+                div.className = "p-4 bg-neutral-900 border border-neutral-800 rounded-xl flex justify-between items-center text-xs";
+                div.innerHTML = `
+                    <div>
+                        <strong class="text-yellow-400 block text-sm">${escapeAttr(f.mes || 'Mês')}</strong>
+                        <span class="text-neutral-400">Fechado em: ${escapeAttr(f.dataFechamento || '-')}</span>
+                    </div>
+                    <span class="text-emerald-400 font-bold text-sm">R$ ${parseFloat(f.faturamento||0).toFixed(2)}</span>
+                `;
+                container.appendChild(div);
+            });
         }
 
         // ================= FUNÇÕES DE GESTÃO DA LOJA ONLINE =================
@@ -1105,6 +1712,32 @@
             }
         }
 
+        async function excluirOrcamento(id) {
+            const confirmou = await confirmarAcao("Excluir Orçamento", "Deseja realmente excluir este orçamento?", "Sim, Excluir");
+            if (confirmou) {
+                const { error } = await supabaseClient.from('orcamentos').delete().eq('id', id);
+                if (!error) {
+                    await carregarDados();
+                    mostrarToast("Orçamento removido.");
+                } else {
+                    mostrarToast(`Erro: ${error.message}`, "erro");
+                }
+            }
+        }
+
+        async function excluirDespesaAvulsa(id) {
+            const confirmou = await confirmarAcao("Excluir Despesa", "Deseja realmente excluir esta despesa?", "Sim, Excluir");
+            if (confirmou) {
+                const { error } = await supabaseClient.from('despesas').delete().eq('id', id);
+                if (!error) {
+                    await carregarDados();
+                    mostrarToast("Despesa removida.");
+                } else {
+                    mostrarToast(`Erro: ${error.message}`, "erro");
+                }
+            }
+        }
+
         async function excluirItemEstoque(id) {
             const confirmou = await confirmarAcao("Excluir do Estoque", "Deseja realmente excluir este material do seu estoque?", "Sim, Excluir");
             if (confirmou) {
@@ -1135,6 +1768,17 @@
             document.querySelectorAll('.secao-conteudo').forEach(el => el.classList.add('hidden'));
             const alvo = document.getElementById(`secao-${secao}`);
             if (alvo) alvo.classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active', 'text-yellow-400', 'bg-yellow-400/10', 'border-l-4', 'border-yellow-400', 'font-bold');
+                btn.classList.add('text-neutral-400', 'hover:text-white', 'hover:bg-neutral-800', 'font-semibold');
+            });
+
+            const btnAtivo = document.getElementById(`btn-${secao}`);
+            if (btnAtivo) {
+                btnAtivo.classList.remove('text-neutral-400', 'hover:text-white', 'hover:bg-neutral-800', 'font-semibold');
+                btnAtivo.classList.add('active', 'text-yellow-400', 'bg-yellow-400/10', 'border-l-4', 'border-yellow-400', 'font-bold');
+            }
         }
 
         function fazerLogin(e) {
