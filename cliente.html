@@ -481,33 +481,42 @@
             renderizarCatalogo();
 
             try {
+                // Traz do Supabase os produtos ORDENADOS do mais novo para o mais antigo
                 const { data, error } = await supabaseClient
                     .from('produtos')
                     .select('*')
-                    .limit(500);
+                    .order('id', { ascending: false })
+                    .limit(1000);
 
                 if (!error && data && data.length > 0) {
                     const produtosMapeados = data.map((item, index) => {
                         let preco = 0;
-                        const valPreco = item.Preco_Custo || item.Preco_Venda || item.Preco || 0;
+                        const valPreco = item.Preco_Venda ?? item.precoVenda ?? item.Preco_Custo ?? item.precoCusto ?? item.Preco ?? 0;
                         if (valPreco) preco = parseFloat(String(valPreco).replace(',', '.'));
 
-                       const nomeProd = item.Nome || item.nome || item.Tipo_Produto || item.Material || item.Referencia || `Produto #${item.id || index + 1}`;
-                        const catProd = item.Categorias_Secundarias || item.Tipo_Produto || 'Gráfica';
+                        const nomeProd = item.Nome || item.nome || item.Tipo_Produto || item.Material || item.Referencia || `Produto #${item.id || index + 1}`;
+                        const catProd = item.Categorias_Secundarias || item.categoria || item.Tipo_Produto || 'Geral';
 
                         return {
                             id: item.id || index + 1000,
                             nome: String(nomeProd),
                             categoria: String(catProd),
                             precoVenda: isNaN(preco) || preco <= 0 ? 25.00 : preco,
-                            precoDe: null,
-                            ref: String(item.Referencia || `REF-${index + 1}`),
+                            precoDe: item.precoDe || null,
+                            ref: String(item.Referencia || item.ref || `REF-${index + 1}`),
                             imagem: formatarUrlImagem(item.Url || item.imagem || ''),
-                            descricao: `<p>Produto: <strong>${escapeAttr(nomeProd)}</strong></p>`
+                            descricao: item.Descricao || item.descricao || `<p>Produto: <strong>${escapeAttr(nomeProd)}</strong></p>`
                         };
                     });
 
-                    catalogoEstoque = [...catalogoEstoque, ...produtosMapeados];
+                    // Insere os produtos do Supabase no topo do catálogo
+                    catalogoEstoque = [...produtosMapeados, ...catalogoEstoque];
+                    
+                    // Remove duplicados
+                    const mapaUnico = new Map();
+                    catalogoEstoque.forEach(prod => mapaUnico.set(prod.id, prod));
+                    catalogoEstoque = Array.from(mapaUnico.values());
+
                     renderizarCatalogo();
                 }
             } catch (err) {
