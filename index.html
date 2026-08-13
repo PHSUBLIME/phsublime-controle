@@ -2621,8 +2621,8 @@
                     totalReceitaRealizada += pPago;
                     if (p.data === hojeStr) fatDia += pPago;
                 }
-                if (p.data === hojeStr && p.status !== 'Cancelado') pedDiaCount++;):
-            if (p.status === 'Em Produção') producaoCount++;
+                if (p.data === hojeStr && p.status !== 'Cancelado') pedDiaCount++;
+                if (p.status === 'Em Produção') producaoCount++;
                 if (p.status === 'AGUARDANDO') pendentesCount++;
                 if (p.status === 'Entregue' || p.status === 'Concluído') entreguesDiaCount++;
             });
