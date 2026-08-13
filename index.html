@@ -518,6 +518,9 @@
                     <button onclick="abrirModalMassa()" class="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 px-4 py-2.5 rounded-xl font-medium text-sm transition-all">
                         <i class="fa-solid fa-file-import text-yellow-400"></i> Adicionar em Massa
                     </button>
+                    <button id="btn-excluir-massa-cliente" onclick="excluirClientesEmMassa()" class="hidden flex items-center gap-2 bg-rose-600 hover:bg-rose-500 text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-rose-950/40">
+    <i class="fa-solid fa-trash-can"></i> Excluir Selecionados (0)
+</button>
                 </div>
             </div>
 
@@ -530,6 +533,9 @@
                 <table class="w-full text-left text-sm text-neutral-300">
                     <thead class="text-xs uppercase bg-neutral-800 text-yellow-400 border-b border-neutral-700">
                         <tr>
+                            <th class="p-3 w-10 text-center">
+    <input type="checkbox" onchange="alternarSelecaoTodosClientes(this)" class="rounded bg-neutral-800 border-neutral-700 text-yellow-400 focus:ring-0 w-4 h-4 cursor-pointer" title="Selecionar Todos">
+</th>
                             <th class="p-3">Nome</th>
                             <th class="p-3">CPF/CNPJ</th>
                             <th class="p-3">Telefone / Whats</th>
@@ -553,6 +559,9 @@
                     <p class="text-neutral-400 text-sm mt-1">Acompanhe pedidos em fila, produção e entregues no ciclo atual.</p>
                 </div>
 
+                <button id="btn-excluir-massa-pedido" onclick="excluirPedidosEmMassa()" class="hidden flex items-center gap-2 bg-rose-600 hover:bg-rose-500 text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-rose-950/40">
+    <i class="fa-solid fa-trash-can"></i> Excluir Selecionados (0)
+</button>
                 <button onclick="abrirModalPedido()" class="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-5 py-3 rounded-xl text-sm transition-all shadow-lg shadow-yellow-950/30">
                     <i class="fa-solid fa-plus text-base"></i> + Novo Pedido
                 </button>
@@ -597,6 +606,9 @@
                 <table class="w-full text-left text-sm text-neutral-300">
                     <thead class="text-xs uppercase bg-neutral-800 text-yellow-400 border-b border-neutral-700">
                         <tr>
+                            <th class="p-3 w-10 text-center">
+    <input type="checkbox" onchange="alternarSelecaoTodosPedidos(this)" class="rounded bg-neutral-800 border-neutral-700 text-yellow-400 focus:ring-0 w-4 h-4 cursor-pointer" title="Selecionar Todos">
+</th>
                             <th class="p-3">ID / Pedido</th>
                             <th class="p-3">Cliente</th>
                             <th class="p-3">Produtos / Descrição</th>
@@ -838,6 +850,9 @@
                     <button onclick="abrirModalEstoque()" class="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-4 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-yellow-950/30">
                         <i class="fa-solid fa-plus"></i> + Novo Item de Estoque
                     </button>
+                    <button id="btn-excluir-massa-estoque" onclick="excluirEstoqueEmMassa()" class="hidden flex items-center gap-2 bg-rose-600 hover:bg-rose-500 text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-rose-950/40">
+    <i class="fa-solid fa-trash-can"></i> Excluir Selecionados (0)
+</button>
                 </div>
             </div>
 
@@ -873,6 +888,9 @@
                 <table class="w-full text-left text-sm text-neutral-300">
                     <thead class="text-xs uppercase bg-neutral-800 text-yellow-400 border-b border-neutral-700">
                         <tr>
+                            <th class="p-3 w-10 text-center">
+    <input type="checkbox" onchange="alternarSelecaoTodosEstoque(this)" class="rounded bg-neutral-800 border-neutral-700 text-yellow-400 focus:ring-0 w-4 h-4 cursor-pointer" title="Selecionar Todos">
+</th>
                             <th class="p-3">Material / Insumo</th>
                             <th class="p-3">Categoria</th>
                             <th class="p-3 text-center">Qtd Atual</th>
@@ -911,6 +929,9 @@
                 <button onclick="abrirModalProdutoLoja()" class="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-4 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-yellow-950/30">
                     <i class="fa-solid fa-plus"></i> + Novo Produto da Loja
                 </button>
+                <button id="btn-excluir-massa-prod-loja" onclick="excluirProdutosLojaEmMassa()" class="hidden flex items-center gap-2 bg-rose-600 hover:bg-rose-500 text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-rose-950/40">
+    <i class="fa-solid fa-trash-can"></i> Excluir Selecionados (0)
+</button>
             </div>
 
             <!-- BARRA DE PESQUISA -->
@@ -924,6 +945,9 @@
                 <table class="w-full text-left text-sm text-neutral-300">
                     <thead class="text-xs uppercase bg-neutral-800 text-yellow-400 border-b border-neutral-700">
                         <tr>
+                            <th class="p-3 w-10 text-center">
+    <input type="checkbox" onchange="alternarSelecaoTodosProdutosLoja(this)" class="rounded bg-neutral-800 border-neutral-700 text-yellow-400 focus:ring-0 w-4 h-4 cursor-pointer" title="Selecionar Todos">
+</th>
                             <th class="p-3">Imagem</th>
                             <th class="p-3">Nome do Produto</th>
                             <th class="p-3">Categoria</th>
@@ -2404,6 +2428,40 @@
             }
         }
 
+        // ================= VARIÁVEIS E FUNÇÕES DE EXCLUSÃO EM MASSA =================
+        let clientesSelecionados = [];
+        let pedidosSelecionados = [];
+        let estoqueSelecionados = [];
+        let produtosLojaSelecionados = [];
+
+        function atualizarBotaoExcluirMassa(tipo) {
+            let qtd = 0;
+            let btn = null;
+
+            if (tipo === 'cliente') {
+                qtd = clientesSelecionados.length;
+                btn = document.getElementById('btn-excluir-massa-cliente');
+            } else if (tipo === 'pedido') {
+                qtd = pedidosSelecionados.length;
+                btn = document.getElementById('btn-excluir-massa-pedido');
+            } else if (tipo === 'estoque') {
+                qtd = estoqueSelecionados.length;
+                btn = document.getElementById('btn-excluir-massa-estoque');
+            } else if (tipo === 'prod-loja') {
+                qtd = produtosLojaSelecionados.length;
+                btn = document.getElementById('btn-excluir-massa-prod-loja');
+            }
+
+            if (btn) {
+                if (qtd > 0) {
+                    btn.classList.remove('hidden');
+                    btn.innerHTML = `<i class="fa-solid fa-trash-can"></i> Excluir Selecionados (${qtd})`;
+                } else {
+                    btn.classList.add('hidden');
+                }
+            }
+        }
+        
         // ================= DADOS DA APLICAÇÃO (SUPABASE) =================
         let appData = {
             dataAtual: new Date().toISOString().split('T')[0],
@@ -3600,6 +3658,43 @@ function renderizarKanban() {
         document.getElementById('modal-radar-entregas').classList.add('hidden');
     }
 
+        function alternarSelecaoTodosClientes(checkboxGeral) {
+            const checkboxes = document.querySelectorAll('.check-cliente');
+            clientesSelecionados = [];
+            checkboxes.forEach(cb => {
+                cb.checked = checkboxGeral.checked;
+                if (checkboxGeral.checked) clientesSelecionados.push(parseInt(cb.value));
+            });
+            atualizarBotaoExcluirMassa('cliente');
+        }
+
+        function alternarSelecaoCliente(id, cb) {
+            if (cb.checked) {
+                if (!clientesSelecionados.includes(id)) clientesSelecionados.push(id);
+            } else {
+                clientesSelecionados = clientesSelecionados.filter(i => i !== id);
+            }
+            atualizarBotaoExcluirMassa('cliente');
+        }
+
+        async function excluirClientesEmMassa() {
+            if (clientesSelecionados.length === 0) return;
+            const confirmou = await confirmarAcao(
+                "Excluir Clientes Selecionados",
+                `Deseja realmente apagar os ${clientesSelecionados.length} clientes selecionados?`,
+                "Sim, Apagar Todos", "fa-trash-can", "rose"
+            );
+            if (confirmou) {
+                const { error } = await supabaseClient.from('clientes').delete().in('id', clientesSelecionados);
+                if (!error) {
+                    clientesSelecionados = [];
+                    await carregarDados();
+                    mostrarToast("Clientes excluídos com sucesso!");
+                } else {
+                    mostrarToast(`Erro ao excluir: ${error.message}`, "erro");
+                }
+            }
+        }
     function renderizarClientes() {
         const tbody = document.getElementById('tabela-clientes-body');
         if (!tbody) return;
@@ -3630,8 +3725,13 @@ function renderizarKanban() {
                 }
             });
 
+            const isChecked = clientesSelecionados.includes(c.id);
+
             const tr = document.createElement('tr');
             tr.innerHTML = `
+                <td class="p-3 text-center">
+                    <input type="checkbox" value="${c.id}" ${isChecked ? 'checked' : ''} onchange="alternarSelecaoCliente(${c.id}, this)" class="check-cliente rounded bg-neutral-800 border-neutral-700 text-yellow-400 focus:ring-0 w-4 h-4 cursor-pointer">
+                </td>
                 <td class="p-3 font-semibold text-white">${escapeAttr(c.nome)}</td>
                 <td class="p-3">${escapeAttr(c.cpf || '-')}</td>
                 <td class="p-3">${escapeAttr(c.telefone || c.whatsapp || '-')}</td>
@@ -3651,6 +3751,8 @@ function renderizarKanban() {
             `;
             tbody.appendChild(tr);
         });
+
+        atualizarBotaoExcluirMassa('cliente');
     }
 
     function abrirModalCliente() {
@@ -4363,7 +4465,157 @@ function renderizarKanban() {
         renderizarPedidos();
     }
 
-    function renderizarPedidos() {
+        function alternarSelecaoTodosPedidos(checkboxGeral) {
+            const checkboxes = document.querySelectorAll('.check-pedido');
+            pedidosSelecionados = [];
+            checkboxes.forEach(cb => {
+                cb.checked = checkboxGeral.checked;
+                if (checkboxGeral.checked) pedidosSelecionados.push(parseInt(cb.value));
+            });
+            atualizarBotaoExcluirMassa('pedido');
+        }
+
+        function alternarSelecaoPedido(id, cb) {
+            if (cb.checked) {
+                if (!pedidosSelecionados.includes(id)) pedidosSelecionados.push(id);
+            } else {
+                pedidosSelecionados = pedidosSelecionados.filter(i => i !== id);
+            }
+            atualizarBotaoExcluirMassa('pedido');
+        }
+
+        async function excluirPedidosEmMassa() {
+            if (pedidosSelecionados.length === 0) return;
+            const confirmou = await confirmarAcao(
+                "Excluir Pedidos Selecionados",
+                `Deseja realmente apagar os ${pedidosSelecionados.length} pedidos selecionados? Os valores serão removidos do caixa.`,
+                "Sim, Apagar Todos", "fa-trash-can", "rose"
+            );
+            if (confirmou) {
+                const { error } = await supabaseClient.from('pedidos').delete().in('id', pedidosSelecionados);
+                if (!error) {
+                    pedidosSelecionados = [];
+                    await carregarDados();
+                    mostrarToast("Pedidos excluídos em massa com sucesso!");
+                } else {
+                    mostrarToast(`Erro ao excluir: ${error.message}`, "erro");
+                }
+            }
+        }
+
+        // A função renderizarPedidos vem logo abaixo, limpinha:
+       function renderizarPedidos() {
+        const tbody = document.getElementById('tabela-pedidos-body');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        const busca = document.getElementById('input-pesquisar-pedido').value.toLowerCase();
+        const dataEspec = document.getElementById('filtro-data-especifica').value;
+
+        let countNovos = 0;
+        let countProducao = 0;
+        let countTotal = appData.pedidos.length;
+
+        const getTime = (p) => {
+            if (p.created_at) {
+                const t = new Date(p.created_at).getTime();
+                if (!isNaN(t)) return t;
+            }
+            if (p.data) {
+                const t = new Date(p.data + 'T00:00:00').getTime();
+                if (!isNaN(t)) return t;
+            }
+            return 0;
+        };
+
+        const pedidosOrdenados = [...appData.pedidos].sort((a, b) => {
+            const timeDiff = getTime(b) - getTime(a);
+            if (timeDiff !== 0) return timeDiff;
+            return (b._originalIndex || 0) - (a._originalIndex || 0);
+        });
+
+        pedidosOrdenados.forEach(p => {
+            if (p.status === 'AGUARDANDO') countNovos++;
+            if (p.status === 'Em Produção') countProducao++;
+
+            if (appData.abaPedidoFiltro === 'hoje' && p.data !== appData.dataAtual) return;
+            if (appData.abaPedidoFiltro === 'prontos' && !(p.status === 'Pronto p/ Retirada' || p.status === 'Concluído')) return;
+            if (dataEspec && p.data !== dataEspec) return;
+
+            const descProdutos = p.itens ? p.itens.map(i => `${i.servico || 'Item'} (${i.qtd}x)`).join(', ') : 'Serviço';
+            const resp = p.responsavel || 'N/I';
+            const codExt = p.codigoExterno || '';
+            const stPag = p.statusPagamento || 'Pendente';
+
+            let badgePag = 'bg-rose-500/20 text-rose-400 border-rose-500/40';
+            if (stPag === 'Pago 100%') badgePag = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40';
+            else if (stPag === 'Sinal 50%' || stPag === 'Sinal / Parcial') badgePag = 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40';
+
+            const buscaTexto = `${p.id} ${codExt} ${p.clienteNome} ${descProdutos} ${resp} ${p.status} ${stPag}`.toLowerCase();
+            if (busca && !buscaTexto.includes(busca)) return;
+
+            const isChecked = pedidosSelecionados.includes(p.id);
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="p-3 text-center">
+                    <input type="checkbox" value="${p.id}" ${isChecked ? 'checked' : ''} onchange="alternarSelecaoPedido(${p.id}, this)" class="check-pedido rounded bg-neutral-800 border-neutral-700 text-yellow-400 focus:ring-0 w-4 h-4 cursor-pointer">
+                </td>
+                <td class="p-3 font-bold text-white">
+                    #${p.id}
+                    ${codExt ? `<br><span class="text-[10px] bg-yellow-400/10 text-yellow-400 border border-yellow-400/30 px-1.5 py-0.5 rounded font-mono">📦 Ext: ${escapeAttr(codExt)}</span>` : ''}
+                    <br><span class="text-xs text-neutral-500 font-normal">${escapeAttr(p.data)}</span>
+                </td>
+                <td class="p-3 font-semibold text-yellow-400">${escapeAttr(p.clienteNome)}</td>
+                <td class="p-3 text-xs">${escapeAttr(descProdutos)}</td>
+                <td class="p-3 text-xs font-bold text-neutral-300"><i class="fa-solid fa-user-gear text-[10px] text-yellow-400"></i> ${escapeAttr(resp)}</td>
+                <td class="p-3 font-black text-white">R$ ${parseFloat(p.total||0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                <td class="p-3 font-bold text-rose-400">R$ ${parseFloat(p.despesa||0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                <td class="p-3 text-xs text-neutral-400">${escapeAttr(p.formaPagamento)}</td>
+                <td class="p-3">
+                    <select onchange="alterarStatusPedido(${p.id}, this.value)" class="bg-neutral-800 text-xs text-white border border-neutral-700 rounded-lg p-1 font-bold focus:outline-none">
+                        <option value="AGUARDANDO" ${p.status==='AGUARDANDO'?'selected':''}>AGUARDANDO</option>
+                        <option value="Criação de Arte" ${p.status==='Criação de Arte'?'selected':''}>🎨 Criação de Arte</option>
+                        <option value="Em Produção" ${p.status==='Em Produção'?'selected':''}>Em Produção</option>
+                        <option value="Pronto p/ Retirada" ${p.status==='Pronto p/ Retirada'?'selected':''}>Pronto p/ Retirada</option>
+                        <option value="Concluído" ${p.status==='Concluído'?'selected':''}>Concluído</option>
+                        <option value="Entregue" ${p.status==='Entregue'?'selected':''}>Entregue</option>
+                        <option value="Cancelado" ${p.status==='Cancelado'?'selected':''}>Cancelado</option>
+                    </select>
+                </td>
+                <td class="p-3">
+                    <select onchange="alterarStatusPagamentoPedido(${p.id}, this.value)" class="bg-neutral-800 text-xs border border-neutral-700 rounded-lg p-1 font-bold focus:outline-none ${badgePag}">
+                        <option value="Pendente" ${stPag==='Pendente'?'selected':''}>🔴 Pendente</option>
+                        <option value="Sinal 50%" ${stPag==='Sinal 50%'||stPag==='Sinal / Parcial'?'selected':''}>🟡 Sinal / Parcial</option>
+                        <option value="Pago 100%" ${stPag==='Pago 100%'?'selected':''}>🟢 Pago 100%</option>
+                    </select>
+                </td>
+                <td class="p-3 text-right space-x-1">
+                    ${stPag !== 'Pago 100%' ? `
+                        <button onclick="quitarSaldoRapido(${p.id})" class="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white p-2 rounded-lg text-xs font-bold border border-emerald-500/30" title="💵 Quitar Saldo em 1 Clique">
+                            <i class="fa-solid fa-dollar-sign"></i>
+                        </button>
+                    ` : ''}
+                    <button onclick="abrirModalComprovante(${p.id})" class="bg-yellow-400/20 hover:bg-yellow-400 text-yellow-400 hover:text-black p-2 rounded-lg text-xs font-bold border border-yellow-400/30" title="Gerar Comprovante / Recibo">
+                        <i class="fa-solid fa-file-invoice"></i>
+                    </button>
+                    <button onclick="editarPedido(${p.id})" class="bg-neutral-800 hover:bg-neutral-700 text-neutral-200 p-2 rounded-lg text-xs" title="Editar Pedido">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button onclick="excluirPedido(${p.id})" class="bg-rose-950/50 hover:bg-rose-900 text-rose-400 p-2 rounded-lg text-xs" title="Excluir Pedido">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('kpi-pedidos-novos').innerText = countNovos;
+        document.getElementById('kpi-pedidos-producao').innerText = countProducao;
+        document.getElementById('kpi-pedidos-total').innerText = countTotal;
+
+        atualizarBotaoExcluirMassa('pedido');
+    }
         const tbody = document.getElementById('tabela-pedidos-body');
         if (!tbody) return;
         tbody.innerHTML = '';
