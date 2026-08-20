@@ -208,6 +208,12 @@
                     </span>
                     <span id="badge-estoque-alerta" class="bg-rose-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full hidden">0</span>
                 </button>
+                <button onclick="navegar('cobranca')" id="btn-cobranca" class="nav-btn flex items-center justify-between w-full px-4 py-3 rounded-xl font-semibold text-sm transition-all text-neutral-400 hover:text-white hover:bg-neutral-800">
+    <span class="flex items-center gap-3">
+        <i class="fa-solid fa-hand-holding-dollar text-base text-yellow-400"></i> Cobranças & Crediário
+    </span>
+    <span id="badge-cobranca-alerta" class="bg-rose-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full hidden">0</span>
+</button>
 <button onclick="navegar('historico')" id="btn-historico" class="nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl font-semibold text-sm transition-all text-neutral-400 hover:text-white hover:bg-neutral-800">
     <i class="fa-solid fa-clock-rotate-left text-base"></i> Histórico
 </button>
@@ -905,6 +911,115 @@
             </div>
         </section>
 
+        <!-- ================= SEÇÃO: COBRANÇAS & CREDIÁRIO ================= -->
+        <section id="secao-cobranca" class="secao-conteudo hidden space-y-6">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-neutral-900 p-6 rounded-2xl border border-neutral-800 shadow-2xl">
+                <div>
+                    <h2 class="text-2xl font-black text-yellow-400 flex items-center gap-2">
+                        <i class="fa-solid fa-hand-holding-dollar text-yellow-400"></i> Gestão de Cobranças & Crediário
+                    </h2>
+                    <p class="text-neutral-400 text-sm mt-1">Acompanhe vendas parceladas (até 10x), controle vencimentos e envie cobranças via WhatsApp.</p>
+                </div>
+            </div>
+
+            <!-- CARDS DE MÉTRICAS DE COBRANÇA -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-neutral-900 p-5 rounded-2xl border border-neutral-800 hover:border-yellow-400/50 transition-all">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-bold text-yellow-400 uppercase tracking-wider">Total a Receber</p>
+                            <h3 class="text-2xl font-black text-white mt-1" id="cob-kpi-total-receber">R$ 0,00</h3>
+                        </div>
+                        <div class="p-3 bg-neutral-800 text-yellow-400 border border-neutral-700 rounded-xl">
+                            <i class="fa-solid fa-wallet text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-neutral-400 mt-3">Soma de todas as parcelas futuras</p>
+                </div>
+
+                <div class="bg-neutral-900 p-5 rounded-2xl border border-neutral-800 hover:border-rose-500/50 transition-all">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-bold text-rose-400 uppercase tracking-wider">Atrasados (Inadimplência)</p>
+                            <h3 class="text-2xl font-black text-rose-400 mt-1" id="cob-kpi-atrasados">R$ 0,00</h3>
+                        </div>
+                        <div class="p-3 bg-rose-950/40 text-rose-400 border border-rose-800/50 rounded-xl">
+                            <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-rose-400/80 font-medium mt-3" id="cob-txt-atrasados-qtd">0 parcelas vencidas</p>
+                </div>
+
+                <div class="bg-neutral-900 p-5 rounded-2xl border border-neutral-800 hover:border-amber-400/50 transition-all">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-bold text-amber-400 uppercase tracking-wider">Vencendo Hoje</p>
+                            <h3 class="text-2xl font-black text-amber-300 mt-1" id="cob-kpi-vence-hoje">R$ 0,00</h3>
+                        </div>
+                        <div class="p-3 bg-neutral-800 text-amber-400 border border-neutral-700 rounded-xl">
+                            <i class="fa-solid fa-calendar-day text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-neutral-400 mt-3" id="cob-txt-vence-hoje-qtd">0 parcelas para hoje</p>
+                </div>
+
+                <div class="bg-neutral-900 p-5 rounded-2xl border border-neutral-800 hover:border-emerald-500/50 transition-all">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Recebido Este Mês</p>
+                            <h3 class="text-2xl font-black text-emerald-400 mt-1" id="cob-kpi-recebido-mes">R$ 0,00</h3>
+                        </div>
+                        <div class="p-3 bg-emerald-950/40 text-emerald-400 border border-emerald-800/50 rounded-xl">
+                            <i class="fa-solid fa-circle-check text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-emerald-400/80 font-medium mt-3">Parcelas pagas no mês ativo</p>
+                </div>
+            </div>
+
+          <!-- FILTROS E BUSCA -->
+            <div class="bg-neutral-900 p-4 rounded-2xl border border-neutral-800 flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                    <button onclick="filtrarCobrancaAba('atrasados')" id="btn-cob-atrasados" class="px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 text-white shadow-md transition-all flex items-center gap-1.5">
+                        🚨 Atrasados (<span id="count-aba-atrasados">0</span>)
+                    </button>
+                    <button onclick="filtrarCobrancaAba('hoje')" id="btn-cob-hoje" class="px-4 py-2 rounded-xl text-xs font-bold bg-neutral-800 text-neutral-300 hover:text-white transition-all">
+                        📅 Vencendo Hoje (<span id="count-aba-hoje">0</span>)
+                    </button>
+                    <button onclick="filtrarCobrancaAba('proximos')" id="btn-cob-proximos" class="px-4 py-2 rounded-xl text-xs font-bold bg-neutral-800 text-neutral-300 hover:text-white transition-all">
+                        ⏳ Próximos 30 dias
+                    </button>
+                    <button onclick="filtrarCobrancaAba('pagos')" id="btn-cob-pagos" class="px-4 py-2 rounded-xl text-xs font-bold bg-neutral-800 text-neutral-300 hover:text-white transition-all">
+                        ✅ Pagos
+                    </button>
+                    <button onclick="filtrarCobrancaAba('todas')" id="btn-cob-todas" class="px-4 py-2 rounded-xl text-xs font-bold bg-neutral-800 text-neutral-300 hover:text-white transition-all">
+                        Todas as Parcelas
+                    </button>
+                </div>
+
+                <div class="w-full md:w-80 bg-neutral-800 px-3 py-2 rounded-xl border border-neutral-700 flex items-center gap-2">
+                    <i class="fa-solid fa-magnifying-glass text-yellow-400"></i>
+                    <input type="text" id="input-pesquisar-cobranca" onkeyup="renderizarParcelasCobranca()" placeholder="Pesquisar por cliente, telefone, pedido..." class="bg-transparent text-white focus:outline-none text-xs w-full placeholder-neutral-500">
+                </div>
+            </div>
+
+            <!-- TABELA DE PARCELAS -->
+            <div class="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 overflow-x-auto">
+                <table class="w-full text-left text-sm text-neutral-300">
+                    <thead class="text-xs uppercase bg-neutral-800 text-yellow-400 border-b border-neutral-700">
+                        <tr>
+                            <th class="p-3">Cliente</th>
+                            <th class="p-3">Pedido / Parcela</th>
+                            <th class="p-3">Vencimento</th>
+                            <th class="p-3">Valor Parcela</th>
+                            <th class="p-3">Status</th>
+                            <th class="p-3 text-right">Ações de Cobrança</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-neutral-800" id="tabela-cobrancas-body"></tbody>
+                </table>
+            </div>
+        </section>
         <!-- ================= SEÇÃO: HISTÓRICO ================= -->
         <section id="secao-historico" class="secao-conteudo hidden space-y-6">
             <div class="bg-neutral-900 p-6 rounded-2xl border border-neutral-800">
@@ -1994,6 +2109,7 @@
                             <option value="Cartão de Crédito">Cartão de Crédito</option>
                             <option value="Cartão de Débito">Cartão de Débito</option>
                             <option value="Parte Dinheiro / Parte Pix">Parte Dinheiro / Parte Pix</option>
+                            <option value="Crediário Próprio">💳 Crediário Próprio / Fiado</option>
                         </select>
                     </div>
 
@@ -2024,7 +2140,31 @@
                         <input type="number" step="0.01" id="ped-valor-pago-custom" placeholder="0.00" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-2 text-yellow-300 font-bold focus:outline-none text-xs">
                     </div>
                 </div>
-
+<!-- CAMPOS DE PARCELAMENTO NO CREDIÁRIO -->
+                    <div id="container-campos-crediario" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-neutral-950 border border-yellow-400/40 rounded-xl col-span-full">
+                        <div>
+                            <label class="block text-yellow-400 text-xs font-bold uppercase mb-1">Nº de Parcelas no Crediário</label>
+                            <select id="ped-num-parcelas-crediario" onchange="calcularPreviewCrediarioPedido()" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-2 text-white font-bold text-xs focus:outline-none focus:border-yellow-400">
+                                <option value="1">1x (À vista na promissória)</option>
+                                <option value="2">2x parcelado</option>
+                                <option value="3">3x parcelado</option>
+                                <option value="4">4x parcelado</option>
+                                <option value="5">5x parcelado</option>
+                                <option value="6">6x parcelado</option>
+                                <option value="7">7x parcelado</option>
+                                <option value="8">8x parcelado</option>
+                                <option value="9">9x parcelado</option>
+                                <option value="10">10x parcelado</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-yellow-400 text-xs font-bold uppercase mb-1">Vencimento da 1ª Parcela</label>
+                            <input type="date" id="ped-vencimento-primeira-parcela" onchange="calcularPreviewCrediarioPedido()" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-2 text-white font-bold text-xs focus:outline-none focus:border-yellow-400">
+                        </div>
+                        <div class="col-span-full text-xs font-bold text-emerald-400 bg-neutral-900 p-2 rounded-lg border border-neutral-800" id="txt-preview-crediario-pedido">
+                            Resumo: 1x de R$ 0,00
+                        </div>
+                    </div>
                 <div id="campo-pagamento-misto" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 p-3 bg-neutral-800/50 rounded-xl border border-neutral-700">
                     <div>
                         <label class="block text-xs text-yellow-400 font-semibold mb-1">Valor em Dinheiro (R$)</label>
@@ -2290,6 +2430,118 @@
         </div>
     </div>
 
+    <!-- MODAL DAR BAIXA EM PARCELA / SALDO DE COBRANÇA -->
+    <div id="modal-baixa-parcela" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[970] hidden flex items-center justify-center p-4">
+        <div class="bg-neutral-900 border border-neutral-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-neutral-800 pb-3">
+                <h3 class="text-xl font-bold text-yellow-400 flex items-center gap-2">
+                    <i class="fa-solid fa-dollar-sign"></i> Confirmar Recebimento
+                </h3>
+                <button onclick="fecharModalBaixaParcela()" class="text-neutral-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <form id="form-baixa-parcela" onsubmit="confirmarBaixaParcelaSubmit(event)" class="space-y-3 text-sm">
+                <input type="hidden" id="baixa-parcela-id">
+                <input type="hidden" id="baixa-pedido-id">
+                <input type="hidden" id="baixa-tipo-registro">
+
+                <div class="bg-neutral-950 p-3.5 rounded-xl border border-neutral-800 space-y-1">
+                    <span class="text-[10px] text-neutral-400 font-bold uppercase block" id="baixa-cliente-nome">Cliente: --</span>
+                    <strong class="text-white text-base block" id="baixa-descricao">Parcela 1/5 - Pedido #000</strong>
+                    <span class="text-xs text-rose-400 font-bold block" id="baixa-valor-destaque">Valor: R$ 0,00</span>
+                </div>
+
+                <div>
+                    <label class="block text-neutral-400 text-xs font-semibold mb-1">Data do Pagamento</label>
+                    <input type="date" id="baixa-data-pagamento" required class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-yellow-400 text-xs font-bold">
+                </div>
+
+                <div>
+                    <label class="block text-yellow-400 text-xs font-bold uppercase mb-1">Forma de Pagamento Recebida</label>
+                    <select id="baixa-forma-pagamento" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-2 text-white text-xs font-bold focus:outline-none focus:border-yellow-400">
+                        <option value="Pix">Pix</option>
+                        <option value="Dinheiro">Dinheiro</option>
+                        <option value="Cartão de Crédito">Cartão de Crédito</option>
+                        <option value="Cartão de Débito">Cartão de Débito</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-neutral-400 text-xs font-semibold mb-1">Valor Recebido (R$)</label>
+                    <input type="number" step="0.01" id="baixa-valor-pago" required class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-2 text-emerald-400 font-black text-base focus:outline-none focus:border-emerald-400">
+                </div>
+
+                <div class="flex justify-end gap-3 pt-3 border-t border-neutral-800">
+                    <button type="button" onclick="fecharModalBaixaParcela()" class="px-4 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 rounded-xl font-medium text-xs">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-950/40">
+                        <i class="fa-solid fa-check"></i> Registrar Recebimento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL CARNÊ / EXTRATO DE COBRANÇAS DO CLIENTE -->
+    <div id="modal-carne-cliente" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[960] hidden flex items-center justify-center p-4">
+        <div class="bg-neutral-900 border border-neutral-800 rounded-2xl max-w-3xl w-full p-6 space-y-5 shadow-2xl overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center border-b border-neutral-800 pb-3 no-print">
+                <div>
+                    <h3 class="text-xl font-black text-yellow-400 flex items-center gap-2" id="carne-cliente-nome">
+                        <i class="fa-solid fa-receipt text-yellow-400"></i> Extrato de Crediário & Cobranças
+                    </h3>
+                    <p class="text-xs text-neutral-400" id="carne-cliente-contato">Telefone / Whats: --</p>
+                </div>
+                <button onclick="fecharModalCarneCliente()" class="text-neutral-400 hover:text-white text-lg no-print"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <!-- RESUMO DO CLIENTE -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-neutral-950 p-4 rounded-xl border border-neutral-800 text-xs">
+                <div>
+                    <span class="text-[10px] text-neutral-400 uppercase font-bold block">Total Devido Pendente</span>
+                    <strong class="text-rose-400 font-black text-base" id="carne-resumo-pendente">R$ 0,00</strong>
+                </div>
+                <div>
+                    <span class="text-[10px] text-neutral-400 uppercase font-bold block">Parcelas em Atraso</span>
+                    <strong class="text-rose-500 font-bold text-sm" id="carne-resumo-atrasadas">0 parcela(s)</strong>
+                </div>
+                <div>
+                    <span class="text-[10px] text-neutral-400 uppercase font-bold block">Total Já Pago no Crediário</span>
+                    <strong class="text-emerald-400 font-bold text-sm" id="carne-resumo-pago">R$ 0,00</strong>
+                </div>
+            </div>
+
+            <!-- TABELA DE PARCELAS DO CLIENTE -->
+            <div class="space-y-2">
+                <span class="text-xs font-bold text-yellow-400 uppercase tracking-wide block">Cronograma das Parcelas & Saldo de Pedidos</span>
+                <div class="overflow-x-auto border border-neutral-800 rounded-xl bg-neutral-950">
+                    <table class="w-full text-left text-xs text-neutral-300">
+                        <thead class="bg-neutral-800 text-yellow-400 uppercase text-[10px]">
+                            <tr>
+                                <th class="p-2.5">Pedido / Parcela</th>
+                                <th class="p-2.5">Vencimento</th>
+                                <th class="p-2.5">Valor</th>
+                                <th class="p-2.5">Status</th>
+                                <th class="p-2.5 text-right no-print">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-carne-cliente-body" class="divide-y divide-neutral-800"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap justify-end gap-2.5 pt-3 border-t border-neutral-800 no-print">
+                <button type="button" onclick="fecharModalCarneCliente()" class="px-4 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 rounded-xl font-medium text-xs">
+                    Fechar
+                </button>
+                <button type="button" onclick="window.print()" class="px-4 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-yellow-400 border border-neutral-700 rounded-xl font-bold text-xs flex items-center gap-1.5">
+                    <i class="fa-solid fa-print"></i> Imprimir Carnê
+                </button>
+                <button type="button" id="btn-whats-extrato-completo" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-emerald-950/40">
+                    <i class="fa-brands fa-whatsapp text-base"></i> Enviar Extrato no Whats
+                </button>
+            </div>
+        </div>
+    </div>
     <!-- TOAST DE NOTIFICAÇÃO -->
     <div id="toast" class="fixed bottom-5 right-5 bg-neutral-900 text-white border border-yellow-400 px-5 py-3 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-3 z-[1001]">
         <i id="toast-icon" class="fa-solid fa-circle-check text-yellow-400 text-lg"></i>
@@ -2492,36 +2744,38 @@
                 .replace(/>/g, '&gt;');
         }
 
-        async function carregarDados() {
-            try {
-              const [resCli, resPed, resDesp, resFech, resEst, resOrc, resProd] = await Promise.all([
+       async function carregarDados() {
+    try {
+        const [resCli, resPed, resDesp, resFech, resEst, resOrc, resProd, resPar] = await Promise.all([
             supabaseClient.from('clientes').select('*'),
             supabaseClient.from('pedidos').select('*'),
             supabaseClient.from('despesas').select('*').order('id', { ascending: false }),
             supabaseClient.from('fechamentos').select('*').order('id', { ascending: false }),
             supabaseClient.from('estoque').select('*').order('id', { ascending: false }).limit(1000000),
             supabaseClient.from('orcamentos').select('*').order('id', { ascending: false }),
-            supabaseClient.from('produtos').select('*').order('id', { ascending: false })
+            supabaseClient.from('produtos').select('*').order('id', { ascending: false }),
+            supabaseClient.from('parcelas').select('*').order('vencimento', { ascending: true })
         ]);
 
-                if (resCli.data) appData.clientes = resCli.data;
-                if (resPed.data) {
-                    resPed.data.forEach((p, idx) => p._originalIndex = idx);
-                    appData.pedidos = resPed.data;
-                }
-                if (resDesp.data) appData.despesasOutras = resDesp.data;
-                if (resFech.data) appData.historicoFechamentos = resFech.data;
-                if (resEst.data) appData.estoque = resEst.data;
-                if (resProd && resProd.data) appData.produtosLoja = resProd.data;
-                if (resOrc.data) appData.orcamentos = resOrc.data;
-
-            } catch(e) {
-                console.error("Erro ao carregar dados do Supabase:", e);
-            }
-
-            appData.dataAtual = new Date().toISOString().split('T')[0];
-            atualizarInterfaceCompleta();
+        if (resCli.data) appData.clientes = resCli.data;
+        if (resPed.data) {
+            resPed.data.forEach((p, idx) => p._originalIndex = idx);
+            appData.pedidos = resPed.data;
         }
+        if (resDesp.data) appData.despesasOutras = resDesp.data;
+        if (resFech.data) appData.historicoFechamentos = resFech.data;
+        if (resEst.data) appData.estoque = resEst.data;
+        if (resProd && resProd.data) appData.produtosLoja = resProd.data;
+        if (resOrc.data) appData.orcamentos = resOrc.data;
+        if (resPar && resPar.data) appData.parcelas = resPar.data;
+
+    } catch(e) {
+        console.error("Erro ao carregar dados do Supabase:", e);
+    }
+
+    appData.dataAtual = new Date().toISOString().split('T')[0];
+    atualizarInterfaceCompleta();
+}
 
         function iniciarInscricaoRealtime() {
             if (canalRealtime) {
@@ -4341,15 +4595,45 @@ function renderizarEstoque() {
         txtLucro.className = lucro >= 0 ? "text-xl font-black text-emerald-400" : "text-xl font-black text-rose-500";
     }
 
-    function verificarFormaPagamento() {
-        const val = document.getElementById('ped-forma-pagamento').value;
-        const campoMisto = document.getElementById('campo-pagamento-misto');
-        if (val === 'Parte Dinheiro / Parte Pix') {
-            campoMisto.classList.remove('hidden');
+   function verificarFormaPagamento() {
+    const val = document.getElementById('ped-forma-pagamento').value;
+    const campoMisto = document.getElementById('campo-pagamento-misto');
+    const campoCrediario = document.getElementById('container-campos-crediario');
+
+    if (campoMisto) {
+        if (val === 'Parte Dinheiro / Parte Pix') campoMisto.classList.remove('hidden');
+        else campoMisto.classList.add('hidden');
+    }
+
+    if (campoCrediario) {
+        if (val === 'Crediário Próprio') {
+            campoCrediario.classList.remove('hidden');
+            document.getElementById('ped-vencimento-primeira-parcela').value = appData.dataAtual;
+            calcularPreviewCrediarioPedido();
         } else {
-            campoMisto.classList.add('hidden');
+            campoCrediario.classList.add('hidden');
         }
     }
+}
+
+function calcularPreviewCrediarioPedido() {
+    const total = parseFloat(document.getElementById('ped-total').value || 0);
+    const stPag = document.getElementById('ped-status-pagamento').value;
+    let valorPago = 0;
+
+    if (stPag === 'Pago 100%') valorPago = total;
+    else if (stPag === 'Sinal 50%') {
+        const customVal = parseFloat(document.getElementById('ped-valor-pago-custom')?.value);
+        valorPago = !isNaN(customVal) ? customVal : (total * 0.5);
+    }
+
+    const saldoAFinanciar = Math.max(0, total - valorPago);
+    const numParc = parseInt(document.getElementById('ped-num-parcelas-crediario').value) || 1;
+    const valParc = saldoAFinanciar / numParc;
+
+    document.getElementById('txt-preview-crediario-pedido').innerText = 
+        `Financiamento Crediário: R$ ${saldoAFinanciar.toFixed(2)} divididos em ${numParc}x de R$ ${valParc.toFixed(2)}/mês`;
+}
 
     async function salvarPedido(e, criarOutro = false) {
         if (e && e.preventDefault) e.preventDefault();
@@ -4475,7 +4759,34 @@ function renderizarEstoque() {
             if (!pedId) {
                 await abaterEstoquePorPedido(pedData.itens);
             }
+// Gera as parcelas no crediário no Supabase
+            if (formaPag === 'Crediário Próprio' && !pedId) {
+                const numParc = parseInt(document.getElementById('ped-num-parcelas-crediario').value) || 1;
+                const vencInicial = document.getElementById('ped-vencimento-primeira-parcela').value || appData.dataAtual;
+                const saldoFinanciado = Math.max(0, total - valorPagoCalc);
 
+                if (saldoFinanciado > 0) {
+                    const valParc = parseFloat((saldoFinanciado / numParc).toFixed(2));
+                    let novasParcelas = [];
+
+                    for (let i = 1; i <= numParc; i++) {
+                        novasParcelas.push({
+                            id: Math.floor(100000000 + Math.random() * 900000000) + i,
+                            pedido_id: idSeguro,
+                            cliente_id: clienteId,
+                            cliente_nome: nomeClienteFinal,
+                            cliente_whatsapp: cli ? (cli.whatsapp || cli.telefone || '') : '',
+                            numero_parcela: i,
+                            total_parcelas: numParc,
+                            valor: valParc,
+                            vencimento: adicionarMesesISO(vencInicial, i - 1),
+                            status: 'Pendente'
+                        });
+                    }
+
+                    await supabaseClient.from('parcelas').insert(novasParcelas);
+                }
+            }
             mostrarToast(pedId ? "Pedido alterado e atualizado!" : "Novo pedido salvo e estoque atualizado!");
             await carregarDados();
             if (criarOutro) {
@@ -7034,6 +7345,459 @@ function renderizarProdutosLoja() {
             mostrarToast(`Erro ao importar: ${error.message}`, "erro");
         }
     }
+        // =================================================================
+        // ================= MÓDULO DE COBRANÇAS & CREDIÁRIO ===============
+        // =================================================================
+
+        appData.parcelas = [];
+        appData.abaCobrancaFiltro = 'atrasados';
+
+        // 1. Unifica todos os débitos (Saldos de Pedidos de 50% + Parcelas do Crediário)
+        function obterListaGeralCobrancas() {
+            const hojeStr = appData.dataAtual;
+            let lista = [];
+
+            // A) Adiciona parcelas do Crediário (Tabela 'parcelas')
+            if (appData.parcelas && Array.isArray(appData.parcelas)) {
+                appData.parcelas.forEach(p => {
+                    const venc = p.vencimento || hojeStr;
+                    let st = p.status || 'Pendente';
+                    if (st !== 'Pago' && venc < hojeStr) {
+                        st = 'Atrasado';
+                    }
+
+                    lista.push({
+                        id: p.id,
+                        tipoRegistro: 'parcela',
+                        pedidoId: p.pedido_id,
+                        clienteId: p.cliente_id,
+                        clienteNome: p.cliente_nome || 'Cliente',
+                        whatsapp: p.cliente_whatsapp || '',
+                        descricao: `Parcela ${p.numero_parcela}/${p.total_parcelas} (Pedido #${p.pedido_id})`,
+                        vencimento: venc,
+                        valor: parseFloat(p.valor || 0),
+                        status: st,
+                        dataPagamento: p.data_pagamento || null
+                    });
+                });
+            }
+
+            // B) Adiciona saldos pendentes de Pedidos Padrão (ex: 50% de sinal / a pagar na entrega)
+            appData.pedidos.forEach(ped => {
+                if (ped.status !== 'Cancelado') {
+                    const totalP = parseFloat(ped.total || 0);
+                    const stPag = ped.statusPagamento || 'Pendente';
+
+                    // Se não estiver 100% quitado e tiver parcelas não geradas separadas
+                    if (stPag !== 'Pago 100%') {
+                        const jaPago = parseFloat(ped.valorPago !== undefined ? ped.valorPago : (stPag === 'Sinal 50%' ? totalP * 0.5 : 0));
+                        const saldoPendente = Math.max(0, totalP - jaPago);
+
+                        // Só adiciona se não tiver parcelas de crediário já criadas para este pedido
+                        const temParcelasCrediario = appData.parcelas && appData.parcelas.some(par => par.pedido_id == ped.id);
+
+                        if (saldoPendente > 0 && !temParcelasCrediario) {
+                            const venc = ped.dataEntrega || ped.data || hojeStr;
+                            let st = 'Pendente';
+                            if (venc < hojeStr) {
+                                st = 'Atrasado';
+                            }
+
+                            const cli = appData.clientes.find(c => c.id == ped.clienteId);
+                            const telWhats = cli ? (cli.whatsapp || cli.telefone || '') : '';
+                            const descItens = ped.itens ? ped.itens.map(i => i.servico).join(', ') : 'Serviços';
+
+                            lista.push({
+                                id: ped.id,
+                                tipoRegistro: 'saldo_pedido',
+                                pedidoId: ped.id,
+                                clienteId: ped.clienteId,
+                                clienteNome: ped.clienteNome || 'Cliente',
+                                whatsapp: telWhats,
+                                descricao: `Saldo Final Pedido #${ped.id} (${descItens})`,
+                                vencimento: venc,
+                                valor: saldoPendente,
+                                status: st,
+                                dataPagamento: null
+                            });
+                        }
+                    }
+                }
+            });
+
+            // Ordena por vencimento (mais antigos/atrasados primeiro)
+            lista.sort((a, b) => (a.vencimento || '').localeCompare(b.vencimento || ''));
+            return lista;
+        }
+
+        // 2. Renderiza a Tela de Cobranças e os KPIs
+        function renderizarParcelasCobranca() {
+            const tbody = document.getElementById('tabela-cobrancas-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const hojeStr = appData.dataAtual;
+            const busca = (document.getElementById('input-pesquisar-cobranca')?.value || '').toLowerCase();
+            const todasCobrancas = obterListaGeralCobrancas();
+
+            let totalAReceber = 0;
+            let totalAtrasados = 0;
+            let qtdAtrasados = 0;
+            let totalVenceHoje = 0;
+            let qtdVenceHoje = 0;
+            let totalRecebidoMes = 0;
+
+            const mesAnoAtual = hojeStr.substring(0, 7);
+
+            todasCobrancas.forEach(c => {
+                if (c.status === 'Pago') {
+                    if (c.dataPagamento && c.dataPagamento.startsWith(mesAnoAtual)) {
+                        totalRecebidoMes += c.valor;
+                    }
+                } else {
+                    totalAReceber += c.valor;
+
+                    if (c.vencimento < hojeStr) {
+                        totalAtrasados += c.valor;
+                        qtdAtrasados++;
+                    } else if (c.vencimento === hojeStr) {
+                        totalVenceHoje += c.valor;
+                        qtdVenceHoje++;
+                    }
+                }
+            });
+
+            // Atualiza os Cards de topo
+            document.getElementById('cob-kpi-total-receber').innerText = `R$ ${totalAReceber.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('cob-kpi-atrasados').innerText = `R$ ${totalAtrasados.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('cob-txt-atrasados-qtd').innerText = `${qtdAtrasados} pendência(s) em atraso`;
+            
+            document.getElementById('cob-kpi-vence-hoje').innerText = `R$ ${totalVenceHoje.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('cob-txt-vence-hoje-qtd').innerText = `${qtdVenceHoje} vencimento(s) hoje`;
+
+            document.getElementById('cob-kpi-recebido-mes').innerText = `R$ ${totalRecebidoMes.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+
+            // Atualiza badges
+            document.getElementById('count-aba-atrasados').innerText = qtdAtrasados;
+            document.getElementById('count-aba-hoje').innerText = qtdVenceHoje;
+
+            const badgeMenu = document.getElementById('badge-cobranca-alerta');
+            if (badgeMenu) {
+                if (qtdAtrasados > 0) {
+                    badgeMenu.innerText = qtdAtrasados;
+                    badgeMenu.classList.remove('hidden');
+                } else {
+                    badgeMenu.classList.add('hidden');
+                }
+            }
+
+            // Filtragem da tabela de acordo com a aba selecionada
+            const aba = appData.abaCobrancaFiltro;
+            const filtradas = todasCobrancas.filter(c => {
+                const textoBusca = `${c.clienteNome} ${c.descricao} ${c.whatsapp} #${c.pedidoId}`.toLowerCase();
+                if (busca && !textoBusca.includes(busca)) return false;
+
+                if (aba === 'atrasados') return c.status !== 'Pago' && c.vencimento < hojeStr;
+                if (aba === 'hoje') return c.status !== 'Pago' && c.vencimento === hojeStr;
+                if (aba === 'proximos') return c.status !== 'Pago' && c.vencimento > hojeStr;
+                if (aba === 'pagos') return c.status === 'Pago';
+                return true; // 'todas'
+            });
+
+            if (filtradas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-neutral-500 text-xs italic">Nenhuma cobrança ou vencimento encontrado nesta categoria.</td></tr>`;
+                return;
+            }
+
+            filtradas.forEach(c => {
+                const isAtrasado = c.status === 'Atrasado' || (c.status !== 'Pago' && c.vencimento < hojeStr);
+                const isPago = c.status === 'Pago';
+
+                let badgeStatus = 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40';
+                let statusTxt = 'Pendente';
+
+                if (isPago) {
+                    badgeStatus = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40';
+                    statusTxt = 'Pago';
+                } else if (isAtrasado) {
+                    badgeStatus = 'bg-rose-500/20 text-rose-400 border-rose-500/40';
+                    statusTxt = '🚨 ATRASADO';
+                } else if (c.vencimento === hojeStr) {
+                    badgeStatus = 'bg-amber-500/20 text-amber-300 border-amber-500/40';
+                    statusTxt = '📅 VENCE HOJE';
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = isAtrasado ? "bg-rose-950/20 border-l-2 border-rose-500" : "hover:bg-neutral-800/40 transition-all";
+
+                tr.innerHTML = `
+                    <td class="p-3">
+                        <strong class="text-white text-sm block">${escapeAttr(c.clienteNome)}</strong>
+                        <span class="text-[11px] text-neutral-400"><i class="fa-brands fa-whatsapp text-emerald-400"></i> ${escapeAttr(c.whatsapp || 'Sem Whats')}</span>
+                    </td>
+                    <td class="p-3 text-xs">
+                        <strong class="text-yellow-400 block">${escapeAttr(c.descricao)}</strong>
+                        <span class="text-neutral-500 text-[10px]">Origem: ${c.tipoRegistro === 'parcela' ? 'Crediário' : 'Saldo de Entrega'}</span>
+                    </td>
+                    <td class="p-3 font-mono text-xs ${isAtrasado ? 'text-rose-400 font-bold' : 'text-neutral-300'}">
+                        ${escapeAttr(c.vencimento)}
+                    </td>
+                    <td class="p-3 font-black text-white text-sm">
+                        R$ ${c.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
+                    </td>
+                    <td class="p-3">
+                        <span class="px-2.5 py-1 text-[10px] rounded-full font-bold uppercase border ${badgeStatus}">
+                            ${statusTxt}
+                        </span>
+                    </td>
+                    <td class="p-3 text-right space-x-1">
+                        ${!isPago ? `
+                            <button onclick="enviarCobrancaWhatsApp(${c.id}, '${c.tipoRegistro}')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-md transition-all" title="Cobrar no WhatsApp">
+                                <i class="fa-brands fa-whatsapp text-sm"></i> Cobrar
+                            </button>
+                            <button onclick="abrirModalBaixaParcela(${c.id}, '${c.tipoRegistro}')" class="bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-2.5 py-1.5 rounded-lg text-xs shadow-md transition-all" title="Dar Baixa no Caixa">
+                                <i class="fa-solid fa-dollar-sign"></i> Dar Baixa
+                            </button>
+                        ` : ''}
+                        <button onclick="abrirModalCarneCliente(${c.clienteId})" class="bg-neutral-800 hover:bg-neutral-700 text-yellow-400 px-2.5 py-1.5 rounded-lg text-xs border border-neutral-700" title="Ver Extrato do Cliente">
+                            <i class="fa-solid fa-receipt"></i> Carnê
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filtrarCobrancaAba(aba) {
+            appData.abaCobrancaFiltro = aba;
+            const abas = ['atrasados', 'hoje', 'proximos', 'pagos', 'todas'];
+            abas.forEach(a => {
+                const btn = document.getElementById(`btn-cob-${a}`);
+                if (btn) {
+                    if (a === aba) {
+                        btn.className = a === 'atrasados' ? 
+                            "px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 text-white shadow-md transition-all flex items-center gap-1.5" : 
+                            "px-4 py-2 rounded-xl text-xs font-bold bg-yellow-400 text-black shadow-md transition-all";
+                    } else {
+                        btn.className = "px-4 py-2 rounded-xl text-xs font-bold bg-neutral-800 text-neutral-300 hover:text-white transition-all";
+                    }
+                }
+            });
+            renderizarParcelasCobranca();
+        }
+
+        // 3. Disparar Mensagem de Cobrança Formatada no WhatsApp
+        function enviarCobrancaWhatsApp(id, tipoRegistro) {
+            const cobrancas = obterListaGeralCobrancas();
+            const item = cobrancas.find(c => c.id == id && c.tipoRegistro == tipoRegistro);
+            if (!item) return;
+
+            const primeiroNome = (item.clienteNome || 'Cliente').trim().split(' ')[0];
+            let telClean = (item.whatsapp || '').replace(/\D/g, '');
+            if (telClean.length === 10 || telClean.length === 11) telClean = '55' + telClean;
+
+            const hojeStr = appData.dataAtual;
+            const isAtrasado = item.vencimento < hojeStr;
+            const isHoje = item.vencimento === hojeStr;
+
+            let msg = '';
+
+            if (isAtrasado) {
+                msg = `*Atendimento PHSUBLIME (${usuarioAtualNome})*\n\n` +
+                      `Olá, *${primeiroNome}*! Tudo bem?\n\n` +
+                      `Notamos em nosso sistema que a cobrança referente ao **${item.descricao}** venceu no dia *${item.vencimento}* no valor de *R$ ${item.valor.toFixed(2)}*.\n\n` +
+                      `Para sua comodidade, você pode efetuar o pagamento via Pix. Podemos confirmar a quitação para hoje?\n\n` +
+                      `Qualquer dúvida estamos à disposição! - *PHSUBLIME*`;
+            } else if (isHoje) {
+                msg = `*Atendimento PHSUBLIME (${usuarioAtualNome})*\n\n` +
+                      `Olá, *${primeiroNome}*! Tudo bem?\n\n` +
+                      `Passando para lembrar que hoje (*${item.vencimento}*) vence a cobrança de *R$ ${item.valor.toFixed(2)}* referente ao **${item.descricao}**.\n\n` +
+                      `Segue a nossa chave Pix para facilidade do pagamento. Muito obrigado pela parceria! - *PHSUBLIME*`;
+            } else {
+                msg = `*Atendimento PHSUBLIME (${usuarioAtualNome})*\n\n` +
+                      `Olá, *${primeiroNome}*! Lembramos que a cobrança referente ao **${item.descricao}** no valor de *R$ ${item.valor.toFixed(2)}* tem vencimento agendado para o dia *${item.vencimento}*.\n\n` +
+                      `Qualquer dúvida estamos à sua disposição. - *PHSUBLIME*`;
+            }
+
+            const url = telClean ? 
+                `https://api.whatsapp.com/send?phone=${telClean}&text=${encodeURIComponent(msg)}` : 
+                `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+
+            window.open(url, '_blank');
+        }
+
+        // 4. Modal de Recebimento / Baixa em Parcela
+        function abrirModalBaixaParcela(id, tipoRegistro) {
+            const cobrancas = obterListaGeralCobrancas();
+            const item = cobrancas.find(c => c.id == id && c.tipoRegistro == tipoRegistro);
+            if (!item) return;
+
+            document.getElementById('baixa-parcela-id').value = id;
+            document.getElementById('baixa-pedido-id').value = item.pedidoId;
+            document.getElementById('baixa-tipo-registro').value = tipoRegistro;
+
+            document.getElementById('baixa-cliente-nome').innerText = `Cliente: ${item.clienteNome}`;
+            document.getElementById('baixa-descricao').innerText = item.descricao;
+            document.getElementById('baixa-valor-destaque').innerText = `Valor a Receber: R$ ${item.valor.toFixed(2)}`;
+
+            document.getElementById('baixa-data-pagamento').value = appData.dataAtual;
+            document.getElementById('baixa-valor-pago').value = item.valor.toFixed(2);
+
+            document.getElementById('modal-baixa-parcela').classList.remove('hidden');
+        }
+
+        function fecharModalBaixaParcela() {
+            document.getElementById('modal-baixa-parcela').classList.add('hidden');
+        }
+
+        async function confirmarBaixaParcelaSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('baixa-parcela-id').value;
+            const pedidoId = document.getElementById('baixa-pedido-id').value;
+            const tipo = document.getElementById('baixa-tipo-registro').value;
+            const dataPag = document.getElementById('baixa-data-pagamento').value;
+            const formaPag = document.getElementById('baixa-forma-pagamento').value;
+            const valorPagoInput = parseFloat(document.getElementById('baixa-valor-pago').value || 0);
+
+            if (valorPagoInput <= 0) {
+                mostrarToast("Informe um valor válido!", "erro");
+                return;
+            }
+
+            if (tipo === 'parcela') {
+                // Atualiza a parcela individual no Supabase
+                const { error } = await supabaseClient.from('parcelas').update({
+                    status: 'Pago',
+                    data_pagamento: dataPag,
+                    forma_pagamento: formaPag
+                }).eq('id', id);
+
+                if (error) {
+                    mostrarToast(`Erro ao dar baixa: ${error.message}`, "erro");
+                    return;
+                }
+            }
+
+            // Atualiza também o histórico de pagamentos do Pedido principal para entrar no Caixa
+            const ped = appData.pedidos.find(p => p.id == pedidoId);
+            if (ped) {
+                let historico = Array.isArray(ped.pagamentos) ? [...ped.pagamentos] : [];
+                historico.push({
+                    id: Date.now(),
+                    data: dataPag,
+                    valor: valorPagoInput,
+                    tipo: tipo === 'parcela' ? 'Baixa Parcela Crediário' : 'Quitação Saldo Pedido',
+                    forma: formaPag,
+                    registradoPor: usuarioAtualNome
+                });
+
+                const totalP = parseFloat(ped.total || 0);
+                let novoPagoGeral = parseFloat(ped.valorPago || 0) + valorPagoInput;
+                let novoStatusPag = novoPagoGeral >= totalP ? 'Pago 100%' : 'Sinal 50%';
+
+                await supabaseClient.from('pedidos').update({
+                    statusPagamento: novoStatusPag,
+                    valorPago: Math.min(totalP, novoPagoGeral),
+                    pagamentos: historico
+                }).eq('id', pedidoId);
+            }
+
+            fecharModalBaixaParcela();
+            await carregarDados();
+            mostrarToast("Recebimento registrado com sucesso no caixa!");
+        }
+
+        // 5. Visualizar Carnê/Extrato Completo do Cliente
+        function abrirModalCarneCliente(clienteId) {
+            const cli = appData.clientes.find(c => c.id == clienteId);
+            if (!cli) return;
+
+            document.getElementById('carne-cliente-nome').innerHTML = `<i class="fa-solid fa-receipt text-yellow-400"></i> Carnê/Extrato: ${cli.nome}`;
+            document.getElementById('carne-cliente-contato').innerText = `CPF/CNPJ: ${cli.cpf || 'N/I'} | Tel: ${cli.whatsapp || cli.telefone || 'N/I'}`;
+
+            const cobrancas = obterListaGeralCobrancas().filter(c => c.clienteId == clienteId);
+            const tbody = document.getElementById('tabela-carne-cliente-body');
+            tbody.innerHTML = '';
+
+            let totalPendente = 0;
+            let totalPago = 0;
+            let qtdAtrasadas = 0;
+
+            const hojeStr = appData.dataAtual;
+
+            if (cobrancas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-neutral-500">Nenhuma cobrança registrada para este cliente.</td></tr>`;
+            } else {
+                cobrancas.forEach(c => {
+                    const isPago = c.status === 'Pago';
+                    const isAtrasado = !isPago && c.vencimento < hojeStr;
+
+                    if (isPago) totalPago += c.valor;
+                    else {
+                        totalPendente += c.valor;
+                        if (isAtrasado) qtdAtrasadas++;
+                    }
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="p-2.5 font-bold text-white">${escapeAttr(c.descricao)}</td>
+                        <td class="p-2.5 text-neutral-300 font-mono">${escapeAttr(c.vencimento)}</td>
+                        <td class="p-2.5 font-bold ${isPago ? 'text-emerald-400' : 'text-rose-400'}">R$ ${c.valor.toFixed(2)}</td>
+                        <td class="p-2.5">
+                            <span class="px-2 py-0.5 text-[10px] rounded-full font-bold ${isPago ? 'bg-emerald-500/20 text-emerald-400' : (isAtrasado ? 'bg-rose-500/20 text-rose-400' : 'bg-yellow-500/20 text-yellow-400')}">
+                                ${isPago ? 'Pago' : (isAtrasado ? 'Atrasado' : 'Pendente')}
+                            </span>
+                        </td>
+                        <td class="p-2.5 text-right no-print">
+                            ${!isPago ? `<button onclick="fecharModalCarneCliente(); abrirModalBaixaParcela(${c.id}, '${c.tipoRegistro}');" class="bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-2 py-1 rounded text-[11px]">Receber</button>` : '-'}
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            document.getElementById('carne-resumo-pendente').innerText = `R$ ${totalPendente.toFixed(2)}`;
+            document.getElementById('carne-resumo-atrasadas').innerText = `${qtdAtrasadas} parcela(s)`;
+            document.getElementById('carne-resumo-pago').innerText = `R$ ${totalPago.toFixed(2)}`;
+
+            document.getElementById('btn-whats-extrato-completo').onclick = () => enviarExtratoWhatsAppCliente(clienteId);
+
+            document.getElementById('modal-carne-cliente').classList.remove('hidden');
+        }
+
+        function fecharModalCarneCliente() {
+            document.getElementById('modal-carne-cliente').classList.add('hidden');
+        }
+
+        function enviarExtratoWhatsAppCliente(clienteId) {
+            const cli = appData.clientes.find(c => c.id == clienteId);
+            if (!cli) return;
+
+            const cobrancas = obterListaGeralCobrancas().filter(c => c.clienteId == clienteId && c.status !== 'Pago');
+            if (cobrancas.length === 0) {
+                mostrarToast("Este cliente não possui parcelas pendentes para enviar!", "alerta");
+                return;
+            }
+
+            let telClean = (cli.whatsapp || cli.telefone || '').replace(/\D/g, '');
+            if (telClean.length === 10 || telClean.length === 11) telClean = '55' + telClean;
+
+            let resumoItens = cobrancas.map(c => `• *${c.descricao}* - Venc: *${c.vencimento}* - R$ *${c.valor.toFixed(2)}*`).join('\n');
+            let totalDevido = cobrancas.reduce((acc, c) => acc + c.valor, 0);
+
+            const msg = `🧾 *EXTRATO DE CREDIÁRIO / PENDÊNCIAS - PHSUBLIME*\n\n` +
+                        `Olá, *${cli.nome.split(' ')[0]}*!\n` +
+                        `Segue o resumo das suas parcelas pendentes em nosso sistema:\n\n` +
+                        `${resumoItens}\n\n` +
+                        `💰 *Total Geral Pendente:* R$ *${totalDevido.toFixed(2)}*\n\n` +
+                        `Qualquer dúvida estamos à sua disposição! - *PHSUBLIME*`;
+
+            const url = telClean ? 
+                `https://api.whatsapp.com/send?phone=${telClean}&text=${encodeURIComponent(msg)}` : 
+                `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+
+            window.open(url, '_blank');
+        }
 </script>
 </body>
 </html>
