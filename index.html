@@ -4390,7 +4390,10 @@ function renderizarEstoque() {
             document.getElementById('ped-forma-pagamento').value = p.formaPagamento || 'Dinheiro';
         }
         verificarFormaPagamento();
-
+const parcExistente = appData.parcelas.find(par => par.pedido_id == p.id && par.numero_parcela == 1);
+        if (parcExistente && parcExistente.vencimento) {
+            document.getElementById('ped-vencimento-primeira-parcela').value = parcExistente.vencimento;
+        }
         document.getElementById('ped-status').value = p.status || 'AGUARDANDO';
         document.getElementById('ped-obs').value = p.obs || '';
 
@@ -4764,10 +4767,15 @@ function calcularPreviewCrediarioPedido() {
                 await abaterEstoquePorPedido(pedData.itens);
             }
 // Gera as parcelas no crediário no Supabase
-            if (formaPag === 'Crediário Próprio' && !pedId) {
+            if (formaPag === 'Crediário Próprio') {
                 const numParc = parseInt(document.getElementById('ped-num-parcelas-crediario').value) || 1;
                 const vencInicial = document.getElementById('ped-vencimento-primeira-parcela').value || appData.dataAtual;
                 const saldoFinanciado = Math.max(0, total - valorPagoCalc);
+
+                // Se for edição de pedido antigo, limpa as parcelas velhas do banco antes de criar as novas
+                if (pedId) {
+                    await supabaseClient.from('parcelas').delete().eq('pedido_id', idSeguro);
+                }
 
                 if (saldoFinanciado > 0) {
                     const valParc = parseFloat((saldoFinanciado / numParc).toFixed(2));
