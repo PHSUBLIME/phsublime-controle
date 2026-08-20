@@ -2809,6 +2809,9 @@
             if (secao === 'dashboard') {
                 atualizarGraficos();
             }
+            if (secao === 'cobranca') {
+            renderizarParcelasCobranca();
+        }
         }
 
         function extrairBaseNomeParcela(nome) {
@@ -2943,6 +2946,7 @@ appData.pedidos.forEach(p => {
             renderizarMovimentacoesFinanceiras();
             renderizarHistoricoFechamentos();
             renderizarProdutosLoja();
+            renderizarParcelasCobranca();
             atualizarGraficos();
         }
 function renderizarKanban() {
