@@ -4397,10 +4397,12 @@ function renderizarEstoque() {
         const matchQtd = p.formaPagamento ? p.formaPagamento.match(/\((\d+)x\)/) : null;
         const qtdParc = matchQtd ? parseInt(matchQtd[1]) : (parcelasDoPedido.length > 0 ? parcelasDoPedido.length : 1);
         document.getElementById('ped-num-parcelas-crediario').value = qtdParc;
-
+        
+const matchVenc = p.formaPagamento ? p.formaPagamento.match(/\[(\d{4}-\d{2}-\d{2})\]/) : null;
         const primeiraParc = parcelasDoPedido.find(par => par.numero_parcela == 1) || parcelasDoPedido[0];
-        if (primeiraParc && primeiraParc.vencimento) {
-            document.getElementById('ped-vencimento-primeira-parcela').value = primeiraParc.vencimento;
+        const vencIniData = matchVenc ? matchVenc[1] : (primeiraParc && primeiraParc.vencimento ? primeiraParc.vencimento : '');
+        if (vencIniData) {
+            document.getElementById('ped-vencimento-primeira-parcela').value = vencIniData;
         }
 
         verificarFormaPagamento();
@@ -4709,7 +4711,8 @@ function calcularPreviewCrediarioPedido() {
             detalhePag = `Misto (Dinheiro: R$ ${din.toFixed(2)} | Pix: R$ ${pix.toFixed(2)})`;
         } else if (formaPag && formaPag.includes('Crediário')) {
             const numP = parseInt(document.getElementById('ped-num-parcelas-crediario')?.value || 1);
-            detalhePag = `Crediário Próprio (${numP}x)`;
+            const vencP = document.getElementById('ped-vencimento-primeira-parcela')?.value || appData.dataAtual;
+         detalhePag = `Crediário Próprio (${numP}x) [${vencP}]`;
         }
         const nomeClienteFinal = cli ? cli.nome : (clienteExtraSelect && clienteExtraSelect.id == clienteId ? clienteExtraSelect.nome : clienteInputVal || 'Cliente Desconhecido');
 
@@ -7434,8 +7437,8 @@ function renderizarProdutosLoja() {
                                 const matchQtd = ped.formaPagamento ? ped.formaPagamento.match(/\((\d+)x\)/) : null;
                                 const numP = matchQtd ? parseInt(matchQtd[1]) : 1;
                                 const valP = saldoPendente / numP;
-                                const vencIni = ped.vencimentoPrimeiraParcela || ped.dataEntrega || ped.data || hojeStr;
-
+                               const matchVenc = ped.formaPagamento ? ped.formaPagamento.match(/\[(\d{4}-\d{2}-\d{2})\]/) : null;
+        const vencIni = matchVenc ? matchVenc[1] : (ped.vencimentoPrimeiraParcela || ped.dataEntrega || ped.data || hojeStr);
                                 for (let i = 1; i <= numP; i++) {
                                     const vencP = adicionarMesesISO(vencIni, i - 1);
                                     let st = 'Pendente';
