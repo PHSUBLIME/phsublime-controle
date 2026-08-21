@@ -4392,9 +4392,10 @@ function renderizarEstoque() {
             document.getElementById('ped-forma-pagamento').value = p.formaPagamento || 'Dinheiro';
         }
 
-        // Recupera as parcelas diretamente da tabela de parcelas do banco
+       // Recupera as parcelas do banco ou extrai do pedido
         const parcelasDoPedido = appData.parcelas ? appData.parcelas.filter(par => par.pedido_id == p.id) : [];
-        const qtdParc = parcelasDoPedido.length > 0 ? parcelasDoPedido.length : 1;
+        const matchQtd = p.formaPagamento ? p.formaPagamento.match(/\((\d+)x\)/) : null;
+        const qtdParc = matchQtd ? parseInt(matchQtd[1]) : (parcelasDoPedido.length > 0 ? parcelasDoPedido.length : 1);
         document.getElementById('ped-num-parcelas-crediario').value = qtdParc;
 
         const primeiraParc = parcelasDoPedido.find(par => par.numero_parcela == 1) || parcelasDoPedido[0];
@@ -4701,13 +4702,15 @@ function calcularPreviewCrediarioPedido() {
             valorPagoCalc = !isNaN(valCustom) ? valCustom : (total * 0.5);
         }
 
-        let detalhePag = formaPag;
+      let detalhePag = formaPag;
         if (formaPag === 'Parte Dinheiro / Parte Pix') {
             const din = parseFloat(document.getElementById('ped-valor-dinheiro').value || 0);
             const pix = parseFloat(document.getElementById('ped-valor-pix').value || 0);
             detalhePag = `Misto (Dinheiro: R$ ${din.toFixed(2)} | Pix: R$ ${pix.toFixed(2)})`;
+        } else if (formaPag && formaPag.includes('Crediário')) {
+            const numP = parseInt(document.getElementById('ped-num-parcelas-crediario')?.value || 1);
+            detalhePag = `Crediário Próprio (${numP}x)`;
         }
-
         const nomeClienteFinal = cli ? cli.nome : (clienteExtraSelect && clienteExtraSelect.id == clienteId ? clienteExtraSelect.nome : clienteInputVal || 'Cliente Desconhecido');
 
         const idSeguro = pedId ? parseInt(pedId) : Math.floor(100000000 + Math.random() * 900000000);
@@ -4794,22 +4797,23 @@ function calcularPreviewCrediarioPedido() {
                     let novasParcelas = [];
 
                     for (let i = 1; i <= numParc; i++) {
-                        novasParcelas.push({
-                            id: Math.floor(100000000 + Math.random() * 900000000) + i,
-                            pedido_id: idSeguro,
-                            cliente_id: clienteId,
-                            cliente_nome: nomeClienteFinal,
-                            cliente_whatsapp: cli ? (cli.whatsapp || cli.telefone || '') : '',
-                            numero_parcela: i,
-                            total_parcelas: numParc,
-                            valor: valParc,
-                            vencimento: adicionarMesesISO(vencInicial, i - 1),
-                            status: 'Pendente'
-                        });
-                    }
+                novasParcelas.push({
+                    pedido_id: idSeguro,
+                    cliente_id: clienteId,
+                    cliente_nome: nomeClienteFinal,
+                    cliente_whatsapp: cli ? (cli.whatsapp || cli.telefone || '') : '',
+                    numero_parcela: i,
+                    total_parcelas: numParc,
+                    valor: valParc,
+                    vencimento: adicionarMesesISO(vencInicial, i - 1),
+                    status: 'Pendente'
+                });
+            }
 
-                    await supabaseClient.from('parcelas').insert(novasParcelas);
-                }
+            const { error: errPar } = await supabaseClient.from('parcelas').insert(novasParcelas);
+            if (errPar) {
+                console.error("Erro ao salvar parcelas:", errPar);
+                mostrarToast(`Aviso Parcelas: ${errPar.message}`, "alerta");
             }
             mostrarToast(pedId ? "Pedido alterado e atualizado!" : "Novo pedido salvo e estoque atualizado!");
             await carregarDados();
@@ -7406,7 +7410,7 @@ function renderizarProdutosLoja() {
                 });
             }
 
-           // B) Adiciona saldos pendentes de Pedidos (Separando Crediário de Entregas)
+          // B) Adiciona saldos pendentes de Pedidos
             appData.pedidos.forEach(ped => {
                 if (ped.status !== 'Cancelado') {
                     const totalP = parseFloat(ped.total || 0);
@@ -7425,11 +7429,34 @@ function renderizarProdutosLoja() {
                             const isCrediario = ped.formaPagamento && ped.formaPagamento.includes('Crediário');
 
                             if (isCrediario) {
-                                // CREDIÁRIO: NUNCA usa a Data Prevista de Entrega!
-                                // Puxa a data do Vencimento da Parcela informada no pedido
-                                const vencCrediario = ped.vencimentoPrimeiraParcela || hojeStr;
+                                const matchQtd = ped.formaPagamento ? ped.formaPagamento.match(/\((\d+)x\)/) : null;
+                                const numP = matchQtd ? parseInt(matchQtd[1]) : 1;
+                                const valP = saldoPendente / numP;
+                                const vencIni = ped.vencimentoPrimeiraParcela || ped.dataEntrega || ped.data || hojeStr;
+
+                                for (let i = 1; i <= numP; i++) {
+                                    const vencP = adicionarMesesISO(vencIni, i - 1);
+                                    let st = 'Pendente';
+                                    if (vencP < hojeStr) st = 'Atrasado';
+
+                                    lista.push({
+                                        id: `${ped.id}_${i}`,
+                                        tipoRegistro: 'saldo_pedido',
+                                        pedidoId: ped.id,
+                                        clienteId: ped.clienteId,
+                                        clienteNome: ped.clienteNome || 'Cliente',
+                                        whatsapp: telWhats,
+                                        descricao: `Parcela ${i}/${numP} (Pedido #${ped.id} - ${descItens})`,
+                                        vencimento: vencP,
+                                        valor: valP,
+                                        status: st,
+                                        dataPagamento: null
+                                    });
+                                }
+                            } else {
+                                const venc = ped.dataEntrega || ped.data || hojeStr;
                                 let st = 'Pendente';
-                                if (vencCrediario < hojeStr) st = 'Atrasado';
+                                if (venc < hojeStr) st = 'Atrasado';
 
                                 lista.push({
                                     id: ped.id,
@@ -7438,31 +7465,12 @@ function renderizarProdutosLoja() {
                                     clienteId: ped.clienteId,
                                     clienteNome: ped.clienteNome || 'Cliente',
                                     whatsapp: telWhats,
-                                    descricao: `Parcela Crediário Pedido #${ped.id} (${descItens})`,
-                                    vencimento: vencCrediario,
+                                    descricao: `Saldo Final Pedido #${ped.id} (${descItens})`,
+                                    vencimento: venc,
                                     valor: saldoPendente,
                                     status: st,
                                     dataPagamento: null
                                 });
-                            } else {
-                                // VENDAS NORMAIS (Pix/Dinheiro): O saldo pendente é pago na entrega do produto
-                                const venc = ped.dataEntrega || ped.data || hojeStr;
-                                let st = 'Pendente';
-                                if (venc < hojeStr) st = 'Atrasado';
-
-                               lista.push({
-            id: ped.id,
-            tipoRegistro: 'saldo_pedido',
-            pedidoId: ped.id,
-            clienteId: ped.clienteId,
-            clienteNome: ped.clienteNome || 'Cliente',
-            whatsapp: telWhats,
-            descricao: `Saldo Final Pedido #${ped.id} (${descItens})`,
-            vencimento: venc,
-            valor: saldoPendente,
-            status: st,
-            dataPagamento: null
-        });
                             }
                         }
                     }
