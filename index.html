@@ -4385,15 +4385,25 @@ function renderizarEstoque() {
         document.getElementById('ped-responsavel').value = p.responsavel || usuarioAtualNome;
 
         if (p.formaPagamento && p.formaPagamento.includes('Misto')) {
-            document.getElementById('ped-forma-pagamento').value = 'Parte Dinheiro / Parte Pix';
-        } else {
-            document.getElementById('ped-forma-pagamento').value = p.formaPagamento || 'Dinheiro';
-        }
-        verificarFormaPagamento();
-const parcExistente = appData.parcelas.find(par => par.pedido_id == p.id && par.numero_parcela == 1);
-        if (parcExistente && parcExistente.vencimento) {
-            document.getElementById('ped-vencimento-primeira-parcela').value = parcExistente.vencimento;
-        }
+                document.getElementById('ped-forma-pagamento').value = 'Parte Dinheiro / Parte Pix';
+            } else if (p.formaPagamento && p.formaPagamento.includes('Crediário')) {
+                document.getElementById('ped-forma-pagamento').value = 'Crediário Próprio';
+            } else {
+                document.getElementById('ped-forma-pagamento').value = p.formaPagamento || 'Dinheiro';
+            }
+
+            // Recupera o número de parcelas e a data correta gravados neste pedido
+            const parcelasDoPedido = appData.parcelas ? appData.parcelas.filter(par => par.pedido_id == p.id) : [];
+            if (parcelasDoPedido.length > 0) {
+                document.getElementById('ped-num-parcelas-crediario').value = parcelasDoPedido.length;
+                const primeiraParc = parcelasDoPedido.find(par => par.numero_parcela == 1) || parcelasDoPedido[0];
+                if (primeiraParc && primeiraParc.vencimento) {
+                    document.getElementById('ped-vencimento-primeira-parcela').value = primeiraParc.vencimento;
+                }
+            }
+
+            verificarFormaPagamento();
+            calcularPreviewCrediarioPedido();
         document.getElementById('ped-status').value = p.status || 'AGUARDANDO';
         document.getElementById('ped-obs').value = p.obs || '';
 
@@ -4615,7 +4625,9 @@ const parcExistente = appData.parcelas.find(par => par.pedido_id == p.id && par.
     if (campoCrediario) {
         if (val === 'Crediário Próprio') {
             campoCrediario.classList.remove('hidden');
-            document.getElementById('ped-vencimento-primeira-parcela').value = appData.dataAtual;
+           if (!document.getElementById('ped-vencimento-primeira-parcela').value) {
+    document.getElementById('ped-vencimento-primeira-parcela').value = appData.dataAtual;
+}
             calcularPreviewCrediarioPedido();
         } else {
             campoCrediario.classList.add('hidden');
