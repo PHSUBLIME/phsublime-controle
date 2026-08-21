@@ -7459,11 +7459,8 @@ function renderizarProdutosLoja() {
                                     whatsapp: telWhats,
                                     descricao: `Saldo Final Pedido #${ped.id} (${descItens})`,
                                     vencimento: venc,
-                                    valor: saldoPendente,
-                                    status: st,
                                     dataPagamento: null
-                                });
-                            }
+                            });
                         }
                     }
                 }
@@ -7474,19 +7471,56 @@ function renderizarProdutosLoja() {
             return lista;
         }
 
-            // Atualiza os Cards de topo
-            document.getElementById('cob-kpi-total-receber').innerText = `R$ ${totalAReceber.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            document.getElementById('cob-kpi-atrasados').innerText = `R$ ${totalAtrasados.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            document.getElementById('cob-txt-atrasados-qtd').innerText = `${qtdAtrasados} pendência(s) em atraso`;
-            
-            document.getElementById('cob-kpi-vence-hoje').innerText = `R$ ${totalVenceHoje.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            document.getElementById('cob-txt-vence-hoje-qtd').innerText = `${qtdVenceHoje} vencimento(s) hoje`;
+// 2. Renderiza a Tela de Cobranças e os KPIs
+function renderizarParcelasCobranca() {
+    const tbody = document.getElementById('tabela-cobrancas-body');
+    if (!tbody) return;
+    tbody.innerHTML = '';
 
-            document.getElementById('cob-kpi-recebido-mes').innerText = `R$ ${totalRecebidoMes.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    const hojeStr = appData.dataAtual;
+    const busca = (document.getElementById('input-pesquisar-cobranca')?.value || '').toLowerCase();
+    const todasCobrancas = obterListaGeralCobrancas();
 
-            // Atualiza badges
-            document.getElementById('count-aba-atrasados').innerText = qtdAtrasados;
-            document.getElementById('count-aba-hoje').innerText = qtdVenceHoje;
+    let totalAReceber = 0;
+    let totalAtrasados = 0;
+    let qtdAtrasados = 0;
+    let totalVenceHoje = 0;
+    let qtdVenceHoje = 0;
+    let totalRecebidoMes = 0;
+
+    const mesAnoAtual = hojeStr.substring(0, 7);
+
+    todasCobrancas.forEach(c => {
+        if (c.status === 'Pago') {
+            if (c.dataPagamento && c.dataPagamento.startsWith(mesAnoAtual)) {
+                totalRecebidoMes += c.valor;
+            }
+        } else {
+            totalAReceber += c.valor;
+
+            if (c.vencimento < hojeStr) {
+                totalAtrasados += c.valor;
+                qtdAtrasados++;
+            } else if (c.vencimento === hojeStr) {
+                totalVenceHoje += c.valor;
+                qtdVenceHoje++;
+            }
+        }
+    });
+
+    // Atualiza os Cards de topo
+    document.getElementById('cob-kpi-total-receber').innerText = `R$ ${totalAReceber.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    document.getElementById('cob-kpi-atrasados').innerText = `R$ ${totalAtrasados.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    document.getElementById('cob-txt-atrasados-qtd').innerText = `${qtdAtrasados} pendência(s) em atraso`;
+    
+    document.getElementById('cob-kpi-vence-hoje').innerText = `R$ ${totalVenceHoje.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    document.getElementById('cob-txt-vence-hoje-qtd').innerText = `${qtdVenceHoje} vencimento(s) hoje`;
+
+    document.getElementById('cob-kpi-recebido-mes').innerText = `R$ ${totalRecebidoMes.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+
+    // Atualiza badges
+    document.getElementById('count-aba-atrasados').innerText = qtdAtrasados;
+    document.getElementById('count-aba-hoje').innerText = qtdVenceHoje;
 
             const badgeMenu = document.getElementById('badge-cobranca-alerta');
             if (badgeMenu) {
