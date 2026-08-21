@@ -4702,7 +4702,7 @@ function calcularPreviewCrediarioPedido() {
             valorPagoCalc = !isNaN(valCustom) ? valCustom : (total * 0.5);
         }
 
-      let detalhePag = formaPag;
+        let detalhePag = formaPag;
         if (formaPag === 'Parte Dinheiro / Parte Pix') {
             const din = parseFloat(document.getElementById('ped-valor-dinheiro').value || 0);
             const pix = parseFloat(document.getElementById('ped-valor-pix').value || 0);
@@ -4725,7 +4725,6 @@ function calcularPreviewCrediarioPedido() {
         if (stPag === 'Pendente') {
             historicoPagamentos = []; // Zera pagamentos se for alterado para Pendente
         } else if (stPag === 'Sinal 50%') {
-            // Garante que o histórico reflita apenas a entrada do Sinal de 50%
             historicoPagamentos = [{
                 id: Date.now(),
                 data: pExistente ? (pExistente.data || appData.dataAtual) : appData.dataAtual,
@@ -4744,8 +4743,9 @@ function calcularPreviewCrediarioPedido() {
                 registradoPor: usuarioAtualNome
             });
         }
+
         // 3. Montar a estrutura do pedData
-       const pedData = {
+        const pedData = {
             id: idSeguro,
             data: dataCriacaoOriginal,
             clienteId: clienteId,
@@ -4770,13 +4770,13 @@ function calcularPreviewCrediarioPedido() {
 
         let { data, error } = await supabaseClient.from('pedidos').upsert([pedData]);
 
-        // Trava de segurança: Se a coluna 'pagamentos' não existir no Supabase, salva sem ela para não dar erro
         if (error && error.message && error.message.includes('pagamentos')) {
             console.warn("Coluna 'pagamentos' não encontrada no banco. Salvando sem a coluna...");
             delete pedData.pagamentos;
             const retry = await supabaseClient.from('pedidos').upsert([pedData]);
             error = retry.error;
         }
+
         if (!error) {
             if (!pedId) {
                 await abaterEstoquePorPedido(pedData.itens);
@@ -4787,7 +4787,6 @@ function calcularPreviewCrediarioPedido() {
                 const vencInicial = document.getElementById('ped-vencimento-primeira-parcela').value || appData.dataAtual;
                 const saldoFinanciado = Math.max(0, total - valorPagoCalc);
 
-                // Se for edição de pedido antigo, limpa as parcelas velhas do banco antes de criar as novas
                 if (pedId) {
                     await supabaseClient.from('parcelas').delete().eq('pedido_id', idSeguro);
                 }
@@ -4797,24 +4796,27 @@ function calcularPreviewCrediarioPedido() {
                     let novasParcelas = [];
 
                     for (let i = 1; i <= numParc; i++) {
-                novasParcelas.push({
-                    pedido_id: idSeguro,
-                    cliente_id: clienteId,
-                    cliente_nome: nomeClienteFinal,
-                    cliente_whatsapp: cli ? (cli.whatsapp || cli.telefone || '') : '',
-                    numero_parcela: i,
-                    total_parcelas: numParc,
-                    valor: valParc,
-                    vencimento: adicionarMesesISO(vencInicial, i - 1),
-                    status: 'Pendente'
-                });
+                        novasParcelas.push({
+                            pedido_id: idSeguro,
+                            cliente_id: clienteId,
+                            cliente_nome: nomeClienteFinal,
+                            cliente_whatsapp: cli ? (cli.whatsapp || cli.telefone || '') : '',
+                            numero_parcela: i,
+                            total_parcelas: numParc,
+                            valor: valParc,
+                            vencimento: adicionarMesesISO(vencInicial, i - 1),
+                            status: 'Pendente'
+                        });
+                    }
+
+                    const { error: errPar } = await supabaseClient.from('parcelas').insert(novasParcelas);
+                    if (errPar) {
+                        console.error("Erro ao salvar parcelas:", errPar);
+                        mostrarToast(`Aviso Parcelas: ${errPar.message}`, "alerta");
+                    }
+                }
             }
 
-            const { error: errPar } = await supabaseClient.from('parcelas').insert(novasParcelas);
-            if (errPar) {
-                console.error("Erro ao salvar parcelas:", errPar);
-                mostrarToast(`Aviso Parcelas: ${errPar.message}`, "alerta");
-            }
             mostrarToast(pedId ? "Pedido alterado e atualizado!" : "Novo pedido salvo e estoque atualizado!");
             await carregarDados();
             if (criarOutro) {
