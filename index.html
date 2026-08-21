@@ -4623,7 +4623,7 @@ function renderizarEstoque() {
     }
 
     if (campoCrediario) {
-        if (val === 'Crediário Próprio') {
+        if (val && val.includes('Crediário')) {
             campoCrediario.classList.remove('hidden');
            if (!document.getElementById('ped-vencimento-primeira-parcela').value) {
     document.getElementById('ped-vencimento-primeira-parcela').value = appData.dataAtual;
@@ -4779,7 +4779,7 @@ function calcularPreviewCrediarioPedido() {
                 await abaterEstoquePorPedido(pedData.itens);
             }
 // Gera as parcelas no crediário no Supabase
-            if (formaPag === 'Crediário Próprio') {
+            if (formaPag && formaPag.includes('Crediário')) {
                 const numParc = parseInt(document.getElementById('ped-num-parcelas-crediario').value) || 1;
                 const vencInicial = document.getElementById('ped-vencimento-primeira-parcela').value || appData.dataAtual;
                 const saldoFinanciado = Math.max(0, total - valorPagoCalc);
