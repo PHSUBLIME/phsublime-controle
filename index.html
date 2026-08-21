@@ -7450,17 +7450,19 @@ function renderizarProdutosLoja() {
                                 let st = 'Pendente';
                                 if (venc < hojeStr) st = 'Atrasado';
 
-                                lista.push({
-                                    id: ped.id,
-                                    tipoRegistro: 'saldo_pedido',
-                                    pedidoId: ped.id,
-                                    clienteId: ped.clienteId,
-                                    clienteNome: ped.clienteNome || 'Cliente',
-                                    whatsapp: telWhats,
-                                    descricao: `Saldo Final Pedido #${ped.id} (${descItens})`,
-                                    vencimento: venc,
-                                    dataPagamento: null             
-                                });
+                               lista.push({
+            id: ped.id,
+            tipoRegistro: 'saldo_pedido',
+            pedidoId: ped.id,
+            clienteId: ped.clienteId,
+            clienteNome: ped.clienteNome || 'Cliente',
+            whatsapp: telWhats,
+            descricao: `Saldo Final Pedido #${ped.id} (${descItens})`,
+            vencimento: venc,
+            valor: saldoPendente,
+            status: st,
+            dataPagamento: null
+        });
                             }
                         }
                     }
