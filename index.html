@@ -6832,17 +6832,55 @@ async function reverterBaixaParcela(id, dataInicialOriginal, numParcela) {
         }
 
         const servicosMap = {};
+        const displayNames = {};
+
         appData.pedidos.forEach(p => {
             if (p.status !== 'Cancelado' && p.itens) {
                 p.itens.forEach(i => {
-                    const nomeS = i.servico || 'Outros';
-                    servicosMap[nomeS] = (servicosMap[nomeS] || 0) + 1;
+                    const raw = (i.servico || 'Outros').trim();
+                    // Remove acentos e converte para minúsculo para agrupar
+                    const key = raw.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+                    
+                    if (!displayNames[key]) {
+                        // Formata o nome bonito (primeira letra maiúscula)
+                        displayNames[key] = raw.charAt(0).toUpperCase() + raw.slice(1);
+                    }
+                    servicosMap[key] = (servicosMap[key] || 0) + 1;
                 });
             }
         });
 
-        const labelsServ = Object.keys(servicosMap).length > 0 ? Object.keys(servicosMap) : ['Nenhum serviço'];
-        const dataServ = Object.keys(servicosMap).length > 0 ? Object.values(servicosMap) : [1];
+        // Ordena os serviços do mais vendido para o menos vendido
+        const itemsOrdenados = Object.keys(servicosMap)
+            .map(key => ({ nome: displayNames[key], count: servicosMap[key] }))
+            .sort((a, b) => b.count - a.count);
+
+        let labelsServ = [];
+        let dataServ = [];
+
+        if (itemsOrdenados.length > 0) {
+            if (itemsOrdenados.length <= 5) {
+                labelsServ = itemsOrdenados.map(item => item.nome);
+                dataServ = itemsOrdenados.map(item => item.count);
+            } else {
+                const top5 = itemsOrdenados.slice(0, 5);
+                const resto = itemsOrdenados.slice(5);
+                const somaResto = resto.reduce((acc, curr) => acc + curr.count, 0);
+
+                labelsServ = top5.map(item => item.nome);
+                dataServ = top5.map(item => item.count);
+
+                if (somaResto > 0) {
+                    labelsServ.push('Outros');
+                    dataServ.push(somaResto);
+                }
+            }
+        } else {
+            labelsServ = ['Nenhum serviço'];
+            dataServ = [1];
+        }
+
+        const coresGrafico = ['#facc15', '#3b82f6', '#10b981', '#f97316', '#a855f7', '#64748b'];
 
         if (!appData.servicosChart) {
             const ctxS = document.getElementById('servicosChart').getContext('2d');
@@ -6853,9 +6891,7 @@ async function reverterBaixaParcela(id, dataInicialOriginal, numParcela) {
                     datasets: [{
                         data: dataServ,
                         minAngle: 12,
-                        backgroundColor: [
-                            '#facc15', '#3b82f6', '#10b981', '#f97316', '#a855f7', '#ec4899', '#06b6d4', '#f43f5e'
-                        ],
+                        backgroundColor: coresGrafico,
                         borderWidth: 2,
                         borderColor: '#18181b'
                     }]
@@ -6879,9 +6915,7 @@ async function reverterBaixaParcela(id, dataInicialOriginal, numParcela) {
         } else {
             appData.servicosChart.data.labels = labelsServ;
             appData.servicosChart.data.datasets[0].data = dataServ;
-            appData.servicosChart.data.datasets[0].backgroundColor = [
-                '#facc15', '#3b82f6', '#10b981', '#f97316', '#a855f7', '#ec4899', '#06b6d4', '#f43f5e'
-            ];
+            appData.servicosChart.data.datasets[0].backgroundColor = coresGrafico;
             appData.servicosChart.update();
         }
     }
