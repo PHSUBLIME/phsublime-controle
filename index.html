@@ -7406,7 +7406,7 @@ function renderizarProdutosLoja() {
                 });
             }
 
-           // B) Adiciona saldos pendentes de Pedidos Padrão (ex: 50% de sinal / a pagar na entrega)
+           // B) Adiciona saldos pendentes de Pedidos (Separando Crediário de Entregas)
             appData.pedidos.forEach(ped => {
                 if (ped.status !== 'Cancelado') {
                     const totalP = parseFloat(ped.total || 0);
@@ -7419,27 +7419,51 @@ function renderizarProdutosLoja() {
                         const temParcelasCrediario = appData.parcelas && appData.parcelas.some(par => par.pedido_id == ped.id);
 
                         if (saldoPendente > 0 && !temParcelasCrediario) {
-                            const venc = ped.dataEntrega || ped.data || hojeStr;
-                            let st = 'Pendente';
-                            if (venc < hojeStr) st = 'Atrasado';
-
                             const cli = appData.clientes.find(c => c.id == ped.clienteId);
                             const telWhats = cli ? (cli.whatsapp || cli.telefone || '') : '';
                             const descItens = ped.itens ? ped.itens.map(i => i.servico).join(', ') : 'Serviços';
+                            const isCrediario = ped.formaPagamento && ped.formaPagamento.includes('Crediário');
 
-                            lista.push({
-                                id: ped.id,
-                                tipoRegistro: 'saldo_pedido',
-                                pedidoId: ped.id,
-                                clienteId: ped.clienteId,
-                                clienteNome: ped.clienteNome || 'Cliente',
-                                whatsapp: telWhats,
-                                descricao: `Saldo Final Pedido #${ped.id} (${descItens})`,
-                                vencimento: venc,
-                                valor: saldoPendente,
-                                status: st,
-                                dataPagamento: null
-                            });
+                            if (isCrediario) {
+                                // CREDIÁRIO: NUNCA usa a Data Prevista de Entrega!
+                                // Puxa a data do Vencimento da Parcela informada no pedido
+                                const vencCrediario = ped.vencimentoPrimeiraParcela || hojeStr;
+                                let st = 'Pendente';
+                                if (vencCrediario < hojeStr) st = 'Atrasado';
+
+                                lista.push({
+                                    id: ped.id,
+                                    tipoRegistro: 'saldo_pedido',
+                                    pedidoId: ped.id,
+                                    clienteId: ped.clienteId,
+                                    clienteNome: ped.clienteNome || 'Cliente',
+                                    whatsapp: telWhats,
+                                    descricao: `Parcela Crediário Pedido #${ped.id} (${descItens})`,
+                                    vencimento: vencCrediario,
+                                    valor: saldoPendente,
+                                    status: st,
+                                    dataPagamento: null
+                                });
+                            } else {
+                                // VENDAS NORMAIS (Pix/Dinheiro): O saldo pendente é pago na entrega do produto
+                                const venc = ped.dataEntrega || ped.data || hojeStr;
+                                let st = 'Pendente';
+                                if (venc < hojeStr) st = 'Atrasado';
+
+                                lista.push({
+                                    id: ped.id,
+                                    tipoRegistro: 'saldo_pedido',
+                                    pedidoId: ped.id,
+                                    clienteId: ped.clienteId,
+                                    clienteNome: ped.clienteNome || 'Cliente',
+                                    whatsapp: telWhats,
+                                    descricao: `Saldo Final Pedido #${ped.id} (${descItens})`,
+                                    vencimento: venc,
+                                    valor: saldoPendente,
+                                    status: st,
+                                    dataPagamento: null
+                                });
+                            }
                         }
                     }
                 }
@@ -7449,43 +7473,6 @@ function renderizarProdutosLoja() {
             lista.sort((a, b) => (a.vencimento || '').localeCompare(b.vencimento || ''));
             return lista;
         }
-
-        // 2. Renderiza a Tela de Cobranças e os KPIs
-        function renderizarParcelasCobranca() {
-            const tbody = document.getElementById('tabela-cobrancas-body');
-            if (!tbody) return;
-            tbody.innerHTML = '';
-
-            const hojeStr = appData.dataAtual;
-            const busca = (document.getElementById('input-pesquisar-cobranca')?.value || '').toLowerCase();
-            const todasCobrancas = obterListaGeralCobrancas();
-
-            let totalAReceber = 0;
-            let totalAtrasados = 0;
-            let qtdAtrasados = 0;
-            let totalVenceHoje = 0;
-            let qtdVenceHoje = 0;
-            let totalRecebidoMes = 0;
-
-            const mesAnoAtual = hojeStr.substring(0, 7);
-
-            todasCobrancas.forEach(c => {
-                if (c.status === 'Pago') {
-                    if (c.dataPagamento && c.dataPagamento.startsWith(mesAnoAtual)) {
-                        totalRecebidoMes += c.valor;
-                    }
-                } else {
-                    totalAReceber += c.valor;
-
-                    if (c.vencimento < hojeStr) {
-                        totalAtrasados += c.valor;
-                        qtdAtrasados++;
-                    } else if (c.vencimento === hojeStr) {
-                        totalVenceHoje += c.valor;
-                        qtdVenceHoje++;
-                    }
-                }
-            });
 
             // Atualiza os Cards de topo
             document.getElementById('cob-kpi-total-receber').innerText = `R$ ${totalAReceber.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
