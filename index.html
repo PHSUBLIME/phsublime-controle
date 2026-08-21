@@ -4392,15 +4392,13 @@ function renderizarEstoque() {
             document.getElementById('ped-forma-pagamento').value = p.formaPagamento || 'Dinheiro';
         }
 
-        // Recupera o número de parcelas gravadas no pedido
+        // Recupera as parcelas diretamente da tabela de parcelas do banco
         const parcelasDoPedido = appData.parcelas ? appData.parcelas.filter(par => par.pedido_id == p.id) : [];
-        const qtdParc = p.numParcelas || (parcelasDoPedido.length > 0 ? parcelasDoPedido.length : 1);
+        const qtdParc = parcelasDoPedido.length > 0 ? parcelasDoPedido.length : 1;
         document.getElementById('ped-num-parcelas-crediario').value = qtdParc;
 
         const primeiraParc = parcelasDoPedido.find(par => par.numero_parcela == 1) || parcelasDoPedido[0];
-        if (p.vencimentoPrimeiraParcela) {
-            document.getElementById('ped-vencimento-primeira-parcela').value = p.vencimentoPrimeiraParcela;
-        } else if (primeiraParc && primeiraParc.vencimento) {
+        if (primeiraParc && primeiraParc.vencimento) {
             document.getElementById('ped-vencimento-primeira-parcela').value = primeiraParc.vencimento;
         }
 
@@ -4760,8 +4758,6 @@ function calcularPreviewCrediarioPedido() {
             statusPagamento: stPag,
             valorPago: valorPagoCalc,
             pagamentos: historicoPagamentos,
-            numParcelas: parseInt(document.getElementById('ped-num-parcelas-crediario')?.value || 1),
-            vencimentoPrimeiraParcela: document.getElementById('ped-vencimento-primeira-parcela')?.value || appData.dataAtual,
             dataEntrega: document.getElementById('ped-data-entrega').value || appData.dataAtual,
             responsavel: document.getElementById('ped-responsavel').value || usuarioAtualNome,
             formaPagamento: detalhePag,
@@ -7410,7 +7406,7 @@ function renderizarProdutosLoja() {
                 });
             }
 
-           // B) Adiciona saldos e parcelas de pedidos
+           // B) Adiciona saldos pendentes de Pedidos Padrão (ex: 50% de sinal / a pagar na entrega)
             appData.pedidos.forEach(ped => {
                 if (ped.status !== 'Cancelado') {
                     const totalP = parseFloat(ped.total || 0);
@@ -7423,55 +7419,27 @@ function renderizarProdutosLoja() {
                         const temParcelasCrediario = appData.parcelas && appData.parcelas.some(par => par.pedido_id == ped.id);
 
                         if (saldoPendente > 0 && !temParcelasCrediario) {
+                            const venc = ped.dataEntrega || ped.data || hojeStr;
+                            let st = 'Pendente';
+                            if (venc < hojeStr) st = 'Atrasado';
+
                             const cli = appData.clientes.find(c => c.id == ped.clienteId);
                             const telWhats = cli ? (cli.whatsapp || cli.telefone || '') : '';
                             const descItens = ped.itens ? ped.itens.map(i => i.servico).join(', ') : 'Serviços';
-                            const isCrediario = ped.formaPagamento && ped.formaPagamento.includes('Crediário');
 
-                            if (isCrediario) {
-                                // Se é Crediário, divide automaticamente nas N parcelas!
-                                const numP = ped.numParcelas || 1;
-                                const valP = saldoPendente / numP;
-                                const vencIni = ped.vencimentoPrimeiraParcela || ped.dataEntrega || ped.data || hojeStr;
-
-                                for (let i = 1; i <= numP; i++) {
-                                    const vencP = adicionarMesesISO(vencIni, i - 1);
-                                    let st = 'Pendente';
-                                    if (vencP < hojeStr) st = 'Atrasado';
-
-                                    lista.push({
-                                        id: `${ped.id}_${i}`,
-                                        tipoRegistro: 'saldo_pedido',
-                                        pedidoId: ped.id,
-                                        clienteId: ped.clienteId,
-                                        clienteNome: ped.clienteNome || 'Cliente',
-                                        whatsapp: telWhats,
-                                        descricao: `Parcela ${i}/${numP} (Pedido #${ped.id} - ${descItens})`,
-                                        vencimento: vencP,
-                                        valor: valP,
-                                        status: st,
-                                        dataPagamento: null
-                                    });
-                                }
-                            } else {
-                                const venc = ped.dataEntrega || ped.data || hojeStr;
-                                let st = 'Pendente';
-                                if (venc < hojeStr) st = 'Atrasado';
-
-                                lista.push({
-                                    id: ped.id,
-                                    tipoRegistro: 'saldo_pedido',
-                                    pedidoId: ped.id,
-                                    clienteId: ped.clienteId,
-                                    clienteNome: ped.clienteNome || 'Cliente',
-                                    whatsapp: telWhats,
-                                    descricao: `Saldo Final Pedido #${ped.id} (${descItens})`,
-                                    vencimento: venc,
-                                    valor: saldoPendente,
-                                    status: st,
-                                    dataPagamento: null
-                                });
-                            }
+                            lista.push({
+                                id: ped.id,
+                                tipoRegistro: 'saldo_pedido',
+                                pedidoId: ped.id,
+                                clienteId: ped.clienteId,
+                                clienteNome: ped.clienteNome || 'Cliente',
+                                whatsapp: telWhats,
+                                descricao: `Saldo Final Pedido #${ped.id} (${descItens})`,
+                                vencimento: venc,
+                                valor: saldoPendente,
+                                status: st,
+                                dataPagamento: null
+                            });
                         }
                     }
                 }
