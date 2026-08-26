@@ -149,7 +149,7 @@
     </div>
 
     <!-- BARRA LATERAL (SIDEBAR) -->
-    <aside class="w-full md:w-64 bg-neutral-900 border-b md:border-b-0 md:border-r border-neutral-800 p-5 flex flex-col justify-between shrink-0 no-print">
+    <aside class="w-full md:w-52 bg-neutral-900 border-b md:border-b-0 md:border-r border-neutral-800 p-4 flex flex-col justify-between shrink-0 no-print">
         <div>
             <div class="flex items-center gap-3 px-2 py-3 mb-6 border-b border-neutral-800">
                 <div class="w-12 h-12 shrink-0 flex items-center justify-center">
@@ -237,7 +237,7 @@
     </aside>
 
     <!-- CONTEÚDO PRINCIPAL -->
-    <main class="flex-1 p-4 md:p-8 overflow-y-auto space-y-6">
+    <main class="flex-1 p-4 md:p-5 overflow-y-auto space-y-6">
 
         <!-- ================= SEÇÃO: DASHBOARD ================= -->
         <section id="secao-dashboard" class="secao-conteudo space-y-6">
@@ -6792,7 +6792,7 @@ async function reverterBaixaParcela(id, dataInicialOriginal, numParcela) {
                         ${escapeAttr(o.status || 'Pendente')}
                     </span>
                 </td>
-                <td class="p-3 text-right space-x-1">
+                <td class="p-3 text-left space-x-1 whitespace-nowrap">
                     ${o.status !== 'Aprovado / Convertido' ? `
                         <button onclick="converterOrcamentoEmPedido(${o.id})" class="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white p-2 rounded-lg text-xs font-bold border border-emerald-500/30" title="⚡ Converter em Pedido">
                             <i class="fa-solid fa-cart-plus"></i> Virar Pedido
