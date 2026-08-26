@@ -3265,63 +3265,63 @@ function renderizarKanban() {
             });
         }
 
-       function enviarMensagemWhatsAppEntrega(pedidoId) {
-    const p = appData.pedidos.find(x => x.id == pedidoId);
-    if (!p) return;
+      function enviarMensagemWhatsAppFeedback(pedidoId) {
+            const p = appData.pedidos.find(x => x.id == pedidoId);
+            if (!p) return;
 
-    const cli = appData.clientes.find(c => c.id == p.clienteId);
+            const cli = appData.clientes.find(c => c.id == p.clienteId);
 
-    // Limpa os termos técnicos (como 4/4, 4/0, 250g, 300g, medidas)
-    const descProdutos = p.itens ? p.itens.map(i => {
-        let nome = i.servico || 'Item';
-        return nome
-            .replace(/\b[0-4]\/[0-4]\b/gi, '') // Remove 4/4, 4/0, 4/1, etc.
-            .replace(/\b\d+g\b/gi, '')         // Remove gramatura (ex: 250g, 300g)
-            .replace(/\b\d+x\d+cm\b/gi, '')    // Remove dimensões (ex: 10x14cm)
-            .replace(/\s+/g, ' ')
-            .trim();
-    }).filter(Boolean).join(', ') : 'seu pedido';
+            // Limpa os termos técnicos (4/4, 250g, tamanhos) para o nome ficar simples
+            const descProdutos = p.itens ? p.itens.map(i => {
+                let nome = i.servico || 'Item';
+                return nome
+                    .replace(/\b[0-4]\/[0-4]\b/gi, '')
+                    .replace(/\b\d+g\b/gi, '')
+                    .replace(/\b\d+x\d+cm\b/gi, '')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+            }).filter(Boolean).join(', ') : 'seu pedido';
 
-    const nomeCompleto = p.clienteNome || "Cliente";
-    const primeiroNome = nomeCompleto.trim().split(" ")[0];
+            const nomeCompleto = p.clienteNome || "Cliente";
+            const primeiroNome = nomeCompleto.trim().split(" ")[0];
 
-    // Identifica o horário atual do envio para definir a saudação
-    const horaAtual = new Date().getHours();
-    let saudacao = "Bom dia";
-    if (horaAtual >= 12 && horaAtual < 18) {
-        saudacao = "Boa tarde";
-    } else if (horaAtual >= 18 || horaAtual < 5) {
-        saudacao = "Boa noite";
-    }
+            // Identifica o horário atual para enviar a saudação
+            const horaAtual = new Date().getHours();
+            let saudacao = "Bom dia";
+            if (horaAtual >= 12 && horaAtual < 18) {
+                saudacao = "Boa tarde";
+            } else if (horaAtual >= 18 || horaAtual < 5) {
+                saudacao = "Boa noite";
+            }
 
-    let telClean = '';
-    if (cli) {
-        const telRaw = cli.whatsapp || cli.telefone || '';
-        telClean = telRaw.replace(/\D/g, '');
-        if (telClean.length === 10 || telClean.length === 11) {
-            telClean = '55' + telClean;
+            let telClean = '';
+            if (cli) {
+                const telRaw = cli.whatsapp || cli.telefone || '';
+                telClean = telRaw.replace(/\D/g, '');
+                if (telClean.length === 10 || telClean.length === 11) {
+                    telClean = '55' + telClean;
+                }
+            }
+
+            const msg = "*Atendimento PHSUBLIME (" + usuarioAtualNome + ")*\n\n" +
+                "Olá, *" + primeiroNome + "*! " + saudacao + ", tudo bem?\n\n" +
+                "Passando para saber se deu tudo certo com a entrega do seu *" + descProdutos + "*! 📦✨\n\n" +
+                "Como atendemos todo o Estado do Rio de Janeiro, o seu depoimento nos ajuda demais a mostrar para novos clientes que a PHSUBLIME é 100% de confiança!\n\n" +
+                "*Se puder nos mandar um áudio ou mensagem rápida dizendo:*\n" +
+                "📍 De qual *bairro/cidade* você é\n" +
+                "🚚 O que achou da *rapidez da entrega* e do *atendimento*\n" +
+                "⭐ O que achou da *qualidade do material*\n\n" +
+                "Aproveite para nos seguir no Instagram e acompanhar nossas novidades e promoções:\n" +
+                "👉 https://www.instagram.com/phsublime/\n\n" +
+                "*(Se puder postar uma fotinha do produto e marcar a gente lá, ficaremos muito gratos!)*\n\n" +
+                "Muito obrigado pela parceria e conte sempre com a gente! ❤️";
+
+            const url = telClean ?
+                "https://api.whatsapp.com/send?phone=" + telClean + "&text=" + encodeURIComponent(msg) :
+                "https://api.whatsapp.com/send?text=" + encodeURIComponent(msg);
+
+            window.open(url, '_blank');
         }
-    }
-
-    const isRetirada = (p.tipoEntrega === 'Retirada');
-
-    const msg = isRetirada ?
-        "*Atendimento PHSUBLIME (" + usuarioAtualNome + ")*\n\n" +
-        "Olá, *" + primeiroNome + "*! " + saudacao + ", tudo bem?\n\n" +
-        "Passando para avisar que o seu pedido *#" + p.id + "* (*" + descProdutos + "*) já está *PRONTO PARA RETIRADA* na PHSUBLIME! 📦✨\n\n" +
-        "Pode vir retirar no balcão quando desejar. Qualquer dúvida estamos à disposição! - *PHSUBLIME*" :
-
-        "*Atendimento PHSUBLIME (" + usuarioAtualNome + ")*\n\n" +
-        "Olá, *" + primeiroNome + "*! " + saudacao + ", tudo bem?\n\n" +
-        "Passando para avisar que o seu pedido *#" + p.id + "* (*" + descProdutos + "*) da PHSUBLIME está agendado para ser entregue hoje! 🚚✨\n\n" +
-        "Qualquer dúvida estamos à disposição. Obrigado! - *PHSUBLIME*";
-
-    const url = telClean ?
-        "https://api.whatsapp.com/send?phone=" + telClean + "&text=" + encodeURIComponent(msg) :
-        "https://api.whatsapp.com/send?text=" + encodeURIComponent(msg);
-
-    window.open(url, '_blank');
-}
 
         async function concluirEntregaRapida(pedidoId) {
             const { error } = await supabaseClient.from('pedidos').update({ status: 'Entregue' }).eq('id', pedidoId);
