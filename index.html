@@ -3265,44 +3265,63 @@ function renderizarKanban() {
             });
         }
 
-        function enviarMensagemWhatsAppEntrega(pedidoId) {
-            const p = appData.pedidos.find(x => x.id == pedidoId);
-            if (!p) return;
+       function enviarMensagemWhatsAppEntrega(pedidoId) {
+    const p = appData.pedidos.find(x => x.id == pedidoId);
+    if (!p) return;
 
-            const cli = appData.clientes.find(c => c.id == p.clienteId);
-            const descProdutos = p.itens ? p.itens.map(i => `${i.servico || 'Item'} (${i.qtd}x)`).join(', ') : 'seu pedido';
+    const cli = appData.clientes.find(c => c.id == p.clienteId);
 
-            const nomeCompleto = p.clienteNome || "Cliente";
-            const primeiroNome = nomeCompleto.trim().split(" ")[0];
+    // Limpa os termos técnicos (como 4/4, 4/0, 250g, 300g, medidas)
+    const descProdutos = p.itens ? p.itens.map(i => {
+        let nome = i.servico || 'Item';
+        return nome
+            .replace(/\b[0-4]\/[0-4]\b/gi, '') // Remove 4/4, 4/0, 4/1, etc.
+            .replace(/\b\d+g\b/gi, '')         // Remove gramatura (ex: 250g, 300g)
+            .replace(/\b\d+x\d+cm\b/gi, '')    // Remove dimensões (ex: 10x14cm)
+            .replace(/\s+/g, ' ')
+            .trim();
+    }).filter(Boolean).join(', ') : 'seu pedido';
 
-            let telClean = '';
-            if (cli) {
-                const telRaw = cli.whatsapp || cli.telefone || '';
-                telClean = telRaw.replace(/\D/g, '');
-                if (telClean.length === 10 || telClean.length === 11) {
-                    telClean = '55' + telClean;
-                }
-            }
+    const nomeCompleto = p.clienteNome || "Cliente";
+    const primeiroNome = nomeCompleto.trim().split(" ")[0];
 
-            const isRetirada = (p.tipoEntrega === 'Retirada');
+    // Identifica o horário atual do envio para definir a saudação
+    const horaAtual = new Date().getHours();
+    let saudacao = "Bom dia";
+    if (horaAtual >= 12 && horaAtual < 18) {
+        saudacao = "Boa tarde";
+    } else if (horaAtual >= 18 || horaAtual < 5) {
+        saudacao = "Boa noite";
+    }
 
-            const msg = isRetirada ?
-                "*Atendimento PHSUBLIME (" + usuarioAtualNome + ")*\n\n" +
-                "Olá, *" + primeiroNome + "*! Tudo bem?\n\n" +
-                "Passando para avisar que o seu pedido *#" + p.id + "* (*" + descProdutos + "*) já está *PRONTO PARA RETIRADA* na PHSUBLIME! 📦✨\n\n" +
-                "Pode vir retirar no balcão quando desejar. Qualquer dúvida estamos à disposição! - *PHSUBLIME*" :
-
-                "*Atendimento PHSUBLIME (" + usuarioAtualNome + ")*\n\n" +
-                "Olá, *" + primeiroNome + "*! Tudo bem?\n\n" +
-                "Passando para avisar que o seu pedido *#" + p.id + "* (*" + descProdutos + "*) da PHSUBLIME está agendado para ser entregue hoje! 🚚✨\n\n" +
-                "Qualquer dúvida estamos à disposição. Obrigado! - *PHSUBLIME*";
-
-            const url = telClean ?
-                "https://api.whatsapp.com/send?phone=" + telClean + "&text=" + encodeURIComponent(msg) :
-                "https://api.whatsapp.com/send?text=" + encodeURIComponent(msg);
-
-            window.open(url, '_blank');
+    let telClean = '';
+    if (cli) {
+        const telRaw = cli.whatsapp || cli.telefone || '';
+        telClean = telRaw.replace(/\D/g, '');
+        if (telClean.length === 10 || telClean.length === 11) {
+            telClean = '55' + telClean;
         }
+    }
+
+    const isRetirada = (p.tipoEntrega === 'Retirada');
+
+    const msg = isRetirada ?
+        "*Atendimento PHSUBLIME (" + usuarioAtualNome + ")*\n\n" +
+        "Olá, *" + primeiroNome + "*! " + saudacao + ", tudo bem?\n\n" +
+        "Passando para avisar que o seu pedido *#" + p.id + "* (*" + descProdutos + "*) já está *PRONTO PARA RETIRADA* na PHSUBLIME! 📦✨\n\n" +
+        "Pode vir retirar no balcão quando desejar. Qualquer dúvida estamos à disposição! - *PHSUBLIME*" :
+
+        "*Atendimento PHSUBLIME (" + usuarioAtualNome + ")*\n\n" +
+        "Olá, *" + primeiroNome + "*! " + saudacao + ", tudo bem?\n\n" +
+        "Passando para avisar que o seu pedido *#" + p.id + "* (*" + descProdutos + "*) da PHSUBLIME está agendado para ser entregue hoje! 🚚✨\n\n" +
+        "Qualquer dúvida estamos à disposição. Obrigado! - *PHSUBLIME*";
+
+    const url = telClean ?
+        "https://api.whatsapp.com/send?phone=" + telClean + "&text=" + encodeURIComponent(msg) :
+        "https://api.whatsapp.com/send?text=" + encodeURIComponent(msg);
+
+    window.open(url, '_blank');
+}
 
         async function concluirEntregaRapida(pedidoId) {
             const { error } = await supabaseClient.from('pedidos').update({ status: 'Entregue' }).eq('id', pedidoId);
