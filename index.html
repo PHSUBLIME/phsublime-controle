@@ -526,6 +526,9 @@
                     <button onclick="abrirModalMassa()" class="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 px-4 py-2.5 rounded-xl font-medium text-sm transition-all">
                         <i class="fa-solid fa-file-import text-yellow-400"></i> Adicionar em Massa
                     </button>
+                    <button onclick="limparClientesDuplicadosExistentes()" class="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-yellow-400 border border-neutral-700 px-4 py-2.5 rounded-xl font-medium text-sm transition-all" title="Encontrar e apagar cadastros repetidos">
+       <i class="fa-solid fa-broom"></i> Limpar Duplicados
+   </button>
                     <button id="btn-excluir-massa-cliente" onclick="excluirClientesEmMassa()" class="hidden flex items-center gap-2 bg-rose-600 hover:bg-rose-500 text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-rose-950/40">
     <i class="fa-solid fa-trash-can"></i> Excluir Selecionados (0)
 </button>
@@ -2302,6 +2305,50 @@
         </div>
     </div>
 
+    <!-- MODAL REVISAR E LIMPAR DUPLICADOS -->
+    <div id="modal-limpar-duplicados" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[980] hidden flex items-center justify-center p-4">
+        <div class="bg-neutral-900 border border-neutral-800 rounded-2xl max-w-3xl w-full p-6 space-y-4 shadow-2xl overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center border-b border-neutral-800 pb-3">
+                <div>
+                    <h3 class="text-xl font-black text-yellow-400 flex items-center gap-2">
+                        <i class="fa-solid fa-broom text-yellow-400"></i> Cadastros Duplicados Encontrados (<span id="count-duplicados-total">0</span>)
+                    </h3>
+                    <p class="text-xs text-neutral-400 mt-0.5">Revise os cadastros repetidos. O cadastro original mais antigo de cada um será preservado.</p>
+                </div>
+                <button onclick="fecharModalLimparDuplicados()" class="text-neutral-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="flex justify-between items-center bg-neutral-950 p-3 rounded-xl border border-neutral-800 text-xs">
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="check-todos-duplicados" onchange="alternarSelecaoTodosDuplicados(this)" class="rounded bg-neutral-800 border-neutral-700 text-yellow-400 focus:ring-0 w-4 h-4 cursor-pointer">
+                    <label for="check-todos-duplicados" class="text-white font-bold cursor-pointer">Selecionar Todos</label>
+                </div>
+                <button id="btn-excluir-duplicados-massa" onclick="excluirDuplicadosSelecionadosMassa()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-lg shadow-rose-950/40 transition-all">
+                    <i class="fa-solid fa-trash-can"></i> Apagar Selecionados (<span id="count-duplicados-selecionados">0</span>)
+                </button>
+            </div>
+
+            <div class="overflow-x-auto border border-neutral-800 rounded-xl bg-neutral-950">
+                <table class="w-full text-left text-xs text-neutral-300">
+                    <thead class="bg-neutral-800 text-yellow-400 uppercase text-[10px]">
+                        <tr>
+                            <th class="p-2.5 text-center w-10">#</th>
+                            <th class="p-2.5">Cliente Duplicado</th>
+                            <th class="p-2.5">Dado Repetido (Motivo)</th>
+                            <th class="p-2.5 text-right">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-modal-duplicados-body" class="divide-y divide-neutral-800"></tbody>
+                </table>
+            </div>
+
+            <div class="flex justify-end pt-2 border-t border-neutral-800">
+                <button type="button" onclick="fecharModalLimparDuplicados()" class="px-5 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-bold text-xs rounded-xl">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
     <!-- MODAL MASSA ESTOQUE / PRODUTOS -->
     <div id="modal-massa-estoque" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-neutral-900 border border-neutral-800 rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl">
@@ -4085,6 +4132,190 @@ function renderizarEstoque() {
                 }
             }
         }
+        let listaDuplicadosEncontrados = [];
+    let duplicadosSelecionados = [];
+
+    async function limparClientesDuplicadosExistentes() {
+        if (!appData.clientes || appData.clientes.length === 0) {
+            mostrarToast("Nenhum cliente cadastrado no momento.", "alerta");
+            return;
+        }
+
+        const apenasNumeros = (str) => (str || '').replace(/\D/g, '');
+        const normalizarEmail = (str) => (str || '').trim().toLowerCase();
+
+        let cpfsVistos = new Map();
+        let telsVistos = new Map();
+        let emailsVistos = new Map();
+
+        listaDuplicadosEncontrados = [];
+        duplicadosSelecionados = [];
+
+        // Ordena pelo ID mais antigo primeiro (mantém o cadastro original)
+        const clientesOrdenados = [...appData.clientes].sort((a, b) => (a.id || 0) - (b.id || 0));
+
+        clientesOrdenados.forEach(c => {
+            const cpfNum = apenasNumeros(c.cpf);
+            const telNum = apenasNumeros(c.telefone || c.whatsapp);
+            const emailNorm = normalizarEmail(c.email);
+
+            let motivo = null;
+
+            if (cpfNum && cpfsVistos.has(cpfNum)) {
+                const orig = cpfsVistos.get(cpfNum);
+                motivo = `CPF repetido com "${orig.nome}"`;
+            } else if (telNum && telNum.length >= 8 && telsVistos.has(telNum)) {
+                const orig = telsVistos.get(telNum);
+                motivo = `Telefone repetido com "${orig.nome}"`;
+            } else if (emailNorm && emailsVistos.has(emailNorm)) {
+                const orig = emailsVistos.get(emailNorm);
+                motivo = `E-mail repetido com "${orig.nome}"`;
+            }
+
+            if (motivo) {
+                listaDuplicadosEncontrados.push({
+                    cliente: c,
+                    motivo: motivo
+                });
+            } else {
+                if (cpfNum) cpfsVistos.set(cpfNum, c);
+                if (telNum && telNum.length >= 8) telsVistos.set(telNum, c);
+                if (emailNorm) emailsVistos.set(emailNorm, c);
+            }
+        });
+
+        if (listaDuplicadosEncontrados.length === 0) {
+            mostrarToast("Excelente! Nenhum cliente duplicado foi encontrado na sua base.", "sucesso");
+            return;
+        }
+
+        renderizarModalDuplicados();
+        document.getElementById('modal-limpar-duplicados').classList.remove('hidden');
+    }
+
+    function fecharModalLimparDuplicados() {
+        document.getElementById('modal-limpar-duplicados').classList.add('hidden');
+    }
+
+    function renderizarModalDuplicados() {
+        const tbody = document.getElementById('tabela-modal-duplicados-body');
+        const countTotal = document.getElementById('count-duplicados-total');
+        const countSel = document.getElementById('count-duplicados-selecionados');
+        const checkTodos = document.getElementById('check-todos-duplicados');
+
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        countTotal.innerText = listaDuplicadosEncontrados.length;
+        countSel.innerText = duplicadosSelecionados.length;
+
+        if (checkTodos) {
+            checkTodos.checked = (listaDuplicadosEncontrados.length > 0 && duplicadosSelecionados.length === listaDuplicadosEncontrados.length);
+        }
+
+        if (listaDuplicadosEncontrados.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-neutral-500 text-xs italic">Todos os cadastros duplicados foram removidos! 🎉</td></tr>`;
+            return;
+        }
+
+        listaDuplicadosEncontrados.forEach(item => {
+            const c = item.cliente;
+            const isChecked = duplicadosSelecionados.includes(c.id);
+
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-neutral-900 transition-all";
+            tr.innerHTML = `
+                <td class="p-2.5 text-center">
+                    <input type="checkbox" value="${c.id}" ${isChecked ? 'checked' : ''} onchange="alternarSelecaoDuplicadoIndividual(${c.id}, this)" class="check-duplicado rounded bg-neutral-800 border-neutral-700 text-yellow-400 focus:ring-0 w-4 h-4 cursor-pointer">
+                </td>
+                <td class="p-2.5">
+                    <strong class="text-white text-xs block">${escapeAttr(c.nome)}</strong>
+                    <span class="text-[10px] text-neutral-400">${escapeAttr(c.telefone || c.whatsapp || c.email || c.cpf || '-')}</span>
+                </td>
+                <td class="p-2.5 text-xs text-rose-400 font-semibold">
+                    <i class="fa-solid fa-triangle-exclamation text-[10px]"></i> ${escapeAttr(item.motivo)}
+                </td>
+                <td class="p-2.5 text-right">
+                    <button onclick="excluirDuplicadoUmPorUm(${c.id})" class="bg-rose-950/60 hover:bg-rose-900 text-rose-400 font-bold px-2.5 py-1.5 rounded-lg text-xs border border-rose-800/60 transition-all flex items-center gap-1 ml-auto" title="Apagar apenas este cadastro">
+                        <i class="fa-solid fa-trash"></i> Apagar
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function alternarSelecaoTodosDuplicados(cbGeral) {
+        duplicadosSelecionados = [];
+        if (cbGeral.checked) {
+            duplicadosSelecionados = listaDuplicadosEncontrados.map(item => item.cliente.id);
+        }
+        renderizarModalDuplicados();
+    }
+
+    function alternarSelecaoDuplicadoIndividual(id, cb) {
+        if (cb.checked) {
+            if (!duplicadosSelecionados.includes(id)) duplicadosSelecionados.push(id);
+        } else {
+            duplicadosSelecionados = duplicadosSelecionados.filter(i => i !== id);
+        }
+        renderizarModalDuplicados();
+    }
+
+    async function excluirDuplicadoUmPorUm(id) {
+        const confirmou = await confirmarAcao(
+            "Apagar Cliente Duplicado",
+            "Deseja realmente apagar este cadastro duplicado?",
+            "Sim, Apagar",
+            "fa-trash-can",
+            "rose"
+        );
+
+        if (confirmou) {
+            const { error } = await supabaseClient.from('clientes').delete().eq('id', id);
+
+            if (!error) {
+                listaDuplicadosEncontrados = listaDuplicadosEncontrados.filter(item => item.cliente.id !== id);
+                duplicadosSelecionados = duplicadosSelecionados.filter(i => i !== id);
+                await carregarDados();
+                renderizarModalDuplicados();
+                mostrarToast("Cadastro duplicado removido!");
+            } else {
+                mostrarToast(`Erro ao apagar: ${error.message}`, "erro");
+            }
+        }
+    }
+
+    async function excluirDuplicadosSelecionadosMassa() {
+        if (duplicadosSelecionados.length === 0) {
+            mostrarToast("Selecione pelo menos um cadastro duplicado para apagar.", "alerta");
+            return;
+        }
+
+        const confirmou = await confirmarAcao(
+            "🧹 APAGAR DUPLICADOS SELECIONADOS",
+            `Deseja realmente apagar os ${duplicadosSelecionados.length} cadastro(s) duplicado(s) selecionado(s)?`,
+            "Sim, Apagar Selecionados",
+            "fa-trash-can",
+            "rose"
+        );
+
+        if (confirmou) {
+            mostrarToast(`Apagando ${duplicadosSelecionados.length} duplicados...`);
+
+            const { error } = await supabaseClient.from('clientes').delete().in('id', duplicadosSelecionados);
+
+            if (!error) {
+                listaDuplicadosEncontrados = listaDuplicadosEncontrados.filter(item => !duplicadosSelecionados.includes(item.cliente.id));
+                duplicadosSelecionados = [];
+                await carregarDados();
+                renderizarModalDuplicados();
+                mostrarToast("Cadastros duplicados selecionados foram removidos com sucesso! 🎉");
+            } else {
+                mostrarToast(`Erro ao apagar: ${error.message}`, "erro");
+            }
+        }
+    }
     function renderizarClientes() {
         const tbody = document.getElementById('tabela-clientes-body');
         if (!tbody) return;
