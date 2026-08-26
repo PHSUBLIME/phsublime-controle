@@ -2305,46 +2305,24 @@
         </div>
     </div>
 
-    <!-- MODAL REVISAR E LIMPAR DUPLICADOS -->
+    <!-- MODAL REVISAR E COMPARAR DUPLICADOS -->
     <div id="modal-limpar-duplicados" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[980] hidden flex items-center justify-center p-4">
-        <div class="bg-neutral-900 border border-neutral-800 rounded-2xl max-w-3xl w-full p-6 space-y-4 shadow-2xl overflow-y-auto max-h-[90vh]">
+        <div class="bg-neutral-900 border border-neutral-800 rounded-2xl max-w-4xl w-full p-6 space-y-4 shadow-2xl overflow-y-auto max-h-[90vh]">
             <div class="flex justify-between items-center border-b border-neutral-800 pb-3">
                 <div>
                     <h3 class="text-xl font-black text-yellow-400 flex items-center gap-2">
-                        <i class="fa-solid fa-broom text-yellow-400"></i> Cadastros Duplicados Encontrados (<span id="count-duplicados-total">0</span>)
+                        <i class="fa-solid fa-broom text-yellow-400"></i> Comparador e Mesclador de Cadastros
                     </h3>
-                    <p class="text-xs text-neutral-400 mt-0.5">Revise os cadastros repetidos. O cadastro original mais antigo de cada um será preservado.</p>
+                    <p class="text-xs text-neutral-400 mt-0.5">Escolha se deseja Unir as informações (Mesclar) ou Apagar um cadastro duplicado.</p>
                 </div>
                 <button onclick="fecharModalLimparDuplicados()" class="text-neutral-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
-            <div class="flex justify-between items-center bg-neutral-950 p-3 rounded-xl border border-neutral-800 text-xs">
-                <div class="flex items-center gap-2">
-                    <input type="checkbox" id="check-todos-duplicados" onchange="alternarSelecaoTodosDuplicados(this)" class="rounded bg-neutral-800 border-neutral-700 text-yellow-400 focus:ring-0 w-4 h-4 cursor-pointer">
-                    <label for="check-todos-duplicados" class="text-white font-bold cursor-pointer">Selecionar Todos</label>
-                </div>
-                <button id="btn-excluir-duplicados-massa" onclick="excluirDuplicadosSelecionadosMassa()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-lg shadow-rose-950/40 transition-all">
-                    <i class="fa-solid fa-trash-can"></i> Apagar Selecionados (<span id="count-duplicados-selecionados">0</span>)
-                </button>
-            </div>
-
-            <div class="overflow-x-auto border border-neutral-800 rounded-xl bg-neutral-950">
-                <table class="w-full text-left text-xs text-neutral-300">
-                    <thead class="bg-neutral-800 text-yellow-400 uppercase text-[10px]">
-                        <tr>
-                            <th class="p-2.5 text-center w-10">#</th>
-                            <th class="p-2.5">Cliente Duplicado</th>
-                            <th class="p-2.5">Dado Repetido (Motivo)</th>
-                            <th class="p-2.5 text-right">Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabela-modal-duplicados-body" class="divide-y divide-neutral-800"></tbody>
-                </table>
-            </div>
+            <div id="container-grupos-duplicados" class="space-y-4"></div>
 
             <div class="flex justify-end pt-2 border-t border-neutral-800">
                 <button type="button" onclick="fecharModalLimparDuplicados()" class="px-5 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-bold text-xs rounded-xl">
-                    Fechar
+                    Concluir / Fechar
                 </button>
             </div>
         </div>
@@ -4311,6 +4289,233 @@ function renderizarEstoque() {
                 await carregarDados();
                 renderizarModalDuplicados();
                 mostrarToast("Cadastros duplicados selecionados foram removidos com sucesso! 🎉");
+            } else {
+                mostrarToast(`Erro ao apagar: ${error.message}`, "erro");
+            }
+        }
+    }
+        let gruposDuplicadosMapeados = [];
+
+    async function limparClientesDuplicadosExistentes() {
+        if (!appData.clientes || appData.clientes.length === 0) {
+            mostrarToast("Nenhum cliente cadastrado no momento.", "alerta");
+            return;
+        }
+
+        const apenasNumeros = (str) => (str || '').replace(/\D/g, '');
+        const normalizarEmail = (str) => (str || '').trim().toLowerCase();
+
+        let mapaGrupos = new Map();
+
+        // Mapeia duplicados por CPF, Telefone ou E-mail
+        appData.clientes.forEach(c => {
+            const cpf = apenasNumeros(c.cpf);
+            const tel = apenasNumeros(c.telefone || c.whatsapp);
+            const email = normalizarEmail(c.email);
+
+            let chave = null;
+            let motivo = '';
+
+            if (cpf) {
+                chave = 'cpf_' + cpf;
+                motivo = `CPF: ${c.cpf}`;
+            } else if (tel && tel.length >= 8) {
+                chave = 'tel_' + tel;
+                motivo = `Telefone: ${c.telefone || c.whatsapp}`;
+            } else if (email) {
+                chave = 'email_' + email;
+                motivo = `E-mail: ${c.email}`;
+            }
+
+            if (chave) {
+                if (!mapaGrupos.has(chave)) {
+                    mapaGrupos.set(chave, { motivo: motivo, clientes: [] });
+                }
+                const grupo = mapaGrupos.get(chave);
+                if (!grupo.clientes.some(x => x.id === c.id)) {
+                    grupo.clientes.push(c);
+                }
+            }
+        });
+
+        // Filtra para exibir apenas grupos que realmente tenham 2 ou mais cadastros
+        gruposDuplicadosMapeados = [];
+        mapaGrupos.forEach((grupo) => {
+            if (grupo.clientes.length > 1) {
+                // Ordena dentro do grupo para colocar o cadastro com NOME MAIS COMPLETO primeiro
+                grupo.clientes.sort((a, b) => (b.nome || '').length - (a.nome || '').length);
+                gruposDuplicadosMapeados.push(grupo);
+            }
+        });
+
+        if (gruposDuplicadosMapeados.length === 0) {
+            mostrarToast("Excelente! Nenhum cliente duplicado foi encontrado na sua base.", "sucesso");
+            return;
+        }
+
+        renderizarModalDuplicados();
+        document.getElementById('modal-limpar-duplicados').classList.remove('hidden');
+    }
+
+    function fecharModalLimparDuplicados() {
+        document.getElementById('modal-limpar-duplicados').classList.add('hidden');
+    }
+
+    function renderizarModalDuplicados() {
+        const container = document.getElementById('container-grupos-duplicados');
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (gruposDuplicadosMapeados.length === 0) {
+            container.innerHTML = `<div class="p-8 text-center text-emerald-400 font-bold text-sm bg-neutral-950 rounded-xl border border-neutral-800">
+                <i class="fa-solid fa-circle-check text-2xl mb-2 block"></i> Todos os cadastros duplicados foram resolvidos com sucesso! 🎉
+            </div>`;
+            return;
+        }
+
+        gruposDuplicadosMapeados.forEach((grupo, gIdx) => {
+            const cardGrupo = document.createElement('div');
+            cardGrupo.className = "bg-neutral-950 border border-neutral-800 p-4 rounded-xl space-y-3";
+
+            let htmlClientes = '';
+
+            grupo.clientes.forEach((c, cIdx) => {
+                const isPrincipal = (cIdx === 0); // Primeiro é o principal sugerido
+                const enderecoComp = [c.endereco, c.numero, c.complemento, c.bairro, c.cidade, c.estado].filter(Boolean).join(', ');
+
+                htmlClientes += `
+                    <div class="p-3.5 rounded-xl border ${isPrincipal ? 'bg-neutral-900 border-yellow-400/40' : 'bg-neutral-900/60 border-neutral-800'} text-xs space-y-2">
+                        <div class="flex justify-between items-start flex-wrap gap-2">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <strong class="text-white text-sm font-bold">${escapeAttr(c.nome)}</strong>
+                                    ${isPrincipal ? '<span class="px-2 py-0.5 text-[9px] rounded-full font-black bg-yellow-400/20 text-yellow-400 border border-yellow-400/40">⭐ Nome Mais Completo</span>' : ''}
+                                </div>
+                                <span class="text-[10px] text-neutral-500 font-mono">ID: #${c.id}</span>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                ${!isPrincipal ? `
+                                    <button onclick="mesclarClientesDuplicados(${grupo.clientes[0].id}, ${c.id}, ${gIdx})" class="bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-3 py-1.5 rounded-lg text-xs transition-all shadow-md flex items-center gap-1.5">
+                                        <i class="fa-solid fa-object-group"></i> ⚡ Unir com o Principal
+                                    </button>
+                                ` : ''}
+                                <button onclick="excluirClienteDoGrupo(${c.id}, ${gIdx})" class="bg-rose-950/60 hover:bg-rose-900 text-rose-400 font-bold px-2.5 py-1.5 rounded-lg text-xs border border-rose-800/60 transition-all flex items-center gap-1" title="Apagar apenas este cadastro">
+                                    <i class="fa-solid fa-trash"></i> Apagar
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-neutral-300 bg-black/40 p-2.5 rounded-lg border border-neutral-800/80">
+                            <div><strong>CPF/CNPJ:</strong> ${escapeAttr(c.cpf || 'Não informado')}</div>
+                            <div><strong>Tel / Whats:</strong> ${escapeAttr(c.telefone || c.whatsapp || 'Não informado')}</div>
+                            <div><strong>E-mail:</strong> ${escapeAttr(c.email || 'Não informado')}</div>
+                            <div><strong>Local:</strong> ${escapeAttr(c.cidade ? `${c.cidade}/${c.estado||''}` : 'Não informado')}</div>
+                            <div class="sm:col-span-2"><strong>Endereço:</strong> ${escapeAttr(enderecoComp || 'Não informado')}</div>
+                            ${c.obs ? `<div class="sm:col-span-2 text-yellow-300/90 italic"><strong>Obs:</strong> ${escapeAttr(c.obs)}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            cardGrupo.innerHTML = `
+                <div class="flex justify-between items-center border-b border-neutral-800 pb-2">
+                    <span class="text-xs font-bold text-rose-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Conflito Encontrado (${escapeAttr(grupo.motivo)})
+                    </span>
+                    <span class="text-[10px] text-neutral-500 font-bold uppercase">${grupo.clientes.length} Cadastros</span>
+                </div>
+                <div class="space-y-2.5">${htmlClientes}</div>
+            `;
+
+            container.appendChild(cardGrupo);
+        });
+    }
+
+    async function mesclarClientesDuplicados(idPrincipal, idSecundario, gIdx) {
+        const principal = appData.clientes.find(c => c.id == idPrincipal);
+        const secundario = appData.clientes.find(c => c.id == idSecundario);
+        if (!principal || !secundario) return;
+
+        const confirmou = await confirmarAcao(
+            "⚡ UNIR / MESCLAR CADASTROS",
+            `Deseja unir as informações de "${secundario.nome}" ao cadastro principal de "${principal.nome}"?\n\nTodas as informações incompletas e observações serão somadas.`,
+            "Sim, Unir Informações",
+            "fa-object-group",
+            "yellow"
+        );
+
+        if (confirmou) {
+            mostrarToast("Unindo cadastros...");
+
+            // Une todos os campos: se o principal estiver em branco, puxa do secundario
+            const cadastroUnificado = {
+                id: principal.id,
+                nome: (principal.nome && principal.nome.length >= (secundario.nome || '').length) ? principal.nome : secundario.nome,
+                cpf: principal.cpf || secundario.cpf || '',
+                telefone: principal.telefone || secundario.telefone || '',
+                whatsapp: principal.whatsapp || secundario.whatsapp || '',
+                email: principal.email || secundario.email || '',
+                bairro: principal.bairro || secundario.bairro || '',
+                cidade: principal.cidade || secundario.cidade || '',
+                estado: principal.estado || secundario.estado || '',
+                endereco: (principal.endereco && principal.endereco.length >= (secundario.endereco || '').length) ? principal.endereco : secundario.endereco,
+                obs: [principal.obs, secundario.obs].filter(Boolean).join(' | ')
+            };
+
+            // 1. Atualiza o cadastro principal no banco
+            const { error: errUpd } = await supabaseClient.from('clientes').upsert([cadastroUnificado]);
+            if (errUpd) {
+                mostrarToast(`Erro ao atualizar: ${errUpd.message}`, "erro");
+                return;
+            }
+
+            // 2. Reatribui pedidos antigos do secundario para o principal (se houver)
+            await supabaseClient.from('pedidos').update({ clienteId: principal.id, clienteNome: cadastroUnificado.nome }).eq('clienteId', secundario.id);
+
+            // 3. Deleta o secundario
+            await supabaseClient.from('clientes').delete().eq('id', secundario.id);
+
+            await carregarDados();
+
+            // Atualiza a lista na tela
+            let grupo = gruposDuplicadosMapeados[gIdx];
+            if (grupo) {
+                grupo.clientes = grupo.clientes.filter(c => c.id !== secundario.id);
+                if (grupo.clientes.length <= 1) {
+                    gruposDuplicadosMapeados.splice(gIdx, 1);
+                }
+            }
+
+            renderizarModalDuplicados();
+            mostrarToast(`Cadastros unidos com sucesso em "${cadastroUnificado.nome}"! 🎉`);
+        }
+    }
+
+    async function excluirClienteDoGrupo(id, gIdx) {
+        const confirmou = await confirmarAcao(
+            "Apagar Cadastro",
+            "Deseja realmente apagar apenas este cadastro?",
+            "Sim, Apagar",
+            "fa-trash-can",
+            "rose"
+        );
+
+        if (confirmou) {
+            const { error } = await supabaseClient.from('clientes').delete().eq('id', id);
+
+            if (!error) {
+                let grupo = gruposDuplicadosMapeados[gIdx];
+                if (grupo) {
+                    grupo.clientes = grupo.clientes.filter(c => c.id !== id);
+                    if (grupo.clientes.length <= 1) {
+                        gruposDuplicadosMapeados.splice(gIdx, 1);
+                    }
+                }
+
+                await carregarDados();
+                renderizarModalDuplicados();
+                mostrarToast("Cadastro removido com sucesso!");
             } else {
                 mostrarToast(`Erro ao apagar: ${error.message}`, "erro");
             }
