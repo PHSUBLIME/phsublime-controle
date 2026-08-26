@@ -18,6 +18,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- SheetJS (Leitor Nativo de Arquivos Excel .xlsx) -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #000000; }
         
@@ -2263,18 +2265,39 @@
         </div>
     </div>
 
-    <!-- MODAL MASSA CLIENTES -->
+   <!-- MODAL MASSA CLIENTES -->
     <div id="modal-massa" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-neutral-900 border border-neutral-800 rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-neutral-800 pb-3">
                 <h3 class="text-xl font-bold text-yellow-400"><i class="fa-solid fa-file-import"></i> Adicionar em Massa</h3>
                 <button onclick="fecharModalMassa()" class="text-neutral-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <p class="text-xs text-neutral-400">Cole em tabela (Nome; CPF; Telefone...) ou em lista/bloco do outro sistema (Nome, CPF, Whats, Endereço, etc.):</p>
-            <textarea id="input-massa-texto" rows="8" placeholder="Formatos aceitos:&#10;&#10;1) Em Bloco:&#10;Nome&#10;Rosangela Soares&#10;CPF/CNPJ&#10;82232342700&#10;Telefone&#10;(21)979275067&#10;Endereço&#10;Estrada Real casa 39&#10;&#10;2) Em Tabela (Ponto e vírgula):&#10;João Silva; 111.222.333-44; (21) 99999-8888; joao@email.com; Rio de Janeiro" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl p-3 text-white text-xs font-mono focus:outline-none focus:border-yellow-400"></textarea>
+
+            <!-- ÁREA PARA ESCOLHER ARQUIVO EXCEL DIRETO -->
+            <div class="bg-neutral-950 p-4 rounded-xl border border-neutral-800 space-y-2">
+                <label class="block text-yellow-400 text-xs font-bold uppercase flex items-center gap-1.5">
+                    <i class="fa-solid fa-file-excel text-emerald-400 text-sm"></i> Importar Direto da Planilha Excel (.xlsx / .xls)
+                </label>
+                <div class="flex items-center gap-3 pt-1">
+                    <input type="file" id="input-excel-file" accept=".xlsx, .xls, .csv" onchange="processarArquivoExcel(this)" class="hidden">
+                    <button type="button" onclick="document.getElementById('input-excel-file').click()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-emerald-950/40 transition-all">
+                        <i class="fa-solid fa-folder-open"></i> Escolher Arquivo (DadosClientes.xlsx)
+                    </button>
+                    <span id="txt-nome-excel-selecionado" class="text-xs text-neutral-400 italic">Nenhum arquivo selecionado</span>
+                </div>
+            </div>
+
+            <div class="relative flex py-1 items-center">
+                <div class="flex-grow border-t border-neutral-800"></div>
+                <span class="flex-shrink mx-3 text-neutral-500 text-[10px] uppercase font-bold">ou cole o texto da planilha</span>
+                <div class="flex-grow border-t border-neutral-800"></div>
+            </div>
+
+            <textarea id="input-massa-texto" rows="6" placeholder="Cole em tabela (Nome; CPF; Telefone...) ou em lista/bloco do outro sistema..." class="w-full bg-neutral-800 border border-neutral-700 rounded-xl p-3 text-white text-xs font-mono focus:outline-none focus:border-yellow-400"></textarea>
+
             <div class="flex justify-end gap-3 border-t border-neutral-800 pt-3">
                 <button onclick="fecharModalMassa()" class="px-4 py-2 bg-neutral-800 text-neutral-300 rounded-xl text-sm">Cancelar</button>
-                <button onclick="processarMassa()" class="px-5 py-2 bg-yellow-400 text-black font-bold rounded-xl text-sm">Importar</button>
+                <button onclick="processarMassa()" class="px-5 py-2 bg-yellow-400 text-black font-bold rounded-xl text-sm">Importar Texto Colado</button>
             </div>
         </div>
     </div>
@@ -4204,6 +4227,78 @@ function renderizarEstoque() {
 
     function fecharModalMassa() {
         document.getElementById('modal-massa').classList.add('hidden');
+    }
+        async function processarArquivoExcel(input) {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        document.getElementById('txt-nome-excel-selecionado').innerText = file.name;
+
+        mostrarToast(`Lendo planilha "${file.name}"...`);
+
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const jsonSheet = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+
+                if (jsonSheet.length === 0) {
+                    mostrarToast("A planilha selecionada está vazia!", "erro");
+                    return;
+                }
+
+                let novosClientes = [];
+
+                jsonSheet.forEach((row, idx) => {
+                    let rowClean = {};
+                    Object.keys(row).forEach(k => {
+                        const cleanKey = k.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+                        rowClean[cleanKey] = String(row[k]).trim();
+                    });
+
+                    const nomeVal = rowClean['nome'] || rowClean['cliente'] || rowClean['razaosocial'] || rowClean['nomefantasia'];
+                    if (nomeVal && nomeVal.toLowerCase() !== 'nome') {
+                        novosClientes.push({
+                            id: Math.floor(100000000 + Math.random() * 900000000) + idx,
+                            nome: nomeVal,
+                            cpf: rowClean['cpf'] || rowClean['cnpj'] || '',
+                            telefone: rowClean['telefone1'] || rowClean['telefone2'] || rowClean['telefone'] || rowClean['whatsapp'] || rowClean['tel'] || '',
+                            email: rowClean['email'] || '',
+                            bairro: rowClean['bairro'] || '',
+                            cidade: rowClean['cidade'] || '',
+                            estado: rowClean['uf'] || rowClean['estado'] || '',
+                            endereco: rowClean['endereco'] || rowClean['rua'] || '',
+                            obs: 'Importado de ' + file.name
+                        });
+                    }
+                });
+
+                if (novosClientes.length === 0) {
+                    mostrarToast("Nenhum cliente válido foi encontrado na planilha.", "erro");
+                    return;
+                }
+
+                mostrarToast(`Salvando ${novosClientes.length} clientes no banco de dados...`);
+
+                const { error } = await supabaseClient.from('clientes').insert(novosClientes);
+
+                if (!error) {
+                    fecharModalMassa();
+                    await carregarDados();
+                    mostrarToast(`Sucesso! ${novosClientes.length} clientes importados de "${file.name}"! 🎉`);
+                } else {
+                    console.error("Erro no Supabase:", error);
+                    mostrarToast(`Erro ao salvar no banco: ${error.message}`, "erro");
+                }
+            } catch (err) {
+                console.error("Erro ao ler Excel:", err);
+                mostrarToast("Falha ao ler o arquivo Excel. Verifique o formato do arquivo.", "erro");
+            }
+        };
+        reader.readAsArrayBuffer(file);
     }
 
     async function processarMassa() {
