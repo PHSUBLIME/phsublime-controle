@@ -3331,17 +3331,6 @@ function renderizarKanban() {
 
             const cli = appData.clientes.find(c => c.id == p.clienteId);
 
-            // Limpa os termos técnicos (4/4, 250g, tamanhos) para o nome ficar simples
-            const descProdutos = p.itens ? p.itens.map(i => {
-                let nome = i.servico || 'Item';
-                return nome
-                    .replace(/\b[0-4]\/[0-4]\b/gi, '')
-                    .replace(/\b\d+g\b/gi, '')
-                    .replace(/\b\d+x\d+cm\b/gi, '')
-                    .replace(/\s+/g, ' ')
-                    .trim();
-            }).filter(Boolean).join(', ') : 'seu pedido';
-
             const nomeCompleto = p.clienteNome || "Cliente";
             const primeiroNome = nomeCompleto.trim().split(" ")[0];
 
@@ -3365,16 +3354,10 @@ function renderizarKanban() {
 
             const msg = "*Atendimento PHSUBLIME (" + usuarioAtualNome + ")*\n\n" +
                 "Olá, *" + primeiroNome + "*! " + saudacao + ", tudo bem?\n\n" +
-                "Passando para saber se deu tudo certo com a entrega do seu *" + descProdutos + "*! 📦✨\n\n" +
-                "Como atendemos todo o Estado do Rio de Janeiro, o seu depoimento nos ajuda demais a mostrar para novos clientes que a PHSUBLIME é 100% de confiança!\n\n" +
-                "*Se puder nos mandar um áudio ou mensagem rápida dizendo:*\n" +
-                "📍 De qual *bairro/cidade* você é\n" +
-                "🚚 O que achou da *rapidez da entrega* e do *atendimento*\n" +
-                "⭐ O que achou da *qualidade do material*\n\n" +
-                "Aproveite para nos seguir no Instagram e acompanhar nossas novidades e promoções:\n" +
+                "Se puder nos dar um feedback com um áudio ou texto rápido dizendo de qual *bairro/cidade* você é e o que achou do *atendimento, entrega e qualidade*, nos ajuda demais!\n\n" +
+                "Aproveita para seguir a gente no Insta:\n" +
                 "👉 https://www.instagram.com/phsublime/\n\n" +
-                "*(Se puder postar uma fotinha do produto e marcar a gente lá, ficaremos muito gratos!)*\n\n" +
-                "Muito obrigado pela parceria e conte sempre com a gente! ❤️";
+                "Muito obrigado pelo carinho! ❤️";
 
             const url = telClean ?
                 "https://api.whatsapp.com/send?phone=" + telClean + "&text=" + encodeURIComponent(msg) :
