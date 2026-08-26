@@ -3034,10 +3034,13 @@ function renderizarKanban() {
                             <i class="fa-solid fa-truck"></i> Confirmar Entrega
                         </button>
                     `;
-                } else if (p.status === 'Entregue') {
+              } else if (p.status === 'Entregue') {
                     destinoColuna = 'entregue';
                     cEntregue++;
                     botoesAcao = `
+                        <button onclick="enviarMensagemWhatsAppFeedback(${p.id})" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-lg text-xs transition-all shadow-md flex items-center justify-center gap-1.5 mb-1.5">
+                            <i class="fa-brands fa-whatsapp text-sm"></i> 💬 Pedir Feedback
+                        </button>
                         <span class="block text-center text-emerald-400 font-bold py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-[11px]">
                             <i class="fa-solid fa-check-double"></i> Concluído
                         </span>
@@ -3249,14 +3252,14 @@ function renderizarKanban() {
                                 <i class="fa-brands fa-whatsapp text-base"></i> ${isRetirada ? '📦 Produto Pronto! Avisar Retirada' : '🚚 Avisar Entrega Hoje'}
                             </button>
 
-                            ${!jaEntregue ? `
+                          ${!jaEntregue ? `
                                 <button onclick="concluirEntregaRapida(${p.id})" class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-4 py-2.5 rounded-xl text-xs shadow-lg shadow-yellow-950/30 transition-all">
                                     <i class="fa-solid fa-circle-check"></i> Marcar como Entregue
                                 </button>
                             ` : `
-                                <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5">
-                                    <i class="fa-solid fa-check-double"></i> Concluído
-                                </span>
+                                <button onclick="enviarMensagemWhatsAppFeedback(${p.id})" class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-lg shadow-purple-950/40 transition-all">
+                                    <i class="fa-brands fa-whatsapp text-base"></i> 💬 Pedir Feedback
+                                </button>
                             `}
                         </div>
                     </div>
@@ -3265,6 +3268,63 @@ function renderizarKanban() {
             });
         }
 
+        function enviarMensagemWhatsAppEntrega(pedidoId) {
+            const p = appData.pedidos.find(x => x.id == pedidoId);
+            if (!p) return;
+
+            const cli = appData.clientes.find(c => c.id == p.clienteId);
+
+            // Limpa os termos técnicos (como 4/4, 250g, medidas)
+            const descProdutos = p.itens ? p.itens.map(i => {
+                let nome = i.servico || 'Item';
+                return nome
+                    .replace(/\b[0-4]\/[0-4]\b/gi, '')
+                    .replace(/\b\d+g\b/gi, '')
+                    .replace(/\b\d+x\d+cm\b/gi, '')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+            }).filter(Boolean).join(', ') : 'seu pedido';
+
+            const nomeCompleto = p.clienteNome || "Cliente";
+            const primeiroNome = nomeCompleto.trim().split(" ")[0];
+
+            // Identifica o horário atual do envio para definir a saudação
+            const horaAtual = new Date().getHours();
+            let saudacao = "Bom dia";
+            if (horaAtual >= 12 && horaAtual < 18) {
+                saudacao = "Boa tarde";
+            } else if (horaAtual >= 18 || horaAtual < 5) {
+                saudacao = "Boa noite";
+            }
+
+            let telClean = '';
+            if (cli) {
+                const telRaw = cli.whatsapp || cli.telefone || '';
+                telClean = telRaw.replace(/\D/g, '');
+                if (telClean.length === 10 || telClean.length === 11) {
+                    telClean = '55' + telClean;
+                }
+            }
+
+            const isRetirada = (p.tipoEntrega === 'Retirada');
+
+            const msg = isRetirada ?
+                "*Atendimento PHSUBLIME (" + usuarioAtualNome + ")*\n\n" +
+                "Olá, *" + primeiroNome + "*! " + saudacao + ", tudo bem?\n\n" +
+                "Passando para avisar que o seu pedido *#" + p.id + "* (*" + descProdutos + "*) já está *PRONTO PARA RETIRADA* na PHSUBLIME! 📦✨\n\n" +
+                "Pode vir retirar no balcão quando desejar. Qualquer dúvida estamos à disposição! - *PHSUBLIME*" :
+
+                "*Atendimento PHSUBLIME (" + usuarioAtualNome + ")*\n\n" +
+                "Olá, *" + primeiroNome + "*! " + saudacao + ", tudo bem?\n\n" +
+                "Passando para avisar que o seu pedido *#" + p.id + "* (*" + descProdutos + "*) da PHSUBLIME está agendado para ser entregue hoje! 🚚✨\n\n" +
+                "Qualquer dúvida estamos à disposição. Obrigado! - *PHSUBLIME*";
+
+            const url = telClean ?
+                "https://api.whatsapp.com/send?phone=" + telClean + "&text=" + encodeURIComponent(msg) :
+                "https://api.whatsapp.com/send?text=" + encodeURIComponent(msg);
+
+            window.open(url, '_blank');
+        }
       function enviarMensagemWhatsAppFeedback(pedidoId) {
             const p = appData.pedidos.find(x => x.id == pedidoId);
             if (!p) return;
@@ -4991,6 +5051,9 @@ function calcularPreviewCrediarioPedido() {
                             <i class="fa-solid fa-dollar-sign"></i>
                         </button>
                     ` : ''}
+                    <button onclick="enviarMensagemWhatsAppFeedback(${p.id})" class="bg-purple-600/20 hover:bg-purple-600 text-purple-300 hover:text-white p-2 rounded-lg text-xs font-bold border border-purple-500/30" title="💬 Pedir Feedback no Whats">
+                        <i class="fa-solid fa-comments"></i>
+                    </button>
                     <button onclick="abrirModalComprovante(${p.id})" class="bg-yellow-400/20 hover:bg-yellow-400 text-yellow-400 hover:text-black p-2 rounded-lg text-xs font-bold border border-yellow-400/30" title="Gerar Comprovante / Recibo">
                         <i class="fa-solid fa-file-invoice"></i>
                     </button>
