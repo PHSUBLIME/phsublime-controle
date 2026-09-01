@@ -7560,11 +7560,11 @@ async function reverterBaixaParcela(id, dataInicialOriginal, numParcela) {
     }
 
     function baixarPDF() { window.print(); }
-// ================= FUNÇÃO DE RESGATE E RESTAURAÇÃO =================
+// ================= FUNÇÃO DE RESGATE E RESTAURAÇÃO CORRIGIDA =================
 async function restaurarDadosDoFechamento() {
     const confirmou = await confirmarAcao(
         "RESGATAR VENDAS E DESPESAS",
-        "Deseja resgatar todos os pedidos não concluídos e despesas do relatório do Histórico de volta para as telas ativas?",
+        "Deseja resgatar todos os pedidos e despesas do relatório do Histórico de volta para as telas ativas?",
         "Sim, Resgatar Agora",
         "fa-rotate-left",
         "yellow"
@@ -7574,6 +7574,7 @@ async function restaurarDadosDoFechamento() {
 
     mostrarToast("Buscando dados no Histórico do Supabase...");
 
+    // 1. Busca o último fechamento no Histórico
     const { data: fechamentos, error: errF } = await supabaseClient
         .from('fechamentos')
         .select('*')
@@ -7587,21 +7588,46 @@ async function restaurarDadosDoFechamento() {
 
     const ultimoFechamento = fechamentos[0];
 
-    const pedidosPendentes = (ultimoFechamento.pedidos || []).filter(p => p.status !== 'Entregue' && p.status !== 'Cancelado');
+    // 2. Limpa campos internos extras para o banco aceitar a gravação
+    const pedidosLimpos = (ultimoFechamento.pedidos || []).map(p => {
+        const copy = { ...p };
+        delete copy._originalIndex;
+        delete copy.created_at;
+        delete copy.updated_at;
+        return copy;
+    });
 
-    if (pedidosPendentes.length > 0) {
-        const { error: errP } = await supabaseClient.from('pedidos').upsert(pedidosPendentes);
-        if (errP) console.error("Erro ao restaurar pedidos:", errP.message);
+    // 3. Salva os pedidos de volta no banco
+    if (pedidosLimpos.length > 0) {
+        const { error: errP } = await supabaseClient.from('pedidos').upsert(pedidosLimpos);
+        if (errP) {
+            console.error("Erro ao restaurar pedidos:", errP);
+            mostrarToast(`Erro ao restaurar pedidos: ${errP.message}`, "erro");
+            return;
+        }
     }
 
-    const despesasAgosto = (ultimoFechamento.despesas || []).filter(d => !d.data || d.data.startsWith('2026-08'));
-    if (despesasAgosto.length > 0) {
-        const { error: errD } = await supabaseClient.from('despesas').upsert(despesasAgosto);
-        if (errD) console.error("Erro ao restaurar despesas:", errD.message);
+    // 4. Limpa e restaura as despesas do mês
+    const despesasLimpas = (ultimoFechamento.despesas || []).map(d => {
+        const copy = { ...d };
+        delete copy._originalIndex;
+        delete copy.created_at;
+        delete copy.updated_at;
+        return copy;
+    });
+
+    if (despesasLimpas.length > 0) {
+        const { error: errD } = await supabaseClient.from('despesas').upsert(despesasLimpas);
+        if (errD) {
+            console.error("Erro ao restaurar despesas:", errD);
+            mostrarToast(`Erro ao restaurar despesas: ${errD.message}`, "erro");
+            return;
+        }
     }
 
+    // 5. Atualiza a tela
     await carregarDados();
-    mostrarToast(`Sucesso! ${pedidosPendentes.length} pedidos não concluídos e ${despesasAgosto.length} despesas foram restaurados! 🎉`);
+    mostrarToast(`Sucesso! ${pedidosLimpos.length} pedidos e ${despesasLimpas.length} despesas foram restaurados! 🎉`);
 }
     // ================= FUNÇÃO FECHAR MÊS CORRIGIDA =================
 async function fecharMes() {
