@@ -7575,38 +7575,87 @@ async function reverterBaixaParcela(id, dataInicialOriginal, numParcela) {
     }
 
     function baixarPDF() { window.print(); }
-// ================= FUNÇÃO DE RESGATE INTELIGENTE =================
+// ================= FUNÇÃO DE RESGATE E CORREÇÃO DO HISTÓRICO =================
 async function restaurarDadosDoFechamento() {
     const confirmou = await confirmarAcao(
-        "LIMPAR PAINEL DE SETEMBRO",
-        "Deseja manter na tela ativa APENAS os pedidos pendentes e a entregar (como Fabiana, Karoline, etc.), removendo os 70 pedidos que já foram concluídos em Agosto?",
-        "Sim, Deixar Apenas Pendentes",
-        "fa-filter",
+        "SINCRONIZAR HISTÓRICO E DESPESAS",
+        "Deseja organizar as despesas de Agosto (Hennzo, Pyetro, cartão, etc.) para que apareçam corretamente no relatório do Histórico de Agosto?",
+        "Sim, Organizar Histórico",
+        "fa-check-double",
         "yellow"
     );
 
     if (!confirmou) return;
 
-    mostrarToast("Filtrando e limpando o painel para Setembro...");
+    mostrarToast("Organizando despesas de Agosto no Histórico...");
 
-    // Identifica pedidos de Agosto que JÁ ESTAVAM entregues e quitados 100%
+    // 1. Busca todas as despesas salvas com data de Agosto no Supabase
+    const { data: todasDespesas, error: errD } = await supabaseClient.from('despesas').select('*');
+    if (errD) {
+        mostrarToast(`Erro ao buscar despesas: ${errD.message}`, "erro");
+        return;
+    }
+
+    const despesasAgosto = (todasDespesas || []).filter(d => d.data && d.data.startsWith('2026-08'));
+
+    // 2. Busca o relatório de Agosto no Histórico
+    const { data: fechamentos, error: errF } = await supabaseClient
+        .from('fechamentos')
+        .select('*')
+        .order('id', { ascending: false })
+        .limit(1);
+
+    if (fechamentos && fechamentos.length > 0) {
+        const fechamentoAgosto = fechamentos[0];
+
+        // Limpa campos internos extras para salvar no relatório
+        const despesasAgostoLimpas = despesasAgosto.map(d => {
+            const copy = { ...d };
+            delete copy._originalIndex;
+            delete copy.created_at;
+            delete copy.updated_at;
+            return copy;
+        });
+
+        // Atualiza o relatório do Histórico de Agosto com as despesas reais de Agosto
+        fechamentoAgosto.despesas = despesasAgostoLimpas;
+
+        // Recalcula o total do relatório do Histórico
+        let totalDespAgosto = despesasAgostoLimpas.reduce((acc, d) => acc + parseFloat(d.valor || 0), 0);
+        if (fechamentoAgosto.pedidos) {
+            fechamentoAgosto.pedidos.forEach(p => {
+                if (p.status !== 'Cancelado') totalDespAgosto += parseFloat(p.despesa || 0);
+            });
+        }
+        if (!fechamentoAgosto.resumoFinanceiro) fechamentoAgosto.resumoFinanceiro = {};
+        fechamentoAgosto.resumoFinanceiro.despesasTotais = totalDespAgosto;
+
+        await supabaseClient.from('fechamentos').update({
+            despesas: despesasAgostoLimpas,
+            resumoFinanceiro: fechamentoAgosto.resumoFinanceiro
+        }).eq('id', fechamentoAgosto.id);
+
+        // Remove as despesas de Agosto da tabela ativa
+        const idsAgostoDeletar = despesasAgosto.map(d => d.id);
+        if (idsAgostoDeletar.length > 0) {
+            await supabaseClient.from('despesas').delete().in('id', idsAgostoDeletar);
+        }
+    }
+
+    // 3. Mantém apenas pedidos pendentes ativos no painel de Setembro
     const idsConcluidosAgosto = appData.pedidos
         .filter(p => p.data && p.data.startsWith('2026-08') && p.status === 'Entregue' && p.statusPagamento === 'Pago 100%')
         .map(p => p.id);
 
-    // Remove da tela ativa apenas os pedidos concluídos antigos
     if (idsConcluidosAgosto.length > 0) {
-        const { error: errDel } = await supabaseClient.from('pedidos').delete().in('id', idsConcluidosAgosto);
-        if (errDel) {
-            mostrarToast(`Erro ao limpar: ${errDel.message}`, "erro");
-            return;
-        }
+        await supabaseClient.from('pedidos').delete().in('id', idsConcluidosAgosto);
     }
 
     await carregarDados();
-    mostrarToast("Pronto! Painel de Setembro limpo. Apenas os pedidos pendentes/a entregar ficaram ativos! 🎉");
+    mostrarToast("Pronto! Despesas do Hennzo, Pyetro, cartão, etc. foram organizadas no Histórico de Agosto! 🎉");
 }
-    // ================= FUNÇÃO FECHAR MÊS CORRIGIDA =================
+
+// ================= FUNÇÃO FECHAR MÊS CORRIGIDA =================
 async function fecharMes() {
     const confirmou = await confirmarAcao(
         "FECHAR O MÊS",
