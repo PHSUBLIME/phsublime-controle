@@ -265,7 +265,9 @@
                     <button onclick="baixarPDF()" class="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-4 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-yellow-950/30">
                         <i class="fa-solid fa-file-pdf"></i> Baixar PDF
                     </button>
-
+<button onclick="restaurarDadosDoFechamento()" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-blue-950/40">
+    <i class="fa-solid fa-rotate-left"></i> Resgatar Vendas e Despesas
+</button>
                     <button onclick="fecharMes()" class="flex items-center gap-2 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-800/50 px-4 py-2.5 rounded-xl font-medium text-sm transition-all">
                         <i class="fa-solid fa-lock"></i> Fechar Mês
                     </button>
@@ -7558,88 +7560,142 @@ async function reverterBaixaParcela(id, dataInicialOriginal, numParcela) {
     }
 
     function baixarPDF() { window.print(); }
+// ================= FUNÇÃO DE RESGATE E RESTAURAÇÃO =================
+async function restaurarDadosDoFechamento() {
+    const confirmou = await confirmarAcao(
+        "RESGATAR VENDAS E DESPESAS",
+        "Deseja resgatar todos os pedidos não concluídos e despesas do relatório do Histórico de volta para as telas ativas?",
+        "Sim, Resgatar Agora",
+        "fa-rotate-left",
+        "yellow"
+    );
 
-    async function fecharMes() {
-        const confirmou = await confirmarAcao(
-            "FECHAR O MÊS ATUAL", 
-            "Os pedidos e despesas do ciclo ativo serão arquivados no Histórico e o caixa do novo mês iniciará zerado. Deseja continuar?", 
-            "Sim, Fechar Mês", 
-            "fa-lock", 
-            "yellow"
-        );
+    if (!confirmou) return;
 
-        if (!confirmou) return;
+    mostrarToast("Buscando dados no Histórico do Supabase...");
 
-        let totalFatReal = 0;
-        let despesaPed = 0;
-        let despesaOutras = 0;
-        let totalPedidosCount = 0;
-        let entreguesCount = 0;
+    const { data: fechamentos, error: errF } = await supabaseClient
+        .from('fechamentos')
+        .select('*')
+        .order('id', { ascending: false })
+        .limit(1);
 
-        appData.pedidos.forEach(p => {
-            if (p.status !== 'Cancelado') {
-                const totalP = parseFloat(p.total || 0);
-                const stPag = p.statusPagamento || 'Pendente';
-                const valorPagoCalc = parseFloat(p.valorPago !== undefined ? p.valorPago : (stPag === 'Pago 100%' ? totalP : (stPag === 'Sinal 50%' ? totalP * 0.5 : 0)));
-                totalFatReal += valorPagoCalc;
-                despesaPed += parseFloat(p.despesa || 0);
-            }
-            totalPedidosCount++;
-            if (p.status === 'Entregue' || p.status === 'Concluído') {
-                entreguesCount++;
-            }
-        });
-
-        const despesasMes = obterDespesasMesAtivo();
-        despesasMes.forEach(d => {
-            despesaOutras += parseFloat(d.valor || 0);
-        });
-
-        const despesasTotais = despesaPed + despesaOutras;
-        const lucroBruto = totalFatReal - despesasTotais;
-        const reserva10 = lucroBruto > 0 ? lucroBruto * 0.10 : 0;
-        const lucroLiquido = lucroBruto > 0 ? lucroBruto - reserva10 : lucroBruto;
-
-        const dataHoje = new Date();
-        const dataFechamentoStr = `${String(dataHoje.getDate()).padStart(2, '0')}/${String(dataHoje.getMonth() + 1).padStart(2, '0')}/${dataHoje.getFullYear()}`;
-        const nomeMesAno = dataHoje.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-
-        const novoFechamento = {
-            id: Math.floor(100000000 + Math.random() * 900000000),
-            mes: nomeMesAno.charAt(0).toUpperCase() + nomeMesAno.slice(1),
-            dataFechamento: dataFechamentoStr,
-            resumoFinanceiro: {
-                faturamentoTotal: totalFatReal,
-                despesasTotais: despesasTotais,
-                lucroLiquido: lucroLiquido,
-                reserva10: reserva10,
-                totalPedidos: totalPedidosCount,
-                totalEntregues: entreguesCount
-            },
-            pedidos: appData.pedidos,
-            despesas: despesasMes
-        };
-
-        const { error: errFech } = await supabaseClient.from('fechamentos').insert([novoFechamento]);
-
-        if (errFech) {
-            mostrarToast(`Erro ao fechar mês: ${errFech.message}`, "erro");
-            return;
-        }
-
-        if (appData.pedidos.length > 0) {
-            const idsP = appData.pedidos.map(p => p.id);
-            await supabaseClient.from('pedidos').delete().in('id', idsP);
-        }
-
-        if (despesasMes.length > 0) {
-            const idsD = despesasMes.map(d => d.id);
-            await supabaseClient.from('despesas').delete().in('id', idsD);
-        }
-
-        await carregarDados();
-        mostrarToast("Mês fechado e arquivado com sucesso no Histórico!");
+    if (errF || !fechamentos || fechamentos.length === 0) {
+        mostrarToast("Nenhum registro encontrado no Histórico para restaurar.", "alerta");
+        return;
     }
+
+    const ultimoFechamento = fechamentos[0];
+
+    const pedidosPendentes = (ultimoFechamento.pedidos || []).filter(p => p.status !== 'Entregue' && p.status !== 'Cancelado');
+
+    if (pedidosPendentes.length > 0) {
+        const { error: errP } = await supabaseClient.from('pedidos').upsert(pedidosPendentes);
+        if (errP) console.error("Erro ao restaurar pedidos:", errP.message);
+    }
+
+    const despesasAgosto = (ultimoFechamento.despesas || []).filter(d => !d.data || d.data.startsWith('2026-08'));
+    if (despesasAgosto.length > 0) {
+        const { error: errD } = await supabaseClient.from('despesas').upsert(despesasAgosto);
+        if (errD) console.error("Erro ao restaurar despesas:", errD.message);
+    }
+
+    await carregarDados();
+    mostrarToast(`Sucesso! ${pedidosPendentes.length} pedidos não concluídos e ${despesasAgosto.length} despesas foram restaurados! 🎉`);
+}
+    // ================= FUNÇÃO FECHAR MÊS CORRIGIDA =================
+async function fecharMes() {
+    const confirmou = await confirmarAcao(
+        "FECHAR O MÊS",
+        "Apenas pedidos já ENTREGUES e despesas do mês encerrado serão arquivados. Pedidos em andamento e pendentes CONTINUARÃO ATIVOS na Fila de Produção!",
+        "Sim, Fechar Mês",
+        "fa-lock",
+        "yellow"
+    );
+
+    if (!confirmou) return;
+
+    // Calcula o mês que está sendo encerrado (mês anterior ao atual)
+    const hoje = new Date();
+    let anoAlvo = hoje.getFullYear();
+    let mesAlvoNum = hoje.getMonth(); 
+    if (mesAlvoNum === 0) {
+        mesAlvoNum = 12;
+        anoAlvo -= 1;
+    }
+    const mesAnoAlvoStr = `${anoAlvo}-${String(mesAlvoNum).padStart(2, '0')}`;
+
+    // 1. Separa APENAS pedidos concluídos/entregues para deletar da fila ativa
+    const pedidosFinalizados = appData.pedidos.filter(p => (p.status === 'Entregue' || p.status === 'Concluído' || p.status === 'Cancelado'));
+    const idsPedidosDeletar = pedidosFinalizados.map(p => p.id);
+
+    // 2. Separa despesas do mês encerrado
+    const despesasMesEncerrado = appData.despesasOutras.filter(d => d.data && d.data.startsWith(mesAnoAlvoStr));
+    const idsDespesasDeletar = despesasMesEncerrado.map(d => d.id);
+
+    // Cálculo das métricas do mês
+    let totalFatReal = 0;
+    let despesaPed = 0;
+    let despesaOutras = 0;
+
+    appData.pedidos.forEach(p => {
+        if (p.status !== 'Cancelado' && p.data && p.data.startsWith(mesAnoAlvoStr)) {
+            const totalP = parseFloat(p.total || 0);
+            const stPag = p.statusPagamento || 'Pendente';
+            const valorPagoCalc = parseFloat(p.valorPago !== undefined ? p.valorPago : (stPag === 'Pago 100%' ? totalP : (stPag === 'Sinal 50%' ? totalP * 0.5 : 0)));
+            totalFatReal += valorPagoCalc;
+            despesaPed += parseFloat(p.despesa || 0);
+        }
+    });
+
+    despesasMesEncerrado.forEach(d => {
+        despesaOutras += parseFloat(d.valor || 0);
+    });
+
+    const despesasTotais = despesaPed + despesaOutras;
+    const lucroBruto = totalFatReal - despesasTotais;
+    const reserva10 = lucroBruto > 0 ? lucroBruto * 0.10 : 0;
+    const lucroLiquido = lucroBruto > 0 ? lucroBruto - reserva10 : lucroBruto;
+
+    const dataObjAlvo = new Date(anoAlvo, mesAlvoNum - 1, 1);
+    const nomeMesAno = dataObjAlvo.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
+    const novoFechamento = {
+        id: Math.floor(100000000 + Math.random() * 900000000),
+        mes: nomeMesAno.charAt(0).toUpperCase() + nomeMesAno.slice(1),
+        dataFechamento: appData.dataAtual,
+        resumoFinanceiro: {
+            faturamentoTotal: totalFatReal,
+            despesasTotais: despesasTotais,
+            lucroLiquido: lucroLiquido,
+            reserva10: reserva10,
+            totalPedidos: appData.pedidos.length,
+            totalEntregues: pedidosFinalizados.length
+        },
+        pedidos: appData.pedidos,
+        despesas: despesasMesEncerrado
+    };
+
+    const { error: errFech } = await supabaseClient.from('fechamentos').insert([novoFechamento]);
+
+    if (errFech) {
+        mostrarToast(`Erro ao fechar mês: ${errFech.message}`, "erro");
+        return;
+    }
+
+    // Deleta do banco ativo APENAS os pedidos finalizados
+    if (idsPedidosDeletar.length > 0) {
+        await supabaseClient.from('pedidos').delete().in('id', idsPedidosDeletar);
+    }
+
+    // Deleta apenas as despesas do mês encerrado
+    if (idsDespesasDeletar.length > 0) {
+        await supabaseClient.from('despesas').delete().in('id', idsDespesasDeletar);
+    }
+
+    await carregarDados();
+    mostrarToast("Mês fechado! Os pedidos não concluídos continuam ativos na Fila de Produção.");
+}
 
     function alternarCamposLogistica() {
         const tipo = document.getElementById('ped-tipo-entrega')?.value;
