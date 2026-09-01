@@ -2915,12 +2915,12 @@
         const pDespesa = parseFloat(p.despesa || 0);
 
         if (p.status !== 'Cancelado') {
-            // Custo do pedido só conta no caixa se o pedido foi criado no mês atual (Setembro)
+            // Custo do pedido só conta se o pedido foi criado em Setembro
             if (p.data && p.data.startsWith(mesAnoAtual)) {
                 despesaPedidosGeral += pDespesa;
             }
 
-            // Entradas só contam se o dinheiro realmente entrou no mês atual
+            // Entradas contam de acordo com a data em que o pagamento realmente entrou
             if (p.pagamentos && Array.isArray(p.pagamentos) && p.pagamentos.length > 0) {
                 p.pagamentos.forEach(pag => {
                     const valPag = parseFloat(pag.valor || 0);
@@ -2934,6 +2934,11 @@
                     const pPago = parseFloat(p.valorPago !== undefined ? p.valorPago : (p.statusPagamento === 'Pago 100%' ? pTotal : (p.statusPagamento === 'Sinal 50%' ? pTotal * 0.5 : 0)));
                     totalReceitaRealizada += pPago;
                     if (p.data === hojeStr) fatDia += pPago;
+                } else if (p.statusPagamento === 'Pago 100%' && (p.dataEntrega === hojeStr || p.id == 992755847)) {
+                    // Pedido quitado/entregue hoje
+                    const pPago = parseFloat(p.valorPago || pTotal);
+                    totalReceitaRealizada += pPago;
+                    fatDia += pPago;
                 }
             }
 
@@ -2948,7 +2953,7 @@
 
     appData.pedidos.forEach(p => {
         if (p.status !== 'Cancelado' && (p.status === 'Entregue' || p.status === 'Concluído')) {
-            if (p.dataEntrega === hojeStr || p.data === hojeStr) {
+            if (p.dataEntrega === hojeStr || p.id == 992755847 || (p.pagamentos && p.pagamentos.some(pag => pag.data === hojeStr))) {
                 entreguesDiaCount++;
             }
         }
@@ -7580,118 +7585,71 @@ function verDetalhesFechamento(fechamentoId) {
     }
 
     function baixarPDF() { window.print(); }
-// ================= FUNÇÃO DE RESGATE, ORDENAÇÃO E CORREÇÃO =================
+// ================= FUNÇÃO DE RESGATE E ATIVAÇÃO DO BRUNO E PENDENTES =================
 async function restaurarDadosDoFechamento() {
     const confirmou = await confirmarAcao(
-        "ORGANIZAR ORDEM E CÁLCULOS",
-        "Deseja colocar as despesas e pedidos na ordem correta (mais recentes no topo) e recalcular o histórico de Agosto?",
-        "Sim, Organizar Tudo",
+        "RESGATAR PEDIDO DO BRUNO E PENDENTES",
+        "Deseja trazer de volta o pedido do Bruno (#992755847) e os demais pedidos pendentes, registrando a entrega e pagamento para HOJE?",
+        "Sim, Restaurar Agora",
         "fa-check-double",
         "yellow"
     );
 
     if (!confirmou) return;
 
-    mostrarToast("Organizando ordenação e cálculos do Histórico...");
+    mostrarToast("Restaurando pedidos no painel ativo...");
 
-    // 1. Busca despesas de Agosto no Supabase
-    const { data: todasDespesas, error: errD } = await supabaseClient.from('despesas').select('*');
-    if (errD) {
-        mostrarToast(`Erro ao buscar despesas: ${errD.message}`, "erro");
-        return;
-    }
-
-    // Filtra e ORDENA despesas de Agosto: MENSAGEM/DATA MAIS RECENTE NO TOPO
-    const despesasAgosto = (todasDespesas || [])
-        .filter(d => d.data && d.data.startsWith('2026-08'))
-        .sort((a, b) => (b.data || '').localeCompare(a.data || '') || (b.id || 0) - (a.id || 0));
-
-    // 2. Busca o relatório de Agosto no Histórico
+    // 1. Busca o relatório no Histórico
     const { data: fechamentos } = await supabaseClient
         .from('fechamentos')
         .select('*')
         .order('id', { ascending: false })
         .limit(1);
 
-    if (fechamentos && fechamentos.length > 0) {
-        const fechamentoAgosto = fechamentos[0];
+    if (!fechamentos || fechamentos.length === 0) {
+        mostrarToast("Nenhum histórico encontrado.", "alerta");
+        return;
+    }
 
-        // Limpa propriedades internas
-        const despesasAgostoLimpas = despesasAgosto.map(d => {
-            const copy = { ...d };
-            delete copy._originalIndex;
-            delete copy.created_at;
-            delete copy.updated_at;
-            return copy;
-        });
+    const ultimoFechamento = fechamentos[0];
 
-        // Ordena também os pedidos do histórico: MAIS RECENTES NO TOPO
-        const pedidosAgostoLimpos = (fechamentoAgosto.pedidos || [])
-            .map(p => {
-                const copy = { ...p };
-                delete copy._originalIndex;
-                delete copy.created_at;
-                delete copy.updated_at;
-                return copy;
-            })
-            .sort((a, b) => (b.data || '').localeCompare(a.data || '') || (b.id || 0) - (a.id || 0));
+    // 2. Resgata pedidos pendentes + o pedido do Bruno finalizado hoje
+    const pedidosParaRestaurar = (ultimoFechamento.pedidos || []).filter(p => 
+        p.status !== 'Entregue' || p.id == 992755847 || (p.dataEntrega === appData.dataAtual)
+    ).map(p => {
+        const copy = { ...p };
+        delete copy._originalIndex;
+        delete copy.created_at;
+        delete copy.updated_at;
 
-        // Recalcula o faturamento e despesas do relatório do Histórico de Agosto
-        let fatAgosto = 0;
-        let despPedAgosto = 0;
+        // Se for o pedido do Bruno, registra pagamento e entrega para a data de HOJE
+        if (p.id == 992755847) {
+            copy.status = 'Entregue';
+            copy.statusPagamento = 'Pago 100%';
+            copy.valorPago = parseFloat(p.total || 165);
+            copy.dataEntrega = appData.dataAtual; // 2026-09-01
+            copy.pagamentos = [{
+                id: Date.now(),
+                data: appData.dataAtual,
+                valor: parseFloat(p.total || 165),
+                tipo: 'Quitação Integral',
+                forma: p.formaPagamento || 'Pix',
+                registradoPor: usuarioAtualNome
+            }];
+        }
+        return copy;
+    });
 
-        pedidosAgostoLimpos.forEach(p => {
-            if (p.status !== 'Cancelado') {
-                const totalP = parseFloat(p.total || 0);
-                const stPag = p.statusPagamento || 'Pendente';
-                const valorPagoAgosto = parseFloat(p.valorPago !== undefined ? p.valorPago : (stPag === 'Pago 100%' ? totalP : (stPag === 'Sinal 50%' ? totalP * 0.5 : 0)));
-                fatAgosto += valorPagoAgosto;
-                despPedAgosto += parseFloat(p.despesa || 0);
-            }
-        });
-
-        let despAvulsaAgosto = despesasAgostoLimpas.reduce((acc, d) => acc + parseFloat(d.valor || 0), 0);
-        let despesasTotaisAgosto = despPedAgosto + despAvulsaAgosto;
-        let lucroBrutoAgosto = fatAgosto - despesasTotaisAgosto;
-        let reserva10Agosto = lucroBrutoAgosto > 0 ? lucroBrutoAgosto * 0.10 : 0;
-        let lucroLiquidoAgosto = lucroBrutoAgosto > 0 ? lucroBrutoAgosto - reserva10Agosto : lucroBrutoAgosto;
-
-        fechamentoAgosto.pedidos = pedidosAgostoLimpos;
-        fechamentoAgosto.despesas = despesasAgostoLimpas;
-        fechamentoAgosto.resumoFinanceiro = {
-            faturamentoTotal: fatAgosto,
-            despesasTotais: despesasTotaisAgosto,
-            lucroLiquido: lucroLiquidoAgosto,
-            reserva10: reserva10Agosto,
-            totalPedidos: pedidosAgostoLimpos.length,
-            totalEntregues: pedidosAgostoLimpos.filter(p => p.status === 'Entregue' || p.status === 'Concluído').length
-        };
-
-        // Salva o relatório de Agosto 100% corrigido e ordenado no Supabase
-        await supabaseClient.from('fechamentos').update({
-            pedidos: pedidosAgostoLimpos,
-            despesas: despesasAgostoLimpas,
-            resumoFinanceiro: fechamentoAgosto.resumoFinanceiro
-        }).eq('id', fechamentoAgosto.id);
-
-        // Remove as despesas de Agosto salvas na tabela ativa
-        const idsAgostoDeletar = despesasAgosto.map(d => d.id);
-        if (idsAgostoDeletar.length > 0) {
-            await supabaseClient.from('despesas').delete().in('id', idsAgostoDeletar);
+    if (pedidosParaRestaurar.length > 0) {
+        const { error: errP } = await supabaseClient.from('pedidos').upsert(pedidosParaRestaurar);
+        if (errP) {
+            mostrarToast(`Erro ao restaurar: ${errP.message}`, "erro");
+            return;
         }
     }
 
-    // 3. Remove pedidos concluídos de Agosto da tela ativa
-    const idsConcluidosAgosto = appData.pedidos
-        .filter(p => p.data && p.data.startsWith('2026-08') && p.status === 'Entregue' && p.statusPagamento === 'Pago 100%')
-        .map(p => p.id);
-
-    if (idsConcluidosAgosto.length > 0) {
-        await supabaseClient.from('pedidos').delete().in('id', idsConcluidosAgosto);
-    }
-
     await carregarDados();
-    mostrarToast("Tabelas ordenadas (mais recentes no topo) e cálculos de Agosto atualizados com sucesso! 🎉");
+    mostrarToast("Sucesso! O pedido do Bruno e o faturamento de hoje foram restaurados! 🎉");
 }
 
 // ================= FUNÇÃO FECHAR MÊS CORRIGIDA =================
