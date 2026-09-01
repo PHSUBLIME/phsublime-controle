@@ -2891,114 +2891,113 @@
     }
 
         function atualizarInterfaceCompleta() {
-            const hojeStr = appData.dataAtual;
-            
-            const pData = appData.dataAtual.split('-');
-            if (pData.length === 3) {
-                document.getElementById('dataAtualExtenso').innerText = `${pData[2]}/${pData[1]}/${pData[0]}`;
-            }
-
-            let fatDia = 0;
-            let pedDiaCount = 0;
-            let producaoCount = 0;
-            let pendentesCount = 0;
-            let entreguesDiaCount = 0;
-
-            let totalReceitaRealizada = 0;
-            let totalPendenteReceber = 0;
-            let despesaPedidosGeral = 0;
-            let despesaOutrasGeral = 0;
-
-            appData.pedidos.forEach(p => {
-            const pTotal = parseFloat(p.total || 0);
-            const pDespesa = parseFloat(p.despesa || 0);
-
-            if (p.status !== 'Cancelado') {
-                despesaPedidosGeral += pDespesa;
-
-                // Somar histórico de pagamentos de acordo com a data em que o dinheiro realmente entrou
-                if (p.pagamentos && Array.isArray(p.pagamentos) && p.pagamentos.length > 0) {
-                    p.pagamentos.forEach(pag => {
-                        const valPag = parseFloat(pag.valor || 0);
-                        totalReceitaRealizada += valPag;
-
-                        if (pag.data === hojeStr) {
-                            fatDia += valPag;
-                        }
-                    });
-                } else {
-                    // Fallback para pedidos antigos sem histórico
-                    const pPago = parseFloat(p.valorPago !== undefined ? p.valorPago : (p.statusPagamento === 'Pago 100%' ? pTotal : (p.statusPagamento === 'Sinal 50%' ? pTotal * 0.5 : 0)));
-                    totalReceitaRealizada += pPago;
-                    if (p.data === hojeStr) {
-                        fatDia += pPago;
-                    }
-                }
-
-                const pPagoGeral = parseFloat(p.valorPago || 0);
-                totalPendenteReceber += Math.max(0, pTotal - pPagoGeral);
-            }
-
-            if (p.data === hojeStr && p.status !== 'Cancelado') {
-        pedDiaCount++;
+    const hojeStr = appData.dataAtual;
+    const mesAnoAtual = hojeStr.substring(0, 7); // "2026-09"
+    
+    const pData = appData.dataAtual.split('-');
+    if (pData.length === 3) {
+        document.getElementById('dataAtualExtenso').innerText = `${pData[2]}/${pData[1]}/${pData[0]}`;
     }
 
-    if (p.status === 'Em Produção') producaoCount++;
-    if (p.status === 'AGUARDANDO') pendentesCount++;
-});
+    let fatDia = 0;
+    let pedDiaCount = 0;
+    let producaoCount = 0;
+    let pendentesCount = 0;
+    let entreguesDiaCount = 0;
 
-appData.pedidos.forEach(p => {
-                if (p.status !== 'Cancelado' && (p.status === 'Entregue' || p.status === 'Concluído')) {
-                    if (p.dataEntrega === hojeStr || p.data === hojeStr) {
-                        entreguesDiaCount++;
+    let totalReceitaRealizada = 0;
+    let totalPendenteReceber = 0;
+    let despesaPedidosGeral = 0;
+    let despesaOutrasGeral = 0;
+
+    appData.pedidos.forEach(p => {
+        const pTotal = parseFloat(p.total || 0);
+        const pDespesa = parseFloat(p.despesa || 0);
+
+        if (p.status !== 'Cancelado') {
+            // Custo do pedido só conta no caixa se o pedido foi criado no mês atual (Setembro)
+            if (p.data && p.data.startsWith(mesAnoAtual)) {
+                despesaPedidosGeral += pDespesa;
+            }
+
+            // Entradas só contam se o dinheiro realmente entrou no mês atual
+            if (p.pagamentos && Array.isArray(p.pagamentos) && p.pagamentos.length > 0) {
+                p.pagamentos.forEach(pag => {
+                    const valPag = parseFloat(pag.valor || 0);
+                    if (pag.data && pag.data.startsWith(mesAnoAtual)) {
+                        totalReceitaRealizada += valPag;
+                        if (pag.data === hojeStr) fatDia += valPag;
                     }
+                });
+            } else {
+                if (p.data && p.data.startsWith(mesAnoAtual)) {
+                    const pPago = parseFloat(p.valorPago !== undefined ? p.valorPago : (p.statusPagamento === 'Pago 100%' ? pTotal : (p.statusPagamento === 'Sinal 50%' ? pTotal * 0.5 : 0)));
+                    totalReceitaRealizada += pPago;
+                    if (p.data === hojeStr) fatDia += pPago;
                 }
-            });
+            }
 
-            const despesasMes = obterDespesasMesAtivo();
-            despesasMes.forEach(d => {
-                despesaOutrasGeral += parseFloat(d.valor || 0);
-            });
-
-            const totalDespesaGeral = despesaPedidosGeral + despesaOutrasGeral;
-            const lucroRealizado = totalReceitaRealizada - totalDespesaGeral;
-            
-            const dezPercentLucro = lucroRealizado > 0 ? lucroRealizado * 0.10 : 0;
-            const lucroLiquidoFinal = lucroRealizado > 0 ? lucroRealizado - dezPercentLucro : lucroRealizado;
-
-            document.getElementById('dash-faturamento-dia').innerText = `R$ ${fatDia.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            document.getElementById('dash-pedidos-dia').innerText = pedDiaCount;
-            document.getElementById('dash-em-producao').innerText = producaoCount;
-            document.getElementById('dash-pendentes').innerText = pendentesCount;
-            document.getElementById('dash-entregues').innerText = entreguesDiaCount;
-            document.getElementById('dash-clientes-count').innerText = appData.clientes.length;
-            document.getElementById('dash-investimento').innerText = `R$ ${totalDespesaGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            document.getElementById('dash-lucro').innerText = `R$ ${lucroRealizado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-
-            document.getElementById('desp-kpi-outros').innerText = `R$ ${despesaOutrasGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            document.getElementById('desp-kpi-pedidos').innerText = `R$ ${despesaPedidosGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            document.getElementById('desp-kpi-total').innerText = `R$ ${totalDespesaGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-
-            document.getElementById('fin-entradas').innerText = `R$ ${totalReceitaRealizada.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            document.getElementById('fin-pendente-receber').innerText = `R$ ${totalPendenteReceber.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            document.getElementById('fin-saidas').innerText = `R$ ${totalDespesaGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            document.getElementById('fin-saldo').innerText = `R$ ${lucroRealizado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            document.getElementById('fin-lucro-10').innerText = `R$ ${dezPercentLucro.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            document.getElementById('fin-lucro-liquido').innerText = `R$ ${lucroLiquidoFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-
-            renderizarKanban();
-            renderizarEntreguesHoje();
-            renderizarClientes();
-            renderizarPedidos();
-            renderizarOrcamentos();
-            renderizarEstoque();
-            renderizarDespesas();
-            renderizarMovimentacoesFinanceiras();
-            renderizarHistoricoFechamentos();
-            renderizarProdutosLoja();
-            renderizarParcelasCobranca();
-            atualizarGraficos();
+            const pPagoGeral = parseFloat(p.valorPago || 0);
+            totalPendenteReceber += Math.max(0, pTotal - pPagoGeral);
         }
+
+        if (p.data === hojeStr && p.status !== 'Cancelado') pedDiaCount++;
+        if (p.status === 'Em Produção') producaoCount++;
+        if (p.status === 'AGUARDANDO') pendentesCount++;
+    });
+
+    appData.pedidos.forEach(p => {
+        if (p.status !== 'Cancelado' && (p.status === 'Entregue' || p.status === 'Concluído')) {
+            if (p.dataEntrega === hojeStr || p.data === hojeStr) {
+                entreguesDiaCount++;
+            }
+        }
+    });
+
+    const despesasMes = obterDespesasMesAtivo();
+    despesasMes.forEach(d => {
+        despesaOutrasGeral += parseFloat(d.valor || 0);
+    });
+
+    const totalDespesaGeral = despesaPedidosGeral + despesaOutrasGeral;
+    const lucroRealizado = totalReceitaRealizada - totalDespesaGeral;
+    
+    const dezPercentLucro = lucroRealizado > 0 ? lucroRealizado * 0.10 : 0;
+    const lucroLiquidoFinal = lucroRealizado > 0 ? lucroRealizado - dezPercentLucro : lucroRealizado;
+
+    document.getElementById('dash-faturamento-dia').innerText = `R$ ${fatDia.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    document.getElementById('dash-pedidos-dia').innerText = pedDiaCount;
+    document.getElementById('dash-em-producao').innerText = producaoCount;
+    document.getElementById('dash-pendentes').innerText = pendentesCount;
+    document.getElementById('dash-entregues').innerText = entreguesDiaCount;
+    document.getElementById('dash-clientes-count').innerText = appData.clientes.length;
+    document.getElementById('dash-investimento').innerText = `R$ ${totalDespesaGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    document.getElementById('dash-lucro').innerText = `R$ ${lucroRealizado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+
+    document.getElementById('desp-kpi-outros').innerText = `R$ ${despesaOutrasGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    document.getElementById('desp-kpi-pedidos').innerText = `R$ ${despesaPedidosGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    document.getElementById('desp-kpi-total').innerText = `R$ ${totalDespesaGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+
+    document.getElementById('fin-entradas').innerText = `R$ ${totalReceitaRealizada.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    document.getElementById('fin-pendente-receber').innerText = `R$ ${totalPendenteReceber.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    document.getElementById('fin-saidas').innerText = `R$ ${totalDespesaGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    document.getElementById('fin-saldo').innerText = `R$ ${lucroRealizado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    document.getElementById('fin-lucro-10').innerText = `R$ ${dezPercentLucro.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    document.getElementById('fin-lucro-liquido').innerText = `R$ ${lucroLiquidoFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+
+    renderizarKanban();
+    renderizarEntreguesHoje();
+    renderizarClientes();
+    renderizarPedidos();
+    renderizarOrcamentos();
+    renderizarEstoque();
+    renderizarDespesas();
+    renderizarMovimentacoesFinanceiras();
+    renderizarHistoricoFechamentos();
+    renderizarProdutosLoja();
+    renderizarParcelasCobranca();
+    atualizarGraficos();
+}
 function renderizarKanban() {
             const colAguardando = document.getElementById('kanban-col-aguardando');
             const colProducao = document.getElementById('kanban-col-producao');
@@ -6469,104 +6468,120 @@ async function reverterBaixaParcela(id, dataInicialOriginal, numParcela) {
         }
     }
 
-    // ================= FUNÇÕES DO MÓDULO: FINANCEIRO =================
     function renderizarMovimentacoesFinanceiras() {
-        const tbody = document.getElementById('tabela-financeiro-body');
-        if (!tbody) return;
-        tbody.innerHTML = '';
+    const tbody = document.getElementById('tabela-financeiro-body');
+    if (!tbody) return;
+    tbody.innerHTML = '';
 
-        const filtro = (document.getElementById('input-pesquisar-financeiro')?.value || '').toLowerCase();
-        const mesAnoAtual = appData.dataAtual.substring(0, 7);
+    const filtro = (document.getElementById('input-pesquisar-financeiro')?.value || '').toLowerCase();
+    const mesAnoAtual = appData.dataAtual.substring(0, 7);
 
-        let movimentacoes = [];
+    let movimentacoes = [];
 
-        appData.pedidos.forEach(p => {
-            if (p.status !== 'Cancelado') {
-                const descProdutos = p.itens ? p.itens.map(i => `${i.servico || 'Item'} (${i.qtd}x)`).join(', ') : 'Serviço';
+    appData.pedidos.forEach(p => {
+        if (p.status !== 'Cancelado') {
+            const descProdutos = p.itens ? p.itens.map(i => `${i.servico || 'Item'} (${i.qtd}x)`).join(', ') : 'Serviço';
+
+            if (p.data && p.data.startsWith(mesAnoAtual) && parseFloat(p.despesa || 0) > 0) {
+                movimentacoes.push({
+                    data: p.data,
+                    tipo: 'Saída',
+                    categoria: 'Custo de Produção',
+                    descricao: `Insumos Pedido #${p.id} (${p.clienteNome})`,
+                    valor: parseFloat(p.despesa || 0),
+                    metodo: 'Interno Pedido',
+                    origemTipo: 'pedido',
+                    origemId: p.id
+                });
+            }
+
+            if (p.pagamentos && Array.isArray(p.pagamentos) && p.pagamentos.length > 0) {
+                p.pagamentos.forEach(pag => {
+                    if (pag.data && pag.data.startsWith(mesAnoAtual)) {
+                        movimentacoes.push({
+                            data: pag.data,
+                            tipo: 'Entrada',
+                            categoria: `Venda (${pag.tipo || 'Pagamento'})`,
+                            descricao: `Pedido #${p.id} - ${p.clienteNome} (${descProdutos}) - Resp: ${p.responsavel || 'N/I'}`,
+                            valor: parseFloat(pag.valor || 0),
+                            metodo: pag.forma || p.formaPagamento || 'Pix',
+                            origemTipo: 'pedido',
+                            origemId: p.id
+                        });
+                    }
+                });
+            } else if (p.data && p.data.startsWith(mesAnoAtual)) {
                 const totalP = parseFloat(p.total || 0);
                 const stPag = p.statusPagamento || 'Pendente';
-                let valorEntradaReal = parseFloat(p.valorPago !== undefined ? p.valorPago : (stPag === 'Pago 100%' ? totalP : (stPag === 'Sinal 50%' ? totalP * 0.5 : 0)));
-
-                if (valorEntradaReal > 0) {
+                let valEntrada = parseFloat(p.valorPago !== undefined ? p.valorPago : (stPag === 'Pago 100%' ? totalP : (stPag === 'Sinal 50%' ? totalP * 0.5 : 0)));
+                if (valEntrada > 0) {
                     movimentacoes.push({
                         data: p.data,
                         tipo: 'Entrada',
                         categoria: `Venda (${stPag})`,
                         descricao: `Pedido #${p.id} - ${p.clienteNome} (${descProdutos}) - Resp: ${p.responsavel || 'N/I'}`,
-                        valor: valorEntradaReal,
-                        metodo: p.formaPagamento || 'Dinheiro',
-                        origemTipo: 'pedido',
-                        origemId: p.id
-                    });
-                }
-
-                if (parseFloat(p.despesa || 0) > 0) {
-                    movimentacoes.push({
-                        data: p.data,
-                        tipo: 'Saída',
-                        categoria: 'Custo de Produção',
-                        descricao: `Insumos Pedido #${p.id} (${p.clienteNome})`,
-                        valor: parseFloat(p.despesa || 0),
-                        metodo: 'Interno Pedido',
+                        valor: valEntrada,
+                        metodo: p.formaPagamento || 'Pix',
                         origemTipo: 'pedido',
                         origemId: p.id
                     });
                 }
             }
-        });
-
-        const despesasMes = obterDespesasMesAtivo();
-        despesasMes.forEach(d => {
-            movimentacoes.push({
-                data: d.data_pagamento || d.data,
-                tipo: 'Saída',
-                categoria: 'Despesa Operacional',
-                descricao: `${d.nome} ${d.loja ? `(${d.loja})` : ''} - Resp: ${d.registradoPor || 'N/I'}`,
-                valor: parseFloat(d.valor || 0),
-                metodo: d.tipoPagamento || 'Pix',
-                origemTipo: 'despesa',
-                origemId: d.id
-            });
-        });
-
-        movimentacoes.sort((a, b) => new Date(b.data) - new Date(a.data));
-
-        let exibidos = 0;
-
-        movimentacoes.forEach(m => {
-            const buscaTexto = `${m.data} ${m.tipo} ${m.categoria} ${m.descricao} ${m.metodo}`.toLowerCase();
-            if (filtro && !buscaTexto.includes(filtro)) return;
-
-            exibidos++;
-            const isEntrada = m.tipo === 'Entrada';
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="p-3 font-semibold text-white text-xs">${escapeAttr(m.data)}</td>
-                <td class="p-3">
-                    <span class="px-2.5 py-1 text-[10px] rounded-full font-bold uppercase tracking-wider ${isEntrada ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'}">
-                        ${escapeAttr(m.tipo)}
-                    </span>
-                </td>
-                <td class="p-3 text-xs text-yellow-400 font-medium">${escapeAttr(m.categoria)}</td>
-                <td class="p-3 text-xs font-medium text-neutral-200">${escapeAttr(m.descricao)}</td>
-                <td class="p-3 font-black text-sm ${isEntrada ? 'text-emerald-400' : 'text-rose-400'}">
-                    ${isEntrada ? '+' : '-'} R$ ${m.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
-                </td>
-                <td class="p-3 text-xs text-neutral-400">${escapeAttr(m.metodo)}</td>
-                <td class="p-3 text-right">
-                    ${m.origemTipo === 'pedido' ? 
-                        `<button onclick="navegar('pedidos')" class="bg-neutral-800 hover:bg-neutral-700 text-yellow-400 px-2.5 py-1 rounded-lg text-xs font-semibold border border-neutral-700">Ver Pedido</button>` : 
-                        `<button onclick="editarDespesa(${m.origemId})" class="bg-neutral-800 hover:bg-neutral-700 text-yellow-400 px-2.5 py-1 rounded-lg text-xs font-semibold border border-neutral-700">Ver Despesa</button>`
-                    }
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-        if (exibidos === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-neutral-500 text-xs">Nenhuma movimentação financeira encontrada para este mês.</td></tr>`;
         }
+    });
+
+    const despesasMes = obterDespesasMesAtivo();
+    despesasMes.forEach(d => {
+        movimentacoes.push({
+            data: d.data,
+            tipo: 'Saída',
+            categoria: 'Despesa Operacional',
+            descricao: `${d.nome} ${d.loja ? `(${d.loja})` : ''} - Resp: ${d.registradoPor || 'N/I'}`,
+            valor: parseFloat(d.valor || 0),
+            metodo: d.tipoPagamento || 'Pix',
+            origemTipo: 'despesa',
+            origemId: d.id
+        });
+    });
+
+    movimentacoes.sort((a, b) => (b.data || '').localeCompare(a.data || ''));
+
+    let exibidos = 0;
+
+    movimentacoes.forEach(m => {
+        const buscaTexto = `${m.data} ${m.tipo} ${m.categoria} ${m.descricao} ${m.metodo}`.toLowerCase();
+        if (filtro && !buscaTexto.includes(filtro)) return;
+
+        exibidos++;
+        const isEntrada = m.tipo === 'Entrada';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="p-3 font-semibold text-white text-xs">${escapeAttr(m.data)}</td>
+            <td class="p-3">
+                <span class="px-2.5 py-1 text-[10px] rounded-full font-bold uppercase tracking-wider ${isEntrada ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'}">
+                    ${escapeAttr(m.tipo)}
+                </span>
+            </td>
+            <td class="p-3 text-xs text-yellow-400 font-medium">${escapeAttr(m.categoria)}</td>
+            <td class="p-3 text-xs font-medium text-neutral-200">${escapeAttr(m.descricao)}</td>
+            <td class="p-3 font-black text-sm ${isEntrada ? 'text-emerald-400' : 'text-rose-400'}">
+                ${isEntrada ? '+' : '-'} R$ ${m.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
+            </td>
+            <td class="p-3 text-xs text-neutral-400">${escapeAttr(m.metodo)}</td>
+            <td class="p-3 text-right">
+                ${m.origemTipo === 'pedido' ? 
+                    `<button onclick="navegar('pedidos')" class="bg-neutral-800 hover:bg-neutral-700 text-yellow-400 px-2.5 py-1 rounded-lg text-xs font-semibold border border-neutral-700">Ver Pedido</button>` : 
+                    `<button onclick="editarDespesa(${m.origemId})" class="bg-neutral-800 hover:bg-neutral-700 text-yellow-400 px-2.5 py-1 rounded-lg text-xs font-semibold border border-neutral-700">Ver Despesa</button>`
+                }
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    if (exibidos === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-neutral-500 text-xs">Nenhuma movimentação financeira registrada em Setembro até o momento.</td></tr>`;
     }
+}
 
     // ================= FUNÇÕES DO MÓDULO: HISTÓRICO =================
     function renderizarHistoricoFechamentos() {
