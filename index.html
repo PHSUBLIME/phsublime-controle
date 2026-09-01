@@ -2915,12 +2915,12 @@
         const pDespesa = parseFloat(p.despesa || 0);
 
         if (p.status !== 'Cancelado') {
-            // Custo do pedido só conta se o pedido foi criado em Setembro
+            // Custo do pedido só conta no caixa se o pedido foi criado no mês atual (Setembro)
             if (p.data && p.data.startsWith(mesAnoAtual)) {
                 despesaPedidosGeral += pDespesa;
             }
 
-            // Entradas contam de acordo com a data em que o pagamento realmente entrou
+            // Entradas só contam se o dinheiro realmente entrou no mês atual
             if (p.pagamentos && Array.isArray(p.pagamentos) && p.pagamentos.length > 0) {
                 p.pagamentos.forEach(pag => {
                     const valPag = parseFloat(pag.valor || 0);
@@ -2934,11 +2934,6 @@
                     const pPago = parseFloat(p.valorPago !== undefined ? p.valorPago : (p.statusPagamento === 'Pago 100%' ? pTotal : (p.statusPagamento === 'Sinal 50%' ? pTotal * 0.5 : 0)));
                     totalReceitaRealizada += pPago;
                     if (p.data === hojeStr) fatDia += pPago;
-                } else if (p.statusPagamento === 'Pago 100%' && (p.dataEntrega === hojeStr || p.id == 992755847)) {
-                    // Pedido quitado/entregue hoje
-                    const pPago = parseFloat(p.valorPago || pTotal);
-                    totalReceitaRealizada += pPago;
-                    fatDia += pPago;
                 }
             }
 
@@ -2953,7 +2948,7 @@
 
     appData.pedidos.forEach(p => {
         if (p.status !== 'Cancelado' && (p.status === 'Entregue' || p.status === 'Concluído')) {
-            if (p.dataEntrega === hojeStr || p.id == 992755847 || (p.pagamentos && p.pagamentos.some(pag => pag.data === hojeStr))) {
+            if (p.dataEntrega === hojeStr || p.data === hojeStr) {
                 entreguesDiaCount++;
             }
         }
@@ -6479,7 +6474,7 @@ async function reverterBaixaParcela(id, dataInicialOriginal, numParcela) {
     tbody.innerHTML = '';
 
     const filtro = (document.getElementById('input-pesquisar-financeiro')?.value || '').toLowerCase();
-    const mesAnoAtual = appData.dataAtual.substring(0, 7);
+    const mesAnoAtual = appData.dataAtual.substring(0, 7); // "2026-09"
 
     let movimentacoes = [];
 
@@ -6487,6 +6482,7 @@ async function reverterBaixaParcela(id, dataInicialOriginal, numParcela) {
         if (p.status !== 'Cancelado') {
             const descProdutos = p.itens ? p.itens.map(i => `${i.servico || 'Item'} (${i.qtd}x)`).join(', ') : 'Serviço';
 
+            // Registra custo de produção apenas se for do mês atual
             if (p.data && p.data.startsWith(mesAnoAtual) && parseFloat(p.despesa || 0) > 0) {
                 movimentacoes.push({
                     data: p.data,
@@ -6500,6 +6496,7 @@ async function reverterBaixaParcela(id, dataInicialOriginal, numParcela) {
                 });
             }
 
+            // Registra entradas que ocorreram no mês atual
             if (p.pagamentos && Array.isArray(p.pagamentos) && p.pagamentos.length > 0) {
                 p.pagamentos.forEach(pag => {
                     if (pag.data && pag.data.startsWith(mesAnoAtual)) {
