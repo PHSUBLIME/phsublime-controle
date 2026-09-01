@@ -7560,74 +7560,36 @@ async function reverterBaixaParcela(id, dataInicialOriginal, numParcela) {
     }
 
     function baixarPDF() { window.print(); }
-// ================= FUNÇÃO DE RESGATE E RESTAURAÇÃO CORRIGIDA =================
+// ================= FUNÇÃO DE RESGATE INTELIGENTE =================
 async function restaurarDadosDoFechamento() {
     const confirmou = await confirmarAcao(
-        "RESGATAR VENDAS E DESPESAS",
-        "Deseja resgatar todos os pedidos e despesas do relatório do Histórico de volta para as telas ativas?",
-        "Sim, Resgatar Agora",
-        "fa-rotate-left",
+        "LIMPAR PAINEL DE SETEMBRO",
+        "Deseja manter na tela ativa APENAS os pedidos pendentes e a entregar (como Fabiana, Karoline, etc.), removendo os 70 pedidos que já foram concluídos em Agosto?",
+        "Sim, Deixar Apenas Pendentes",
+        "fa-filter",
         "yellow"
     );
 
     if (!confirmou) return;
 
-    mostrarToast("Buscando dados no Histórico do Supabase...");
+    mostrarToast("Filtrando e limpando o painel para Setembro...");
 
-    // 1. Busca o último fechamento no Histórico
-    const { data: fechamentos, error: errF } = await supabaseClient
-        .from('fechamentos')
-        .select('*')
-        .order('id', { ascending: false })
-        .limit(1);
+    // Identifica pedidos de Agosto que JÁ ESTAVAM entregues e quitados 100%
+    const idsConcluidosAgosto = appData.pedidos
+        .filter(p => p.data && p.data.startsWith('2026-08') && p.status === 'Entregue' && p.statusPagamento === 'Pago 100%')
+        .map(p => p.id);
 
-    if (errF || !fechamentos || fechamentos.length === 0) {
-        mostrarToast("Nenhum registro encontrado no Histórico para restaurar.", "alerta");
-        return;
-    }
-
-    const ultimoFechamento = fechamentos[0];
-
-    // 2. Limpa campos internos extras para o banco aceitar a gravação
-    const pedidosLimpos = (ultimoFechamento.pedidos || []).map(p => {
-        const copy = { ...p };
-        delete copy._originalIndex;
-        delete copy.created_at;
-        delete copy.updated_at;
-        return copy;
-    });
-
-    // 3. Salva os pedidos de volta no banco
-    if (pedidosLimpos.length > 0) {
-        const { error: errP } = await supabaseClient.from('pedidos').upsert(pedidosLimpos);
-        if (errP) {
-            console.error("Erro ao restaurar pedidos:", errP);
-            mostrarToast(`Erro ao restaurar pedidos: ${errP.message}`, "erro");
+    // Remove da tela ativa apenas os pedidos concluídos antigos
+    if (idsConcluidosAgosto.length > 0) {
+        const { error: errDel } = await supabaseClient.from('pedidos').delete().in('id', idsConcluidosAgosto);
+        if (errDel) {
+            mostrarToast(`Erro ao limpar: ${errDel.message}`, "erro");
             return;
         }
     }
 
-    // 4. Limpa e restaura as despesas do mês
-    const despesasLimpas = (ultimoFechamento.despesas || []).map(d => {
-        const copy = { ...d };
-        delete copy._originalIndex;
-        delete copy.created_at;
-        delete copy.updated_at;
-        return copy;
-    });
-
-    if (despesasLimpas.length > 0) {
-        const { error: errD } = await supabaseClient.from('despesas').upsert(despesasLimpas);
-        if (errD) {
-            console.error("Erro ao restaurar despesas:", errD);
-            mostrarToast(`Erro ao restaurar despesas: ${errD.message}`, "erro");
-            return;
-        }
-    }
-
-    // 5. Atualiza a tela
     await carregarDados();
-    mostrarToast(`Sucesso! ${pedidosLimpos.length} pedidos e ${despesasLimpas.length} despesas foram restaurados! 🎉`);
+    mostrarToast("Pronto! Painel de Setembro limpo. Apenas os pedidos pendentes/a entregar ficaram ativos! 🎉");
 }
     // ================= FUNÇÃO FECHAR MÊS CORRIGIDA =================
 async function fecharMes() {
