@@ -6652,72 +6652,77 @@ async function reverterBaixaParcela(id, dataInicialOriginal, numParcela) {
         if (fechamentoAtualModal) excluirFechamento(fechamentoAtualModal.id);
     }
 
-    function verDetalhesFechamento(fechamentoId) {
-        const item = appData.historicoFechamentos.find(f => f.id == fechamentoId);
-        if (!item) return;
+    // ================= FUNÇÃO DE VISUALIZAÇÃO DO HISTÓRICO ORDENADA =================
+function verDetalhesFechamento(fechamentoId) {
+    const item = appData.historicoFechamentos.find(f => f.id == fechamentoId);
+    if (!item) return;
 
-        fechamentoAtualModal = item;
+    fechamentoAtualModal = item;
 
-        document.getElementById('detalhe-hist-titulo').innerText = `Relatório de Fechamento - ${item.mes}`;
-        document.getElementById('detalhe-hist-subtitulo').innerText = `Fechado em: ${item.dataFechamento || 'N/I'}`;
+    document.getElementById('detalhe-hist-titulo').innerText = `Relatório de Fechamento - ${item.mes}`;
+    document.getElementById('detalhe-hist-subtitulo').innerText = `Fechado em: ${item.dataFechamento || 'N/I'}`;
 
-        const rf = item.resumoFinanceiro || {};
-        const fat = parseFloat(rf.faturamentoTotal || item.faturamento || 0);
-        const desp = parseFloat(rf.despesasTotais || 0);
-        const lucro = parseFloat(rf.lucroLiquido || 0);
-        const reserva = parseFloat(rf.reserva10 || 0);
+    const rf = item.resumoFinanceiro || {};
+    const fat = parseFloat(rf.faturamentoTotal || item.faturamento || 0);
+    const desp = parseFloat(rf.despesasTotais || 0);
+    const lucro = parseFloat(rf.lucroLiquido || 0);
+    const reserva = parseFloat(rf.reserva10 || 0);
 
-        document.getElementById('detalhe-hist-fat').innerText = `R$ ${fat.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-        document.getElementById('detalhe-hist-desp').innerText = `R$ ${desp.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-        document.getElementById('detalhe-hist-lucro').innerText = `R$ ${lucro.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-        document.getElementById('detalhe-hist-reserva').innerText = `R$ ${reserva.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    document.getElementById('detalhe-hist-fat').innerText = `R$ ${fat.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    document.getElementById('detalhe-hist-desp').innerText = `R$ ${desp.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    document.getElementById('detalhe-hist-lucro').innerText = `R$ ${lucro.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    document.getElementById('detalhe-hist-reserva').innerText = `R$ ${reserva.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
 
-        const tbodyPed = document.getElementById('detalhe-hist-pedidos-body');
-        tbodyPed.innerHTML = '';
-        const pedidos = item.pedidos || [];
+    const tbodyPed = document.getElementById('detalhe-hist-pedidos-body');
+    tbodyPed.innerHTML = '';
+    
+    // ORDENA PEDIDOS DO HISTÓRICO: MAIS RECENTES NO TOPO
+    const pedidos = (item.pedidos || []).sort((a, b) => (b.data || '').localeCompare(a.data || '') || (b.id || 0) - (a.id || 0));
 
-        if (pedidos.length === 0) {
-            tbodyPed.innerHTML = `<tr><td colspan="7" class="p-3 text-center text-neutral-500">Nenhum pedido registrado neste mês.</td></tr>`;
-        } else {
-            pedidos.forEach(p => {
-                const descProdutos = p.itens ? p.itens.map(i => `${i.servico || 'Item'} (${i.qtd}x)`).join(', ') : 'Serviço';
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="p-2.5 font-bold text-white">#${p.id}<br><span class="text-[10px] text-neutral-500 font-normal">${escapeAttr(p.data)}</span></td>
-                    <td class="p-2.5 font-semibold text-yellow-400">${escapeAttr(p.clienteNome)}</td>
-                    <td class="p-2.5 text-xs">${escapeAttr(descProdutos)}</td>
-                    <td class="p-2.5 text-xs font-bold text-neutral-300">${escapeAttr(p.responsavel || 'N/I')}</td>
-                    <td class="p-2.5 font-black text-white">R$ ${parseFloat(p.total||0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                    <td class="p-2.5 font-bold text-rose-400">R$ ${parseFloat(p.despesa||0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                    <td class="p-2.5"><span class="px-2 py-0.5 text-[10px] rounded-full font-bold bg-neutral-800 border border-neutral-700 text-neutral-300">${escapeAttr(p.status)}</span></td>
-                `;
-                tbodyPed.appendChild(tr);
-            });
-        }
-
-        const tbodyDesp = document.getElementById('detalhe-hist-despesas-body');
-        tbodyDesp.innerHTML = '';
-        const despesas = item.despesas || [];
-
-        if (despesas.length === 0) {
-            tbodyDesp.innerHTML = `<tr><td colspan="6" class="p-3 text-center text-neutral-500">Nenhuma despesa avulsa registrada neste mês.</td></tr>`;
-        } else {
-            despesas.forEach(d => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="p-2.5 font-semibold text-white">${escapeAttr(d.nome)}</td>
-                    <td class="p-2.5 text-neutral-400">${escapeAttr(d.data)}</td>
-                    <td class="p-2.5 text-xs font-bold text-yellow-400">${escapeAttr(d.registradoPor || 'N/I')}</td>
-                    <td class="p-2.5 text-xs text-neutral-400">${escapeAttr(d.tipoPagamento)}</td>
-                    <td class="p-2.5 text-neutral-300">${escapeAttr(d.loja)}</td>
-                    <td class="p-2.5 font-bold text-rose-400">R$ ${parseFloat(d.valor||0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                `;
-                tbodyDesp.appendChild(tr);
-            });
-        }
-
-        document.getElementById('modal-detalhes-historico').classList.remove('hidden');
+    if (pedidos.length === 0) {
+        tbodyPed.innerHTML = `<tr><td colspan="7" class="p-3 text-center text-neutral-500">Nenhum pedido registrado neste mês.</td></tr>`;
+    } else {
+        pedidos.forEach(p => {
+            const descProdutos = p.itens ? p.itens.map(i => `${i.servico || 'Item'} (${i.qtd}x)`).join(', ') : 'Serviço';
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="p-2.5 font-bold text-white">#${p.id}<br><span class="text-[10px] text-neutral-500 font-normal">${escapeAttr(p.data)}</span></td>
+                <td class="p-2.5 font-semibold text-yellow-400">${escapeAttr(p.clienteNome)}</td>
+                <td class="p-2.5 text-xs">${escapeAttr(descProdutos)}</td>
+                <td class="p-2.5 text-xs font-bold text-neutral-300">${escapeAttr(p.responsavel || 'N/I')}</td>
+                <td class="p-2.5 font-black text-white">R$ ${parseFloat(p.total||0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                <td class="p-2.5 font-bold text-rose-400">R$ ${parseFloat(p.despesa||0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                <td class="p-2.5"><span class="px-2 py-0.5 text-[10px] rounded-full font-bold bg-neutral-800 border border-neutral-700 text-neutral-300">${escapeAttr(p.status)}</span></td>
+            `;
+            tbodyPed.appendChild(tr);
+        });
     }
+
+    const tbodyDesp = document.getElementById('detalhe-hist-despesas-body');
+    tbodyDesp.innerHTML = '';
+
+    // ORDENA DESPESAS DO HISTÓRICO: MAIS RECENTES NO TOPO
+    const despesas = (item.despesas || []).sort((a, b) => (b.data || '').localeCompare(a.data || '') || (b.id || 0) - (a.id || 0));
+
+    if (despesas.length === 0) {
+        tbodyDesp.innerHTML = `<tr><td colspan="6" class="p-3 text-center text-neutral-500">Nenhuma despesa avulsa registrada neste mês.</td></tr>`;
+    } else {
+        despesas.forEach(d => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="p-2.5 font-semibold text-white">${escapeAttr(d.nome)}</td>
+                <td class="p-2.5 text-neutral-400">${escapeAttr(d.data)}</td>
+                <td class="p-2.5 text-xs font-bold text-yellow-400">${escapeAttr(d.registradoPor || 'N/I')}</td>
+                <td class="p-2.5 text-xs text-neutral-400">${escapeAttr(d.tipoPagamento)}</td>
+                <td class="p-2.5 text-neutral-300">${escapeAttr(d.loja)}</td>
+                <td class="p-2.5 font-bold text-rose-400">R$ ${parseFloat(d.valor||0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+            `;
+            tbodyDesp.appendChild(tr);
+        });
+    }
+
+    document.getElementById('modal-detalhes-historico').classList.remove('hidden');
+}
 
     function fecharModalDetalhesHistorico() {
         document.getElementById('modal-detalhes-historico').classList.add('hidden');
@@ -7575,31 +7580,34 @@ async function reverterBaixaParcela(id, dataInicialOriginal, numParcela) {
     }
 
     function baixarPDF() { window.print(); }
-// ================= FUNÇÃO DE RESGATE E CORREÇÃO DO HISTÓRICO =================
+// ================= FUNÇÃO DE RESGATE, ORDENAÇÃO E CORREÇÃO =================
 async function restaurarDadosDoFechamento() {
     const confirmou = await confirmarAcao(
-        "SINCRONIZAR HISTÓRICO E DESPESAS",
-        "Deseja organizar as despesas de Agosto (Hennzo, Pyetro, cartão, etc.) para que apareçam corretamente no relatório do Histórico de Agosto?",
-        "Sim, Organizar Histórico",
+        "ORGANIZAR ORDEM E CÁLCULOS",
+        "Deseja colocar as despesas e pedidos na ordem correta (mais recentes no topo) e recalcular o histórico de Agosto?",
+        "Sim, Organizar Tudo",
         "fa-check-double",
         "yellow"
     );
 
     if (!confirmou) return;
 
-    mostrarToast("Organizando despesas de Agosto no Histórico...");
+    mostrarToast("Organizando ordenação e cálculos do Histórico...");
 
-    // 1. Busca todas as despesas salvas com data de Agosto no Supabase
+    // 1. Busca despesas de Agosto no Supabase
     const { data: todasDespesas, error: errD } = await supabaseClient.from('despesas').select('*');
     if (errD) {
         mostrarToast(`Erro ao buscar despesas: ${errD.message}`, "erro");
         return;
     }
 
-    const despesasAgosto = (todasDespesas || []).filter(d => d.data && d.data.startsWith('2026-08'));
+    // Filtra e ORDENA despesas de Agosto: MENSAGEM/DATA MAIS RECENTE NO TOPO
+    const despesasAgosto = (todasDespesas || [])
+        .filter(d => d.data && d.data.startsWith('2026-08'))
+        .sort((a, b) => (b.data || '').localeCompare(a.data || '') || (b.id || 0) - (a.id || 0));
 
     // 2. Busca o relatório de Agosto no Histórico
-    const { data: fechamentos, error: errF } = await supabaseClient
+    const { data: fechamentos } = await supabaseClient
         .from('fechamentos')
         .select('*')
         .order('id', { ascending: false })
@@ -7608,7 +7616,7 @@ async function restaurarDadosDoFechamento() {
     if (fechamentos && fechamentos.length > 0) {
         const fechamentoAgosto = fechamentos[0];
 
-        // Limpa campos internos extras para salvar no relatório
+        // Limpa propriedades internas
         const despesasAgostoLimpas = despesasAgosto.map(d => {
             const copy = { ...d };
             delete copy._originalIndex;
@@ -7617,32 +7625,63 @@ async function restaurarDadosDoFechamento() {
             return copy;
         });
 
-        // Atualiza o relatório do Histórico de Agosto com as despesas reais de Agosto
+        // Ordena também os pedidos do histórico: MAIS RECENTES NO TOPO
+        const pedidosAgostoLimpos = (fechamentoAgosto.pedidos || [])
+            .map(p => {
+                const copy = { ...p };
+                delete copy._originalIndex;
+                delete copy.created_at;
+                delete copy.updated_at;
+                return copy;
+            })
+            .sort((a, b) => (b.data || '').localeCompare(a.data || '') || (b.id || 0) - (a.id || 0));
+
+        // Recalcula o faturamento e despesas do relatório do Histórico de Agosto
+        let fatAgosto = 0;
+        let despPedAgosto = 0;
+
+        pedidosAgostoLimpos.forEach(p => {
+            if (p.status !== 'Cancelado') {
+                const totalP = parseFloat(p.total || 0);
+                const stPag = p.statusPagamento || 'Pendente';
+                const valorPagoAgosto = parseFloat(p.valorPago !== undefined ? p.valorPago : (stPag === 'Pago 100%' ? totalP : (stPag === 'Sinal 50%' ? totalP * 0.5 : 0)));
+                fatAgosto += valorPagoAgosto;
+                despPedAgosto += parseFloat(p.despesa || 0);
+            }
+        });
+
+        let despAvulsaAgosto = despesasAgostoLimpas.reduce((acc, d) => acc + parseFloat(d.valor || 0), 0);
+        let despesasTotaisAgosto = despPedAgosto + despAvulsaAgosto;
+        let lucroBrutoAgosto = fatAgosto - despesasTotaisAgosto;
+        let reserva10Agosto = lucroBrutoAgosto > 0 ? lucroBrutoAgosto * 0.10 : 0;
+        let lucroLiquidoAgosto = lucroBrutoAgosto > 0 ? lucroBrutoAgosto - reserva10Agosto : lucroBrutoAgosto;
+
+        fechamentoAgosto.pedidos = pedidosAgostoLimpos;
         fechamentoAgosto.despesas = despesasAgostoLimpas;
+        fechamentoAgosto.resumoFinanceiro = {
+            faturamentoTotal: fatAgosto,
+            despesasTotais: despesasTotaisAgosto,
+            lucroLiquido: lucroLiquidoAgosto,
+            reserva10: reserva10Agosto,
+            totalPedidos: pedidosAgostoLimpos.length,
+            totalEntregues: pedidosAgostoLimpos.filter(p => p.status === 'Entregue' || p.status === 'Concluído').length
+        };
 
-        // Recalcula o total do relatório do Histórico
-        let totalDespAgosto = despesasAgostoLimpas.reduce((acc, d) => acc + parseFloat(d.valor || 0), 0);
-        if (fechamentoAgosto.pedidos) {
-            fechamentoAgosto.pedidos.forEach(p => {
-                if (p.status !== 'Cancelado') totalDespAgosto += parseFloat(p.despesa || 0);
-            });
-        }
-        if (!fechamentoAgosto.resumoFinanceiro) fechamentoAgosto.resumoFinanceiro = {};
-        fechamentoAgosto.resumoFinanceiro.despesasTotais = totalDespAgosto;
-
+        // Salva o relatório de Agosto 100% corrigido e ordenado no Supabase
         await supabaseClient.from('fechamentos').update({
+            pedidos: pedidosAgostoLimpos,
             despesas: despesasAgostoLimpas,
             resumoFinanceiro: fechamentoAgosto.resumoFinanceiro
         }).eq('id', fechamentoAgosto.id);
 
-        // Remove as despesas de Agosto da tabela ativa
+        // Remove as despesas de Agosto salvas na tabela ativa
         const idsAgostoDeletar = despesasAgosto.map(d => d.id);
         if (idsAgostoDeletar.length > 0) {
             await supabaseClient.from('despesas').delete().in('id', idsAgostoDeletar);
         }
     }
 
-    // 3. Mantém apenas pedidos pendentes ativos no painel de Setembro
+    // 3. Remove pedidos concluídos de Agosto da tela ativa
     const idsConcluidosAgosto = appData.pedidos
         .filter(p => p.data && p.data.startsWith('2026-08') && p.status === 'Entregue' && p.statusPagamento === 'Pago 100%')
         .map(p => p.id);
@@ -7652,7 +7691,7 @@ async function restaurarDadosDoFechamento() {
     }
 
     await carregarDados();
-    mostrarToast("Pronto! Despesas do Hennzo, Pyetro, cartão, etc. foram organizadas no Histórico de Agosto! 🎉");
+    mostrarToast("Tabelas ordenadas (mais recentes no topo) e cálculos de Agosto atualizados com sucesso! 🎉");
 }
 
 // ================= FUNÇÃO FECHAR MÊS CORRIGIDA =================
