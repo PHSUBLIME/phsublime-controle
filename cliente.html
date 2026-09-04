@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PHSUBLIME - Banner com tubete</title>
+    <title>PHSUBLIME - Gráfica Digital Online</title>
 
     <!-- FAVICON -->
     <link rel="icon" type="image/x-icon" href="https://phsublime.sistograf.net/storage/logos/favicon.ico">
@@ -142,7 +142,7 @@
             <!-- LAYOUT PRINCIPAL EM 2 COLUNAS -->
             <div class="flex flex-col lg:flex-row gap-6 pt-2">
                 
-                <!-- SIDEBAR ESQUERDA (EXATA DA SUA IMAGEM) -->
+                <!-- SIDEBAR ESQUERDA -->
                 <aside class="w-full lg:w-64 shrink-0 space-y-4">
                     
                     <!-- MAIS VENDIDOS -->
@@ -261,7 +261,7 @@
                                 <span>TOTAL</span><strong id="cart-resumo-total" class="text-emerald-600 text-xl font-black">R$ 0,00</strong>
                             </div>
                         </div>
-                        <button onclick="finalizarCompraWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 uppercase">
+                        <button onclick="abrirModalCheckout()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 uppercase">
                             <i class="fa-brands fa-whatsapp text-xl"></i> FINALIZAR PEDIDO VIA WHATSAPP
                         </button>
                     </div>
@@ -298,6 +298,117 @@
             </div>
         </div>
     </footer>
+
+    <!-- MODAL DE CHECKOUT DO CLIENTE (DADOS DE ENTREGA) -->
+    <div id="modal-checkout-cliente" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[999] hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 space-y-5 shadow-2xl relative border border-blue-200 my-8">
+            <button onclick="fecharModalCheckout()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-xl font-bold"><i class="fa-solid fa-xmark"></i></button>
+
+            <div class="border-b border-slate-100 pb-3">
+                <h3 class="text-base font-black text-blue-900 font-heading uppercase flex items-center gap-2">
+                    <i class="fa-solid fa-address-card text-amber-500"></i> Dados para Envio e Atendimento
+                </h3>
+                <p class="text-xs text-slate-500">Preencha seus dados abaixo para gerar o pedido formatado direto no WhatsApp.</p>
+            </div>
+
+            <form id="form-checkout-cliente" onsubmit="confirmarPedidoEEnviarWhatsapp(event)" class="space-y-4 text-xs">
+                
+                <!-- TIPO DE PESSOA -->
+                <div class="flex items-center gap-4 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                    <label class="font-bold text-slate-700">Tipo de Cadastro:</label>
+                    <label class="flex items-center gap-1.5 cursor-pointer font-semibold">
+                        <input type="radio" name="checkout_tipo_pessoa" value="PF" checked onchange="toggleCamposPessoa('PF')" class="accent-blue-900"> Pessoa Física
+                    </label>
+                    <label class="flex items-center gap-1.5 cursor-pointer font-semibold">
+                        <input type="radio" name="checkout_tipo_pessoa" value="PJ" onchange="toggleCamposPessoa('PJ')" class="accent-blue-900"> Pessoa Jurídica
+                    </label>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="font-bold text-slate-700 block mb-1" id="lbl-checkout-nome">Nome Completo *</label>
+                        <input type="text" id="checkout-nome" required placeholder="Digite seu nome" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-600">
+                    </div>
+                    <div>
+                        <label class="font-bold text-slate-700 block mb-1" id="lbl-checkout-doc">CPF *</label>
+                        <input type="text" id="checkout-doc" required placeholder="000.000.000-00" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-600">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="font-bold text-slate-700 block mb-1">WhatsApp / Telefone *</label>
+                        <input type="text" id="checkout-wpp" required placeholder="(21) 99999-9999" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-600">
+                    </div>
+                    <div>
+                        <label class="font-bold text-slate-700 block mb-1">Forma de Pagamento Preferida</label>
+                        <select id="checkout-pagamento" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-600">
+                            <option value="PIX">PIX (Aprovação Imediata)</option>
+                            <option value="Cartão de Crédito">Cartão de Crédito</option>
+                            <option value="Pagamento na Retirada/Entrega">Pagamento na Retirada / Entrega</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- ENDEREÇO COM BUSCA DE CEP -->
+                <div class="border-t border-slate-100 pt-3 space-y-3">
+                    <h4 class="font-bold text-slate-800 uppercase text-[11px] flex items-center gap-1.5"><i class="fa-solid fa-truck text-blue-600"></i> Endereço de Entrega</h4>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="font-bold text-slate-700 block mb-1">CEP *</label>
+                            <div class="flex gap-1">
+                                <input type="text" id="checkout-cep" required placeholder="00000-000" onkeyup="buscarCepAuto(this.value)" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-600">
+                            </div>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="font-bold text-slate-700 block mb-1">Rua / Logradouro *</label>
+                            <input type="text" id="checkout-rua" required placeholder="Ex: Rua Maria Flaviana" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-600">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="font-bold text-slate-700 block mb-1">Número *</label>
+                            <input type="text" id="checkout-numero" required placeholder="Nº" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-600">
+                        </div>
+                        <div>
+                            <label class="font-bold text-slate-700 block mb-1">Complemento</label>
+                            <input type="text" id="checkout-complemento" placeholder="Apto, Sala..." class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-600">
+                        </div>
+                        <div>
+                            <label class="font-bold text-slate-700 block mb-1">Bairro *</label>
+                            <input type="text" id="checkout-bairro" required placeholder="Bairro" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-600">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="col-span-2">
+                            <label class="font-bold text-slate-700 block mb-1">Cidade *</label>
+                            <input type="text" id="checkout-cidade" required placeholder="Rio de Janeiro" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-600">
+                        </div>
+                        <div>
+                            <label class="font-bold text-slate-700 block mb-1">UF *</label>
+                            <input type="text" id="checkout-uf" required placeholder="RJ" maxlength="2" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-600 uppercase text-center">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="font-bold text-slate-700 block mb-1">Ponto de Referência / Observações da Arte</label>
+                        <input type="text" id="checkout-obs" placeholder="Ex: Próximo à estação de trem. Quero alterar o texto da arte..." class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-600">
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-slate-100 flex justify-end gap-3">
+                    <button type="button" onclick="fecharModalCheckout()" class="px-5 py-2.5 bg-slate-200 text-slate-800 font-bold rounded-xl text-xs hover:bg-slate-300 transition-all">Cancelar</button>
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white font-black px-6 py-2.5 rounded-xl text-xs shadow-md transition-all flex items-center gap-2 uppercase">
+                        <i class="fa-brands fa-whatsapp text-lg"></i> ENVIAR PEDIDO NO WHATSAPP 🚀
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
 
     <!-- MODAL DE DETALHES DO PRODUTO -->
     <div id="modal-detalhes-produto" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[998] hidden flex items-center justify-center p-4 overflow-y-auto">
@@ -415,7 +526,7 @@
         };
 
         let catalogoEstoque = [];
-        let categoriaFiltro = 'tubete'; // Inicia na categoria "Banner com tubete" como na sua imagem
+        let categoriaFiltro = 'tubete';
         let paginaAtual = 1;
         const ITENS_POR_PAGINA = 24;
         let carrinho = JSON.parse(localStorage.getItem('phsublime_carrinho') || '[]');
@@ -451,28 +562,15 @@
             }
         }
 
-        // CARREGAR TODOS OS PRODUTOS DA SUA TELA DE "BANNER COM TUBETE" + OUTROS
         function carregarEstoquePadrao() {
             catalogoEstoque = [
-                // PRODUTOS DA SUA FOTO DE "BANNER COM TUBETE"
                 { id: 2490, nome: 'Mini Banner 240g 25x35cm', categoria: 'Banner com tubete', precoVenda: 21.90, precoDe: null, ref: 'sign101fp', imagem: 'https://phsublime.sistograf.net/storage/produtos/2490/img/20250917_0_8.jpg', descricao: '<p><strong>KIT 10 MINI BANNERS PERSONALIZADOS – LONA 300g</strong><br>Destaque suas ofertas com muito mais impacto, qualidade e profissionalismo.<br>Tamanho: 25x35 cm cada banner.<br>Impressão: Digital em alta definição.<br>Acabamento: Hastes plásticas superior e inferior + cordão para pendurar (pronto para usar).</p>' },
                 { id: 2491, nome: 'Mini Banner | 40x60cm', categoria: 'Banner com tubete', precoVenda: 28.90, precoDe: 47.90, ref: 'sign102', imagem: 'https://phsublime.sistograf.net/storage/produtos/2490/img/20250917_0_8.jpg', descricao: '<p>Mini Banner 40x60cm impresso em lona com tubete e cordão.</p>' },
                 { id: 2492, nome: 'Mini Banner | 44x64cm', categoria: 'Banner com tubete', precoVenda: 31.90, precoDe: 49.90, ref: 'sign103', imagem: 'https://phsublime.sistograf.net/storage/produtos/2490/img/20250917_0_8.jpg', descricao: '<p>Mini Banner 44x64cm impresso em lona com tubete e cordão.</p>' },
                 { id: 2493, nome: 'Lona 240g | 50X70cm', categoria: 'Banner com tubete', precoVenda: 38.71, precoDe: null, ref: 'sign104', imagem: 'https://phsublime.sistograf.net/storage/produtos/2490/img/20250917_0_8.jpg', descricao: '<p>Lona 240g no formato 50x70cm impresso em alta definição.</p>' },
                 { id: 487, nome: 'Roll UP Lona + Base 80x210cm', categoria: 'Banner com tubete', precoVenda: 580.57, precoDe: null, ref: 'roll001', imagem: 'https://phsublime.com.br/20220928_0_rollup.png', descricao: '<p>Roll UP completo com estrutura de alumínio e lona 80x210cm.</p>' },
-
-                // DEMAIS PRODUTOS DA SUA LOJA
                 { id: 2477, nome: 'Raspadinha | Modelo Trevo | 4/4', categoria: 'Raspadinha', precoVenda: 0.93, precoDe: null, ref: 'rasp001', imagem: 'https://phsublime.sistograf.net/storage/produtos/2477/img/20250911_0_20250815_0_Thumb-Raspadinha-Trevo-4x4Thumb01.png', descricao: '<p>Raspadinha personalizada Modelo Trevo 4x4 cores.</p>' },
-                { id: 1406, nome: 'Copo Long Drink | 350ml | Rosa', categoria: 'Copo', precoVenda: 4.79, precoDe: null, ref: 'ldr001', imagem: 'https://phsublime.sistograf.net/storage/produtos/1406/img/20250911_0_20220813_0_LongDrinkRosaBebêSólido.png', descricao: '<p>Copo Long Drink 350ml Rosa Sólido com personalização.</p>' },
-                { id: 1438, nome: 'Copo Twister | 575ml | Vermelho Cristal', categoria: 'Copo', precoVenda: 6.67, precoDe: null, ref: 'tws001', imagem: 'https://phsublime.sistograf.net/storage/produtos/1438/img/20250911_0_20220813_0_VermelhoTransparente.png', descricao: '<p>Copo Twister 575ml Vermelho Cristal Transparente.</p>' },
-                { id: 1777, nome: 'Agenda Colors | 2 Dias por página | 1/1 - 200 Páginas', categoria: 'Agenda', precoVenda: 18.59, precoDe: null, ref: 'agd001', imagem: 'https://phsublime.sistograf.net/storage/produtos/1777/img/20250911_0_20240926_0_Agenda2DPP-Colorida.png', descricao: '<p>Agenda Colors 2 Dias por página caprichada com 200 páginas.</p>' },
-                { id: 1618, nome: 'Agenda Candy | 1 Dia por página | 1/1 - 380 Páginas', categoria: 'Agenda', precoVenda: 41.82, precoDe: null, ref: 'agd002', imagem: 'https://phsublime.sistograf.net/storage/produtos/1618/img/20250911_0_20240926_0_Agenda1DPP-Candy.png', descricao: '<p>Agenda Candy 1 Dia por página com 380 páginas.</p>' },
-                { id: 1868, nome: 'Camisa Premium Plus Size | Azul Marinho', categoria: 'Camisa', precoVenda: 57.85, precoDe: null, ref: 'cms001', imagem: 'https://phsublime.sistograf.net/storage/produtos/1868/img/20250911_0_20230923_0_PlusSizeazulmarinho.png', descricao: '<p>Camisa Premium Plus Size Azul Marinho.</p>' },
-                { id: 1893, nome: 'Camisa Oversized | Preta', categoria: 'Camisa', precoVenda: 69.46, precoDe: null, ref: 'cms002', imagem: 'https://phsublime.sistograf.net/storage/produtos/1893/img/20250911_0_20230925_0_oversizepreta.png', descricao: '<p>Camisa Oversized Preta de alta qualidade.</p>' },
-                { id: 1173, nome: 'Almofada Com Enchimento | 45x45cm | 4/4 Cores', categoria: 'Casa', precoVenda: 65.05, precoDe: null, ref: 'alm001', imagem: 'https://phsublime.sistograf.net/storage/produtos/1173/img/20250911_0_20210929_0_ALMOFADA_2.png', descricao: '<p>Almofada personalizada com enchimento 45x45cm.</p>' },
-                { id: 1224, nome: 'Cartela 300g | 45x80mm | 4/0 | UV 1/0', categoria: 'Cartela', precoVenda: 139.11, precoDe: null, ref: 'ctl001', imagem: 'https://phsublime.sistograf.net/storage/produtos/1224/img/20250911_0_20220223_0_modelo44-0.png', descricao: '<p>Cartela para Bijuteria 300g com verniz UV.</p>' },
-                { id: 1041, nome: 'Folheto 115g | 21x30cm | 4/4', categoria: 'Folheto', precoVenda: 278.28, precoDe: null, ref: 'flh001', imagem: 'https://phsublime.sistograf.net/storage/produtos/1041/img/20250911_0_20190326_imprimir-folheto-21x30-115g-04.jpg', descricao: '<p>Folheto Couchê 115g tamanho A4 (21x30cm).</p>' },
-                { id: 774, nome: 'Ventarola 250g | 4/4 | UV 1/0', categoria: 'Ventarola', precoVenda: 348.48, precoDe: null, ref: 'vnt001', imagem: 'https://phsublime.sistograf.net/storage/produtos/774/img/20250911_0_20200107_0_imprimir-ventarola-pesonalizada-para-revendeda-250g.png', descricao: '<p>Ventarola personalizada 250g com verniz UV.</p>' }
+                { id: 1406, nome: 'Copo Long Drink | 350ml | Rosa', categoria: 'Copo', precoVenda: 4.79, precoDe: null, ref: 'ldr001', imagem: 'https://phsublime.sistograf.net/storage/produtos/1406/img/20250911_0_20220813_0_LongDrinkRosaBebêSólido.png', descricao: '<p>Copo Long Drink 350ml Rosa Sólido com personalização.</p>' }
             ];
         }
 
@@ -481,7 +579,6 @@
             renderizarCatalogo();
 
             try {
-                // Traz do Supabase os produtos ORDENADOS do mais novo para o mais antigo
                 const { data, error } = await supabaseClient
                     .from('produtos')
                     .select('*')
@@ -509,10 +606,7 @@
                         };
                     });
 
-                    // Insere os produtos do Supabase no topo do catálogo
                     catalogoEstoque = [...produtosMapeados, ...catalogoEstoque];
-                    
-                    // Remove duplicados
                     const mapaUnico = new Map();
                     catalogoEstoque.forEach(prod => mapaUnico.set(prod.id, prod));
                     catalogoEstoque = Array.from(mapaUnico.values());
@@ -553,7 +647,6 @@
             }, 300);
         }
 
-        // Função de Relevância que coloca a busca exata em 1º lugar
         function calcularRelevancia(item, busca) {
             if (!busca) return 0;
             const nome = (item.nome || '').toLowerCase().trim();
@@ -596,7 +689,6 @@
                 return bateuBusca && bateuCategoria;
             });
 
-            // Ordena para colocar o resultado exato no topo da tela (1º lugar)
             if (busca) {
                 filtrados.sort((a, b) => calcularRelevancia(b, busca) - calcularRelevancia(a, busca));
             }
@@ -806,20 +898,98 @@
             if (totalEl) totalEl.innerText = `R$ ${total.toFixed(2)}`;
         }
 
-        function finalizarCompraWhatsApp() {
+        // ============ LÓGICA DE CHECKOUT E BUSCA DE CEP ============
+        function abrirModalCheckout() {
+            if (carrinho.length === 0) return;
+            document.getElementById('modal-checkout-cliente').classList.remove('hidden');
+        }
+
+        function fecharModalCheckout() {
+            document.getElementById('modal-checkout-cliente').classList.add('hidden');
+        }
+
+        function toggleCamposPessoa(tipo) {
+            const lblNome = document.getElementById('lbl-checkout-nome');
+            const lblDoc = document.getElementById('lbl-checkout-doc');
+            const inputDoc = document.getElementById('checkout-doc');
+
+            if (tipo === 'PJ') {
+                if (lblNome) lblNome.innerText = 'Razão Social / Nome Fantasia *';
+                if (lblDoc) lblDoc.innerText = 'CNPJ *';
+                if (inputDoc) inputDoc.placeholder = '00.000.000/0001-00';
+            } else {
+                if (lblNome) lblNome.innerText = 'Nome Completo *';
+                if (lblDoc) lblDoc.innerText = 'CPF *';
+                if (inputDoc) inputDoc.placeholder = '000.000.000-00';
+            }
+        }
+
+        async function buscarCepAuto(val) {
+            const cep = val.replace(/\D/g, '');
+            if (cep.length === 8) {
+                try {
+                    const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                    const data = await res.json();
+                    if (!data.erro) {
+                        document.getElementById('checkout-rua').value = data.logradouro || '';
+                        document.getElementById('checkout-bairro').value = data.bairro || '';
+                        document.getElementById('checkout-cidade').value = data.localidade || '';
+                        document.getElementById('checkout-uf').value = data.uf || '';
+                        document.getElementById('checkout-numero').focus();
+                    }
+                } catch(e) {
+                    console.error("Erro na busca de CEP", e);
+                }
+            }
+        }
+
+        function confirmarPedidoEEnviarWhatsapp(e) {
+            e.preventDefault();
+
             if (carrinho.length === 0) return;
 
+            const tipoPessoa = document.querySelector('input[name="checkout_tipo_pessoa"]:checked')?.value || 'PF';
+            const nome = document.getElementById('checkout-nome').value;
+            const doc = document.getElementById('checkout-doc').value;
+            const wpp = document.getElementById('checkout-wpp').value;
+            const pagamento = document.getElementById('checkout-pagamento').value;
+
+            const cep = document.getElementById('checkout-cep').value;
+            const rua = document.getElementById('checkout-rua').value;
+            const numero = document.getElementById('checkout-numero').value;
+            const complemento = document.getElementById('checkout-complemento').value;
+            const bairro = document.getElementById('checkout-bairro').value;
+            const cidade = document.getElementById('checkout-cidade').value;
+            const uf = document.getElementById('checkout-uf').value;
+            const obs = document.getElementById('checkout-obs').value;
+
             let texto = `*NOVO PEDIDO - PHSUBLIME GRÁFICA*\n\n`;
+            texto += `👤 *DADOS DO CLIENTE (${tipoPessoa}):*\n`;
+            texto += `• Nome/Razão: ${nome}\n`;
+            texto += `• Documento: ${doc}\n`;
+            texto += `• WhatsApp: ${wpp}\n\n`;
+
+            texto += `📍 *ENDEREÇO DE ENTREGA:*\n`;
+            texto += `• CEP: ${cep}\n`;
+            texto += `• Logradouro: ${rua}, nº ${numero}${complemento ? ' (' + complemento + ')' : ''}\n`;
+            texto += `• Bairro: ${bairro} | Cidade: ${cidade}-${uf.toUpperCase()}\n`;
+            if (obs) texto += `• Obs/Ref: ${obs}\n`;
+            texto += `\n💳 *FORMA DE PAGAMENTO:* ${pagamento}\n\n`;
+
+            texto += `📦 *ITENS DO PEDIDO:*\n`;
             let total = 0;
 
             carrinho.forEach((item, index) => {
                 const sub = item.preco * item.qtd;
                 total += sub;
-                texto += `${index + 1}. *${item.nome}*\n   Qtd: ${item.qtd}x | Subtotal: R$ ${sub.toFixed(2)}\n\n`;
+                texto += `${index + 1}. *${item.nome}*\n   Qtd: ${item.qtd}x | Subtotal: R$ ${sub.toFixed(2)}\n`;
             });
 
-            texto += `*TOTAL DO PEDIDO: R$ ${total.toFixed(2)}*\n\nAguardo as instruções para pagamento e envio do arquivo da arte!`;
+            texto += `\n----------------------------------\n`;
+            texto += `💰 *TOTAL DO PEDIDO: R$ ${total.toFixed(2)}*\n\n`;
+            texto += `Aguardo instruções para pagamento e envio do arquivo da arte!`;
 
+            fecharModalCheckout();
             const link = `https://wa.me/${WHATSAPP_ATENDIMENTO}?text=${encodeURIComponent(texto)}`;
             window.open(link, '_blank');
         }
