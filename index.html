@@ -2601,8 +2601,8 @@
     <!-- SCRIPT PRINCIPAL -->
     <script>
         // ================= CONFIGURAÇÃO DO SUPABASE =================
-        const SUPABASE_URL = 'https://qkcrimqakjsokdztzqxe.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_mF--YXTFkjyjbQ7Uw7Qq1w_ODzsJPA1'; 
+        const SUPABASE_URL = 'https://wkjbhnahvievkeytcpuc.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_Uyij_0fP3GRYRMeDBWM8aA_KXr9hLSs';
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -2801,7 +2801,7 @@
             supabaseClient.from('pedidos').select('*'),
             supabaseClient.from('despesas').select('*').order('id', { ascending: false }),
             supabaseClient.from('fechamentos').select('*').order('id', { ascending: false }),
-            supabaseClient.from('estoque').select('*').order('id', { ascending: false }).limit(1000000),
+            supabaseClient.from('estoque').select('*').order('id', { ascending: false }),
             supabaseClient.from('orcamentos').select('*').order('id', { ascending: false }),
             supabaseClient.from('produtos').select('*').order('id', { ascending: false }),
             supabaseClient.from('parcelas').select('*').order('vencimento', { ascending: true })
