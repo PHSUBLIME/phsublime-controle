@@ -2453,15 +2453,22 @@
             </p>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div class="bg-neutral-800/80 p-4 rounded-xl border border-neutral-700">
-                    <span class="text-[10px] text-neutral-400 font-bold uppercase block">Plano Fixo Mensal</span>
-                    <span class="text-xl font-black text-white">R$ 600,00</span>
-                    <span class="text-[10px] text-neutral-500 block mt-1">Sua mensalidade atual</span>
+                <div class="bg-neutral-800/80 p-4 rounded-xl border border-neutral-700 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] text-neutral-400 font-bold uppercase block">Plano Fixo Mensal</span>
+                            <button type="button" onclick="editarValorPlanoFixo()" class="text-xs text-yellow-400 hover:text-yellow-300 font-bold flex items-center gap-1" title="Alterar valor do plano">
+                                <i class="fa-solid fa-pen"></i> Alterar
+                            </button>
+                        </div>
+                        <span class="text-xl font-black text-white mt-1 block" id="frete-valor-plano-label">R$ 600,00</span>
+                    </div>
+                    <span class="text-[10px] text-neutral-500 block mt-1">Sua mensalidade contratada</span>
                 </div>
                 <div class="bg-neutral-800/80 p-4 rounded-xl border border-neutral-700">
                     <span class="text-[10px] text-neutral-400 font-bold uppercase block">Entregas Dropship</span>
                     <span class="text-xl font-black text-yellow-400" id="frete-qtd-entregas">0</span>
-                    <span class="text-[10px] text-neutral-500 block mt-1">Pedidos no mês</span>
+                    <span class="text-[10px] text-neutral-500 block mt-1" id="frete-periodo-label">Pedidos no período</span>
                 </div>
                 <div class="bg-neutral-800/80 p-4 rounded-xl border border-neutral-700">
                     <span class="text-[10px] text-neutral-400 font-bold uppercase block">Custo Estimado Avulso</span>
@@ -2472,14 +2479,22 @@
 
             <div id="frete-painel-resultado" class="p-4 rounded-xl border text-xs space-y-1"></div>
 
-            <div class="flex justify-end pt-2 border-t border-neutral-800">
-                <button type="button" onclick="fecharModalAnaliseFrete()" class="px-5 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-bold text-xs rounded-xl">
+            <div class="flex flex-wrap items-center justify-between gap-2.5 pt-2 border-t border-neutral-800">
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="zerarAuditoriaFrete()" class="px-3.5 py-2 bg-rose-950/60 hover:bg-rose-900 text-rose-400 border border-rose-800/60 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all">
+                        <i class="fa-solid fa-rotate-left"></i> Zerar Contagem
+                    </button>
+                    <button type="button" id="btn-restaurar-ciclo-frete" onclick="restaurarCicloFrete()" class="hidden px-3.5 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all">
+                        <i class="fa-solid fa-calendar-days"></i> Ver Mês Inteiro
+                    </button>
+                </div>
+
+                <button type="button" onclick="fecharModalAnaliseFrete()" class="px-5 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-bold text-xs rounded-xl">
                     Fechar Consulta
                 </button>
             </div>
         </div>
     </div>
-
     <!-- MODAL DAR BAIXA EM PARCELA / SALDO DE COBRANÇA -->
     <div id="modal-baixa-parcela" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[970] hidden flex items-center justify-center p-4">
         <div class="bg-neutral-900 border border-neutral-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
@@ -7849,24 +7864,91 @@ async function fecharMes() {
         }
     }
 
+   // ===== CONTROLE DA AUDITORIA DO PLANO DE ENTREGAS =====
+    function obterValorPlanoFixo() {
+        const salvo = localStorage.getItem('phsublime_valor_plano_fixo');
+        return salvo !== null ? parseFloat(salvo) : 600.00;
+    }
+
+    async function editarValorPlanoFixo() {
+        const valorAtual = obterValorPlanoFixo();
+        const novoValorStr = prompt("Informe o novo valor mensal do Plano Fixo de Entregas (R$):", valorAtual.toFixed(2));
+        if (novoValorStr !== null) {
+            const num = parseFloat(novoValorStr.replace(',', '.'));
+            if (!isNaN(num) && num >= 0) {
+                localStorage.setItem('phsublime_valor_plano_fixo', num.toFixed(2));
+                mostrarToast(`Valor do Plano Fixo atualizado para R$ ${num.toFixed(2)}!`);
+                abrirModalAnaliseFrete();
+            } else {
+                mostrarToast("Valor inválido informado!", "erro");
+            }
+        }
+    }
+
+    async function zerarAuditoriaFrete() {
+        const confirmou = await confirmarAcao(
+            "Zerar Contador de Auditoria",
+            "Deseja zerar a contagem de entregas deste ciclo? Apenas pedidos a partir de hoje serão contabilizados.",
+            "Sim, Zerar Agora",
+            "fa-rotate-left",
+            "rose"
+        );
+
+        if (confirmou) {
+            localStorage.setItem('phsublime_data_corte_frete', appData.dataAtual);
+            mostrarToast("Contador de auditoria zerado para o novo ciclo!");
+            abrirModalAnaliseFrete();
+        }
+    }
+
+    function restaurarCicloFrete() {
+        localStorage.removeItem('phsublime_data_corte_frete');
+        mostrarToast("Exibindo todas as entregas do mês ativo!");
+        abrirModalAnaliseFrete();
+    }
+
     function abrirModalAnaliseFrete() {
         let totalEntregasDrop = 0;
         let totalCustoAvulsoAcumulado = 0;
-        const PLANO_FIXO = 300.00;
+        const PLANO_FIXO = obterValorPlanoFixo();
+
+        const planoLabel = document.getElementById('frete-valor-plano-label');
+        if (planoLabel) planoLabel.innerText = `R$ ${PLANO_FIXO.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+
+        const dataCorte = localStorage.getItem('phsublime_data_corte_frete');
+        const mesAnoAtual = appData.dataAtual.substring(0, 7);
+
+        const btnRestaurar = document.getElementById('btn-restaurar-ciclo-frete');
+        const periodoLabel = document.getElementById('frete-periodo-label');
+
+        if (dataCorte) {
+            if (btnRestaurar) btnRestaurar.classList.remove('hidden');
+            if (periodoLabel) periodoLabel.innerText = `Desde ${dataCorte}`;
+        } else {
+            if (btnRestaurar) btnRestaurar.classList.add('hidden');
+            if (periodoLabel) periodoLabel.innerText = `Pedidos do mês (${mesAnoAtual})`;
+        }
 
         appData.pedidos.forEach(p => {
             if (p.status !== 'Cancelado') {
-                const costoUnit = p.custoFreteAvulso !== undefined ? parseFloat(p.custoFreteAvulso) : (p.tipoEntrega === 'Retirada' ? 16.90 : 21.00);
+                // Filtra pelo corte (se você tiver zerado) ou pelo mês ativo
+                if (dataCorte) {
+                    if (!p.data || p.data < dataCorte) return;
+                } else {
+                    if (p.data && !p.data.startsWith(mesAnoAtual)) return;
+                }
+
+                const custoUnit = p.custoFreteAvulso !== undefined ? parseFloat(p.custoFreteAvulso) : (p.tipoEntrega === 'Retirada' ? 16.90 : 21.00);
                 
-                if (costoUnit > 0) {
+                if (custoUnit > 0) {
                     totalEntregasDrop++;
-                    totalCustoAvulsoAcumulado += costoUnit;
+                    totalCustoAvulsoAcumulado += custoUnit;
                 }
             }
         });
 
         document.getElementById('frete-qtd-entregas').innerText = totalEntregasDrop;
-        document.getElementById('frete-custo-avulso-total').innerText = `R$ ${totalCustoAvulsoAcumulado.toFixed(2)}`;
+        document.getElementById('frete-custo-avulso-total').innerText = `R$ ${totalCustoAvulsoAcumulado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
 
         const painelResultado = document.getElementById('frete-painel-resultado');
         const diferenca = totalCustoAvulsoAcumulado - PLANO_FIXO;
@@ -7874,26 +7956,26 @@ async function fecharMes() {
         if (totalEntregasDrop === 0) {
             painelResultado.className = "p-4 rounded-xl border border-neutral-700 bg-neutral-800 text-neutral-300 text-xs";
             painelResultado.innerHTML = `
-                <strong class="text-white block text-sm">Nenhuma entrega ou envio Dropship registrado este mês</strong>
-                <p>Assim que cadastrar pedidos com valor de frete avulso, a comparação aparecerá aqui.</p>
+                <strong class="text-white block text-sm">Nenhuma entrega Dropship no período</strong>
+                <p>Assim que cadastrar pedidos com frete neste ciclo, a comparação aparecerá aqui.</p>
             `;
-        } else if (diferenca > 0) {
+        } else if (diferenca >= 0) {
             painelResultado.className = "p-4 rounded-xl border border-emerald-500/50 bg-emerald-950/30 text-emerald-200 text-xs space-y-1";
             painelResultado.innerHTML = `
                 <strong class="text-emerald-400 text-sm font-black flex items-center gap-1.5">
-                    <i class="fa-solid fa-circle-check"></i> O PLANO FIXO (R$ 600,00) VALE A PENA!
+                    <i class="fa-solid fa-circle-check"></i> O PLANO FIXO (R$ ${PLANO_FIXO.toFixed(2)}) VALE A PENA!
                 </strong>
-                <p>Se você pagasse cada frete separadamente no avulso, gastaria <strong>R$ ${totalCustoAvulsoAcumulado.toFixed(2)}</strong>.</p>
-                <p class="font-bold text-white">Você economizou R$ ${diferenca.toFixed(2)} este mês ao manter o plano fixo!</p>
+                <p>Se você pagasse cada frete avulso, gastaria <strong>R$ ${totalCustoAvulsoAcumulado.toFixed(2)}</strong>.</p>
+                <p class="font-bold text-white">Você economizou R$ ${diferenca.toFixed(2)} neste ciclo ao manter o plano fixo!</p>
             `;
         } else {
             painelResultado.className = "p-4 rounded-xl border border-rose-500/50 bg-rose-950/30 text-rose-200 text-xs space-y-1";
             painelResultado.innerHTML = `
                 <strong class="text-rose-400 text-sm font-black flex items-center gap-1.5">
-                    <i class="fa-solid fa-circle-xmark"></i> O PLANO FIXO NÃO ESTÁ VALENDO A PENA!
+                    <i class="fa-solid fa-circle-xmark"></i> O PLANO FIXO NÃO COMPENSOU ATÉ AGORA!
                 </strong>
                 <p>Se você pagasse cada frete separadamente no avulso, gastaria apenas <strong>R$ ${totalCustoAvulsoAcumulado.toFixed(2)}</strong>.</p>
-                <p class="font-bold text-white">Você está tendo R$ ${Math.abs(diferenca).toFixed(2)} de prejuízo por causa da taxa fixa de R$ 600,00.</p>
+                <p class="font-bold text-white">Você está com R$ ${Math.abs(diferenca).toFixed(2)} de diferença em relação ao custo avulso.</p>
             `;
         }
 
@@ -7903,25 +7985,6 @@ async function fecharMes() {
     function fecharModalAnaliseFrete() {
         document.getElementById('modal-analise-frete').classList.add('hidden');
     }
-
-    function alternarCampoSinalCustom() {
-        const stPag = document.getElementById('ped-status-pagamento')?.value;
-        const containerCustom = document.getElementById('container-valor-sinal-custom');
-        const total = parseFloat(document.getElementById('ped-total')?.value || 0);
-
-        if (containerCustom) {
-            if (stPag === 'Sinal 50%') {
-                containerCustom.classList.remove('hidden');
-                const inputCustom = document.getElementById('ped-valor-pago-custom');
-                if (inputCustom && (!inputCustom.value || inputCustom.value === '0.00')) {
-                    inputCustom.value = (total * 0.5).toFixed(2);
-                }
-            } else {
-                containerCustom.classList.add('hidden');
-            }
-        }
-    }
-
         // --- EXCLUSÃO EM MASSA: PRODUTOS DA LOJA ---
 function alternarSelecaoTodosProdutosLoja(checkboxGeral) {
     const checkboxes = document.querySelectorAll('.check-prod-loja');
