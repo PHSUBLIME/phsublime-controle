@@ -4920,45 +4920,61 @@ function renderizarEstoque() {
     let indexItemEdicao = null;
 
     function abrirModalPedido() {
-        if (appData.clientes.length === 0) {
-            mostrarToast("Cadastre pelo menos um cliente antes!", "erro");
-            return;
+        try {
+            const modalPed = document.getElementById('modal-pedido');
+            if (!modalPed) return;
+
+            const formPed = document.getElementById('form-pedido');
+            if (formPed) formPed.reset();
+
+            const tit = document.getElementById('modal-pedido-titulo');
+            if (tit) tit.innerHTML = `<i class="fa-solid fa-cart-plus"></i> Novo Pedido`;
+
+            if (document.getElementById('ped-id')) document.getElementById('ped-id').value = '';
+            if (document.getElementById('ped-cliente-input')) document.getElementById('ped-cliente-input').value = '';
+            if (document.getElementById('ped-cliente-id')) document.getElementById('ped-cliente-id').value = '';
+            if (document.getElementById('ped-codigo-externo')) document.getElementById('ped-codigo-externo').value = '';
+            if (document.getElementById('ped-valor-arte')) document.getElementById('ped-valor-arte').value = '0.00';
+            if (document.getElementById('ped-valor-entrega')) document.getElementById('ped-valor-entrega').value = '0.00';
+            if (document.getElementById('ped-status-pagamento')) document.getElementById('ped-status-pagamento').value = 'Pendente';
+            
+            const customInput = document.getElementById('ped-valor-pago-custom');
+            if (customInput) customInput.value = '';
+
+            if (document.getElementById('ped-responsavel')) {
+                document.getElementById('ped-responsavel').value = usuarioAtualNome;
+            }
+
+            clienteExtraSelect = null;
+            if (typeof popularDataListClientes === 'function') popularDataListClientes();
+            if (typeof popularDataListEstoque === 'function') popularDataListEstoque();
+
+            itensPedidoTemp = [];
+            if (typeof limparFormProdutoItem === 'function') limparFormProdutoItem();
+            if (typeof renderizarTabelaItensPedido === 'function') renderizarTabelaItensPedido();
+            if (typeof calcularTotalPedidoAutomatico === 'function') calcularTotalPedidoAutomatico();
+
+            if (document.getElementById('ped-data-entrega')) {
+                document.getElementById('ped-data-entrega').value = appData.dataAtual || new Date().toISOString().split('T')[0];
+            }
+            if (document.getElementById('ped-tipo-entrega')) {
+                document.getElementById('ped-tipo-entrega').value = 'Entrega';
+            }
+            if (document.getElementById('ped-custo-frete-avulso')) {
+                document.getElementById('ped-custo-frete-avulso').value = '21.00';
+            }
+
+            if (typeof alternarCamposLogistica === 'function') alternarCamposLogistica();
+            if (typeof alternarCampoSinalCustom === 'function') alternarCampoSinalCustom();
+            if (typeof verificarFormaPagamento === 'function') verificarFormaPagamento();
+
+            // Abre o modal com garantia
+            modalPed.classList.remove('hidden');
+
+        } catch (err) {
+            console.error("Erro ao abrir modal de novo pedido:", err);
+            document.getElementById('modal-pedido')?.classList.remove('hidden');
         }
-
-        document.getElementById('modal-pedido-titulo').innerHTML = `<i class="fa-solid fa-cart-plus"></i> Novo Pedido`;
-        document.getElementById('ped-id').value = '';
-        document.getElementById('form-pedido').reset();
-        document.getElementById('ped-cliente-input').value = '';
-        document.getElementById('ped-cliente-id').value = '';
-        document.getElementById('ped-codigo-externo').value = '';
-        document.getElementById('ped-valor-arte').value = '0.00';
-        document.getElementById('ped-valor-entrega').value = '0.00';
-        document.getElementById('ped-status-pagamento').value = 'Pendente';
-        const customInput = document.getElementById('ped-valor-pago-custom');
-        if (customInput) customInput.value = '';
-
-        document.getElementById('ped-responsavel').value = usuarioAtualNome;
-
-        clienteExtraSelect = null;
-        popularDataListClientes();
-        popularDataListEstoque();
-
-        itensPedidoTemp = [];
-        limparFormProdutoItem();
-        renderizarTabelaItensPedido();
-        calcularTotalPedidoAutomatico();
-
-        document.getElementById('ped-data-entrega').value = appData.dataAtual;
-        if (document.getElementById('ped-tipo-entrega')) {
-            document.getElementById('ped-tipo-entrega').value = 'Entrega';
-        }
-        if (document.getElementById('ped-custo-frete-avulso')) {
-            document.getElementById('ped-custo-frete-avulso').value = '21.00';
-        }
-        alternarCamposLogistica();
-        alternarCampoSinalCustom();
-
-        document.getElementById('modal-pedido').classList.remove('hidden');
     }
 
     function fecharModalPedido() { document.getElementById('modal-pedido').classList.add('hidden'); }
