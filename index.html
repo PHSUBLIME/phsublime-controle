@@ -7881,7 +7881,7 @@ async function fecharMes() {
             painelResultado.className = "p-4 rounded-xl border border-emerald-500/50 bg-emerald-950/30 text-emerald-200 text-xs space-y-1";
             painelResultado.innerHTML = `
                 <strong class="text-emerald-400 text-sm font-black flex items-center gap-1.5">
-                    <i class="fa-solid fa-circle-check"></i> O PLANO FIXO (R$ 300,00) VALE A PENA!
+                    <i class="fa-solid fa-circle-check"></i> O PLANO FIXO (R$ 600,00) VALE A PENA!
                 </strong>
                 <p>Se você pagasse cada frete separadamente no avulso, gastaria <strong>R$ ${totalCustoAvulsoAcumulado.toFixed(2)}</strong>.</p>
                 <p class="font-bold text-white">Você economizou R$ ${diferenca.toFixed(2)} este mês ao manter o plano fixo!</p>
@@ -7893,7 +7893,7 @@ async function fecharMes() {
                     <i class="fa-solid fa-circle-xmark"></i> O PLANO FIXO NÃO ESTÁ VALENDO A PENA!
                 </strong>
                 <p>Se você pagasse cada frete separadamente no avulso, gastaria apenas <strong>R$ ${totalCustoAvulsoAcumulado.toFixed(2)}</strong>.</p>
-                <p class="font-bold text-white">Você está tendo R$ ${Math.abs(diferenca).toFixed(2)} de prejuízo por causa da taxa fixa de R$ 300,00.</p>
+                <p class="font-bold text-white">Você está tendo R$ ${Math.abs(diferenca).toFixed(2)} de prejuízo por causa da taxa fixa de R$ 600,00.</p>
             `;
         }
 
