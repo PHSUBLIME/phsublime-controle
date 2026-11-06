@@ -4964,79 +4964,121 @@ function renderizarEstoque() {
     function fecharModalPedido() { document.getElementById('modal-pedido').classList.add('hidden'); }
 
     function editarPedido(id) {
-        const p = appData.pedidos.find(x => x.id == id);
-        if (!p) return;
+        try {
+            const p = appData.pedidos.find(x => x.id == id);
+            if (!p) {
+                mostrarToast("Pedido não encontrado!", "erro");
+                return;
+            }
 
-        document.getElementById('modal-pedido-titulo').innerHTML = `<i class="fa-solid fa-pen"></i> Editar Pedido #${p.id}`;
-        document.getElementById('ped-id').value = p.id;
-        document.getElementById('ped-codigo-externo').value = p.codigoExterno || '';
-        document.getElementById('ped-valor-arte').value = parseFloat(p.valorArte || 0).toFixed(2);
-        document.getElementById('ped-valor-entrega').value = parseFloat(p.valorEntrega || 0).toFixed(2);
-        document.getElementById('ped-status-pagamento').value = p.statusPagamento || 'Pendente';
+            const modalPed = document.getElementById('modal-pedido');
+            if (!modalPed) return;
 
-        clienteExtraSelect = { id: p.clienteId, nome: p.clienteNome };
+            document.getElementById('modal-pedido-titulo').innerHTML = `<i class="fa-solid fa-pen"></i> Editar Pedido #${p.id}`;
+            document.getElementById('ped-id').value = p.id;
+            document.getElementById('ped-codigo-externo').value = p.codigoExterno || '';
+            document.getElementById('ped-valor-arte').value = parseFloat(p.valorArte || 0).toFixed(2);
+            document.getElementById('ped-valor-entrega').value = parseFloat(p.valorEntrega || 0).toFixed(2);
 
-        popularDataListClientes();
-        popularDataListEstoque();
+            // Ajusta o status de pagamento corretamente
+            let stPag = p.statusPagamento || 'Pendente';
+            if (stPag === 'Sinal / Parcial' || stPag.includes('Sinal')) {
+                stPag = 'Sinal 50%';
+            }
+            document.getElementById('ped-status-pagamento').value = stPag;
 
-        const cli = appData.clientes.find(c => c.id == p.clienteId);
-        if (cli) {
-            document.getElementById('ped-cliente-input').value = `${cli.nome} ${cli.cpf ? `(${cli.cpf})` : ''} [ID:${cli.id}]`;
-            document.getElementById('ped-cliente-id').value = cli.id;
-        } else {
-            document.getElementById('ped-cliente-input').value = p.clienteNome || '';
-            document.getElementById('ped-cliente-id').value = p.clienteId;
+            clienteExtraSelect = { id: p.clienteId, nome: p.clienteNome };
+
+            popularDataListClientes();
+            popularDataListEstoque();
+
+            const cli = appData.clientes.find(c => c.id == p.clienteId);
+            if (cli) {
+                document.getElementById('ped-cliente-input').value = `${cli.nome} ${cli.cpf ? `(${cli.cpf})` : ''} [ID:${cli.id}]`;
+                document.getElementById('ped-cliente-id').value = cli.id;
+            } else {
+                document.getElementById('ped-cliente-input').value = p.clienteNome || '';
+                document.getElementById('ped-cliente-id').value = p.clienteId || '';
+            }
+
+            // Garante que os itens sejam lidos mesmo se vierem como texto do banco
+            if (typeof p.itens === 'string') {
+                try {
+                    itensPedidoTemp = JSON.parse(p.itens);
+                } catch(e) {
+                    itensPedidoTemp = [];
+                }
+            } else if (Array.isArray(p.itens)) {
+                itensPedidoTemp = JSON.parse(JSON.stringify(p.itens));
+            } else {
+                itensPedidoTemp = [];
+            }
+
+            limparFormProdutoItem();
+            renderizarTabelaItensPedido();
+            calcularTotalPedidoAutomatico();
+
+            document.getElementById('ped-data-entrega').value = p.dataEntrega || appData.dataAtual;
+            
+            if (document.getElementById('ped-tipo-entrega')) {
+                document.getElementById('ped-tipo-entrega').value = p.tipoEntrega || 'Entrega';
+            }
+            if (document.getElementById('ped-custo-frete-avulso')) {
+                document.getElementById('ped-custo-frete-avulso').value = p.custoFreteAvulso !== undefined ? p.custoFreteAvulso : 21.00;
+            }
+            alternarCamposLogistica();
+
+            if (stPag === 'Sinal 50%') {
+                const inputCustom = document.getElementById('ped-valor-pago-custom');
+                if (inputCustom) {
+                    inputCustom.value = parseFloat(p.valorPago !== undefined ? p.valorPago : (p.total * 0.5)).toFixed(2);
+                }
+            }
+            alternarCampoSinalCustom();
+
+            document.getElementById('ped-responsavel').value = p.responsavel || usuarioAtualNome;
+
+            if (p.formaPagamento && p.formaPagamento.includes('Misto')) {
+                document.getElementById('ped-forma-pagamento').value = 'Parte Dinheiro / Parte Pix';
+            } else if (p.formaPagamento && p.formaPagamento.includes('Crediário')) {
+                document.getElementById('ped-forma-pagamento').value = 'Crediário Próprio';
+            } else {
+                document.getElementById('ped-forma-pagamento').value = p.formaPagamento || 'Pix';
+            }
+
+            // Recupera as parcelas do banco com segurança
+            const parcelasDoPedido = (appData.parcelas && Array.isArray(appData.parcelas)) ? appData.parcelas.filter(par => par.pedido_id == p.id) : [];
+            const matchQtd = p.formaPagamento ? p.formaPagamento.match(/\((\d+)x\)/) : null;
+            const qtdParc = matchQtd ? parseInt(matchQtd[1]) : (parcelasDoPedido.length > 0 ? parcelasDoPedido.length : 1);
+            
+            const numParcEl = document.getElementById('ped-num-parcelas-crediario');
+            if (numParcEl) numParcEl.value = qtdParc;
+            
+            const matchVenc = p.formaPagamento ? p.formaPagamento.match(/\[(\d{4}-\d{2}-\d{2})\]/) : null;
+            const primeiraParc = parcelasDoPedido.find(par => par.numero_parcela == 1) || parcelasDoPedido[0];
+            const vencIniData = matchVenc ? matchVenc[1] : (primeiraParc && primeiraParc.vencimento ? primeiraParc.vencimento : '');
+            
+            const vencParcEl = document.getElementById('ped-vencimento-primeira-parcela');
+            if (vencParcEl && vencIniData) {
+                vencParcEl.value = vencIniData;
+            }
+
+            verificarFormaPagamento();
+            if (typeof calcularPreviewCrediarioPedido === 'function') {
+                calcularPreviewCrediarioPedido();
+            }
+
+            document.getElementById('ped-status').value = p.status || 'AGUARDANDO';
+            document.getElementById('ped-obs').value = p.obs || '';
+
+            // Abre o modal de edição
+            modalPed.classList.remove('hidden');
+
+        } catch (err) {
+            console.error("Erro ao abrir edição do pedido:", err);
+            document.getElementById('modal-pedido')?.classList.remove('hidden');
         }
-
-        itensPedidoTemp = p.itens ? JSON.parse(JSON.stringify(p.itens)) : [];
-        limparFormProdutoItem();
-        renderizarTabelaItensPedido();
-        calcularTotalPedidoAutomatico();
-
-        document.getElementById('ped-data-entrega').value = p.dataEntrega || appData.dataAtual;
-        if (document.getElementById('ped-tipo-entrega')) {
-            document.getElementById('ped-tipo-entrega').value = p.tipoEntrega || 'Entrega';
-        }
-        if (document.getElementById('ped-custo-frete-avulso')) {
-            document.getElementById('ped-custo-frete-avulso').value = p.custoFreteAvulso !== undefined ? p.custoFreteAvulso : 21.00;
-        }
-        alternarCamposLogistica();
-        if (p.statusPagamento === 'Sinal 50%' || p.statusPagamento === 'Sinal / Parcial') {
-            const inputCustom = document.getElementById('ped-valor-pago-custom');
-            if (inputCustom) inputCustom.value = parseFloat(p.valorPago !== undefined ? p.valorPago : (p.total * 0.5)).toFixed(2);
-        }
-        alternarCampoSinalCustom();
-        document.getElementById('ped-responsavel').value = p.responsavel || usuarioAtualNome;
-
-        if (p.formaPagamento && p.formaPagamento.includes('Misto')) {
-            document.getElementById('ped-forma-pagamento').value = 'Parte Dinheiro / Parte Pix';
-        } else if (p.formaPagamento && p.formaPagamento.includes('Crediário')) {
-            document.getElementById('ped-forma-pagamento').value = 'Crediário Próprio';
-        } else {
-            document.getElementById('ped-forma-pagamento').value = p.formaPagamento || 'Dinheiro';
-        }
-
-       // Recupera as parcelas do banco ou extrai do pedido
-        const parcelasDoPedido = appData.parcelas ? appData.parcelas.filter(par => par.pedido_id == p.id) : [];
-        const matchQtd = p.formaPagamento ? p.formaPagamento.match(/\((\d+)x\)/) : null;
-        const qtdParc = matchQtd ? parseInt(matchQtd[1]) : (parcelasDoPedido.length > 0 ? parcelasDoPedido.length : 1);
-        document.getElementById('ped-num-parcelas-crediario').value = qtdParc;
-        
-const matchVenc = p.formaPagamento ? p.formaPagamento.match(/\[(\d{4}-\d{2}-\d{2})\]/) : null;
-        const primeiraParc = parcelasDoPedido.find(par => par.numero_parcela == 1) || parcelasDoPedido[0];
-        const vencIniData = matchVenc ? matchVenc[1] : (primeiraParc && primeiraParc.vencimento ? primeiraParc.vencimento : '');
-        if (vencIniData) {
-            document.getElementById('ped-vencimento-primeira-parcela').value = vencIniData;
-        }
-
-        verificarFormaPagamento();
-        calcularPreviewCrediarioPedido();
-        document.getElementById('ped-status').value = p.status || 'AGUARDANDO';
-        document.getElementById('ped-obs').value = p.obs || '';
-
-        document.getElementById('modal-pedido').classList.remove('hidden');
     }
-
     function limparFormProdutoItem() {
         indexItemEdicao = null;
         document.getElementById('item-estoque-input').value = '';
