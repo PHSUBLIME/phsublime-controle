@@ -2136,10 +2136,10 @@
                     <div>
                         <label class="block text-emerald-400 text-xs font-bold uppercase mb-1">Status Pagamento</label>
                         <select id="ped-status-pagamento" onchange="alternarCampoSinalCustom()" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-400 text-xs font-bold">
-                            <option value="Pendente">🔴 Pendente (0% Pago)</option>
-                            <option value="Sinal 50%">🟡 Sinal / Pagamento Parcial</option>
-                            <option value="Pago 100%">🟢 Pago (100% Quitado)</option>
-                        </select>
+    <option value="Pendente">🔴 Pendente (0% Pago)</option>
+    <option value="Sinal 50%">🟡 Sinal / Pagamento Parcial</option>
+    <option value="Pago 100%">🟢 Pago (100% Quitado)</option>
+</select>
                     </div>
 
                     <div id="container-valor-sinal-custom" class="hidden">
@@ -4919,6 +4919,30 @@ function renderizarEstoque() {
     let itensPedidoTemp = [];
     let indexItemEdicao = null;
 
+  function alternarCampoSinalCustom() {
+    const select = document.getElementById('ped-status-pagamento');
+    const valor = (select?.value || '').toLowerCase();
+    const textoVisivel = (select?.options[select.selectedIndex]?.text || '').toLowerCase();
+    const container = document.getElementById('container-valor-sinal-custom');
+    const inputValor = document.getElementById('ped-valor-pago-custom');
+    const totalPed = parseFloat(document.getElementById('ped-total')?.value || 0);
+
+    if (container) {
+        if (valor.includes('sinal') || valor.includes('parcial') || textoVisivel.includes('sinal') || textoVisivel.includes('parcial')) {
+            container.classList.remove('hidden');
+            if (inputValor && (!inputValor.value || parseFloat(inputValor.value) === 0)) {
+                inputValor.value = (totalPed * 0.5).toFixed(2);
+            }
+        } else {
+            container.classList.add('hidden');
+        }
+    }
+
+    if (typeof calcularPreviewCrediarioPedido === 'function') {
+        calcularPreviewCrediarioPedido();
+    }
+}
+        
     function abrirModalPedido() {
         try {
             const modalPed = document.getElementById('modal-pedido');
